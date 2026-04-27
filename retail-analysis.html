@@ -20,39 +20,73 @@
 <div class="header">
   <div>
     <h1>📈 零售分析报表</h1>
-    <div class="sub">同环比 · 毛利分析 · 多条件筛选 · 昆明域高测试</div>
+    <div class="sub">品牌 · 年份 · 季节 · 门店 · 款号 · 同环比/毛利</div>
   </div>
   <div class="time-badge" id="updateTime">⏱ 加载中...</div>
 </div>
 
-<!-- 查询面板 -->
+<!-- 查询面板 两行布局 -->
 <div class="filter-panel">
   <div class="ftitle">🔍 查询条件</div>
-  <div class="filter-group">
+  
+  <!-- 第一行：核心筛选 -->
+  <div class="filter-group" style="margin-bottom:10px;">
     <div class="item">
-      <label>📅 开始日期</label>
-      <input type="text" id="startDate" value="2026-03-01" style="width:125px">
+      <label>📅 日期起</label>
+      <input type="text" id="startDate" value="2026-01-01" style="width:115px">
     </div>
     <div class="item">
-      <label>📅 结束日期</label>
-      <input type="text" id="endDate" value="2026-04-27" style="width:125px">
+      <label>📅 日期止</label>
+      <input type="text" id="endDate" value="2026-04-27" style="width:115px">
     </div>
     <div class="item">
-      <label>🏬 门店（可多选）</label>
-      <div class="check-group" id="storeCheckGroup"></div>
+      <label>🏬 品牌</label>
+      <select id="brandSelect" style="min-width:100px">
+        <option value="all">全部品牌</option>
+        <option value="2">CHUU</option>
+        <option value="3">NO ONE ELSE</option>
+        <option value="4">其他品牌</option>
+      </select>
     </div>
     <div class="item">
-      <label>👔 商品分类（单选）</label>
-      <div class="check-group">
-        <label><input type="radio" name="cat" value="all" checked> 全部</label>
-        <label><input type="radio" name="cat" value="shoes"> 鞋类</label>
-        <label><input type="radio" name="cat" value="clothes"> 服装</label>
-        <label><input type="radio" name="cat" value="accessories"> 配饰</label>
+      <label>📦 款号</label>
+      <input type="text" id="styleNo" placeholder="输入款号" style="width:130px">
+    </div>
+    <div class="item">
+      <label>📆 年份（可多选）</label>
+      <div class="check-group" id="yearGroup">
+        <label><input type="checkbox" value="2026" checked> 2026</label>
+        <label><input type="checkbox" value="2025" checked> 2025</label>
+        <label><input type="checkbox" value="2024"> 2024</label>
+        <label><input type="checkbox" value="2023"> 2023</label>
       </div>
     </div>
     <div class="item">
-      <label>🔎 搜索单品</label>
-      <input type="text" id="searchText" placeholder="款号/品名" style="width:120px">
+      <label>🍂 季节（可多选）</label>
+      <div class="check-group" id="seasonGroup">
+        <label><input type="checkbox" value="春夏" class="season-cb"> 春夏</label>
+        <label><input type="checkbox" value="秋冬" class="season-cb"> 秋冬</label>
+        <label><input type="checkbox" value="春季" class="season-cb"> 春季</label>
+        <label><input type="checkbox" value="夏季" class="season-cb"> 夏季</label>
+        <label><input type="checkbox" value="秋季" class="season-cb"> 秋季</label>
+        <label><input type="checkbox" value="冬季" class="season-cb"> 冬季</label>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:2px;">
+        <span class="btn btn-sm btn-outline" onclick="toggleAllSeason(true)">全选</span>
+        <span class="btn btn-sm btn-outline" onclick="toggleAllSeason(false)">清空</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 第二行：门店 + 按钮 -->
+  <div class="filter-group" style="align-items:flex-start;">
+    <div class="item" style="flex:1;min-width:300px;">
+      <label>🏪 门店（可多选/全选）</label>
+      <div class="check-group" id="storeGroup" style="max-height:120px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:4px;margin-top:2px;">
+        <span class="btn btn-sm btn-outline" onclick="toggleAllStores(true)">全选</span>
+        <span class="btn btn-sm btn-outline" onclick="toggleAllStores(false)">清空</span>
+      </div>
     </div>
     <div class="item" style="flex-direction:row;gap:6px;align-items:flex-end;padding-bottom:2px">
       <button class="btn btn-primary" onclick="doQuery()">🔍 查询</button>
@@ -66,58 +100,30 @@
 
 <!-- 图表 -->
 <div class="row">
-  <div class="chart-card">
-    <div class="ctitle">📊 月度销售趋势 <span class="tag">本期 / 同比(去年) / 环比(上月)</span></div>
-    <div class="chart-container"><canvas id="trendChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">🏪 门店销售排行 <span class="tag">成交金额 TOP15</span></div>
-    <div class="chart-container"><canvas id="storeChart"></canvas></div>
-  </div>
+  <div class="chart-card"><div class="ctitle">📊 月度趋势 <span class="tag">本期/同比(去年)/环比(上月)</span></div><div class="chart-container"><canvas id="trendChart"></canvas></div></div>
+  <div class="chart-card"><div class="ctitle">🏪 门店排行 <span class="tag">成交金额 TOP15</span></div><div class="chart-container"><canvas id="storeChart"></canvas></div></div>
 </div>
-
 <div class="row3">
-  <div class="chart-card">
-    <div class="ctitle">💰 毛利率分析 <span class="tag">按门店 毛利率+毛利额</span></div>
-    <div class="chart-container"><canvas id="profitChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">📈 每日销售趋势 <span class="tag">本期 vs 同期对比</span></div>
-    <div class="chart-container"><canvas id="dailyChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">🏬 品类销售占比 <span class="tag">鞋服配</span></div>
-    <div class="chart-container"><canvas id="catChart"></canvas></div>
-  </div>
+  <div class="chart-card"><div class="ctitle">💰 毛利率分析 <span class="tag">按门店</span></div><div class="chart-container"><canvas id="profitChart"></canvas></div></div>
+  <div class="chart-card"><div class="ctitle">📈 每日趋势 <span class="tag">本期 vs 同期</span></div><div class="chart-container"><canvas id="dailyChart"></canvas></div></div>
+  <div class="chart-card"><div class="ctitle">🏬 品类占比 <span class="tag">鞋服配</span></div><div class="chart-container"><canvas id="catChart"></canvas></div></div>
 </div>
-
 <div class="row">
-  <div class="chart-card">
-    <div class="ctitle">🔁 同环比分析 <span class="tag">同比=上年同期</span></div>
-    <div class="chart-container" style="height:220px"><canvas id="yoyChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">📊 销售结构 <span class="tag">零售类型分布</span></div>
-    <div class="chart-container" style="height:220px"><canvas id="structChart"></canvas></div>
-  </div>
+  <div class="chart-card"><div class="ctitle">🔁 同环比 <span class="tag">同比=上年 环比=上月</span></div><div class="chart-container" style="height:220px"><canvas id="yoyChart"></canvas></div></div>
+  <div class="chart-card"><div class="ctitle">📊 结构 <span class="tag">零售类型</span></div><div class="chart-container" style="height:220px"><canvas id="structChart"></canvas></div></div>
 </div>
 
 <!-- 明细表 -->
 <div class="table-card">
-  <div style="font-size:13px;font-weight:600;margin-bottom:10px">📋 零售明细（含毛利估算）</div>
-  <table>
-    <thead><tr>
-      <th>单号</th><th>日期</th><th>门店</th>
-      <th class="text-right">零售金额</th><th class="text-right">成交金额</th>
-      <th class="text-right">成本(估)</th><th class="text-right">毛利(估)</th>
-      <th class="text-center">毛利率</th><th class="text-right">数量</th><th>款号</th><th>会员</th>
-    </tr></thead>
-    <tbody id="tableBody"><tr><td colspan="11" class="text-center" style="color:#94a3b8;padding:30px">加载中...</td></tr></tbody>
-  </table>
-  </div>
+  <div style="font-size:13px;font-weight:600;margin-bottom:10px">📋 零售明细（含毛利估算）<span style="font-weight:400;font-size:11px;color:#94a3b8;margin-left:8px">展示最近50条</span></div>
+  <table><thead><tr>
+    <th>单号</th><th>日期</th><th>门店</th><th class="text-right">零售金额</th><th class="text-right">成交金额</th>
+    <th class="text-right">成本(估)</th><th class="text-right">毛利(估)</th><th class="text-center">毛利率</th><th class="text-right">数量</th><th>款号</th><th>会员</th>
+  </tr></thead><tbody id="tableBody"><tr><td colspan="11" class="text-center" style="color:#94a3b8;padding:30px">加载中...</td></tr></tbody></table>
+</div>
 
 <div class="footer">
-  毛利估算基于行业平均毛利率55%，实际以财务数据为准 &nbsp;|&nbsp; <span id="footerTime"></span>
+  毛利=成交金额-成本(55%毛利率估算) &nbsp;|&nbsp; 实际以财务为准 &nbsp;|&nbsp; <span id="footerTime"></span>
 </div>
 
 <script src="retail-analysis.js"></script>
