@@ -310,10 +310,11 @@ function rTable(){
   tbody.innerHTML=html;
 }
 
-// 初始化
-window.addEventListener('DOMContentLoaded',function(){
-  // 门店多选
+// 初始化 - 页面加载后立即执行
+function initPage(){
+  if(!document.getElementById('storeGroup'))return setTimeout(initPage,50);
   var sg=document.getElementById('storeGroup');
+  if(sg.children.length>0)return; // 避免二次初始化
   var storesSorted=STORES.slice();
   storesSorted.sort(function(a,b){return a[1].localeCompare(b[1])});
   for(var i=0;i<storesSorted.length;i++){
@@ -321,9 +322,10 @@ window.addEventListener('DOMContentLoaded',function(){
     l.innerHTML='<input type="checkbox" value="'+storesSorted[i][0]+'" checked>'+storesSorted[i][1];
     sg.appendChild(l);
   }
-  // 生成数据
   AD=genData();
   FD=AD;
-  document.getElementById('footerTime').textContent=(new Date()).toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  var ft=document.getElementById('footerTime');
+  if(ft)ft.textContent=(new Date()).toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
   doQuery();
-});
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initPage)}else{initPage()}
