@@ -1,0 +1,49 @@
+/* ========== 零售分析报表 ========== */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1500px;margin:0 auto}
+.header{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;border-radius:16px;padding:20px 28px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 4px 20px rgba(67,97,238,.25)}
+.header h1{font-size:20px;font-weight:700}
+.header .sub{font-size:12px;opacity:.7;margin-top:2px}
+.time-badge{font-size:11px;opacity:.6;background:rgba(255,255,255,.12);padding:4px 12px;border-radius:16px}
+.filter-panel{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #e2e8f0;margin-bottom:18px}
+.filter-panel .ftitle{font-size:13px;font-weight:600;color:#64748b;margin-bottom:10px}
+.filter-group{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-group .item{display:flex;flex-direction:column;gap:3px}
+.filter-group .item label{font-size:11px;color:#94a3b8;font-weight:500}
+.filter-group .item input[type=text],.filter-group .item select{padding:6px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#fff;color:#1a1a2e;outline:none}
+.filter-group .item input[type=text]:focus,.filter-group .item select:focus{border-color:#4361ee;box-shadow:0 0 0 2px rgba(67,97,238,.1)}
+.btn{padding:7px 16px;border:none;border-radius:7px;font-size:12px;cursor:pointer}
+.btn-primary{background:#4361ee;color:#fff}
+.btn-primary:hover{background:#3651d4}
+.btn-outline{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0}
+.btn-outline:hover{background:#e2e8f0}
+.check-group{display:flex;gap:5px;flex-wrap:wrap;max-width:600px}
+.check-group label{font-size:11px;display:flex;align-items:center;gap:3px;padding:2px 7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;transition:all .15s}
+.check-group label:hover{border-color:#4361ee;background:#eef2ff}
+.check-group input[type=checkbox]{accent-color:#4361ee;width:12px;height:12px}
+.check-group input[type=radio]{accent-color:#4361ee;width:12px;height:12px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #e2e8f0}
+.kpi-card .label{font-size:11px;color:#64748b;margin-bottom:2px}
+.kpi-card .val{font-size:22px;font-weight:700;color:#1a1a2e}
+.kpi-card .subrow{display:flex;gap:12px;margin-top:4px;font-size:11px}
+.kpi-card .subrow .up{color:#059669}.kpi-card .subrow .down{color:#dc2626}.kpi-card .subrow .info{color:#64748b}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.row{grid-template-columns:1fr}}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:1100px){.row3{grid-template-columns:1fr 1fr}}@media(max-width:700px){.row3{grid-template-columns:1fr}}
+.chart-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0}
+.chart-card .ctitle{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chart-card .ctitle .tag{font-size:10px;font-weight:400;background:#eef2ff;color:#4361ee;padding:1px 7px;border-radius:8px}
+.chart-container{width:100%;height:250px}
+.table-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;margin-bottom:14px;overflow-x:auto}
+.table-card table{width:100%;border-collapse:collapse;font-size:12px}
+.table-card th{text-align:left;padding:7px 8px;background:#f8fafc;color:#64748b;font-weight:600;font-size:10px;border-bottom:2px solid #e2e8f0;white-space:nowrap}
+.table-card td{padding:7px 8px;border-bottom:1px solid #f0f2f5;font-size:11px}
+.table-card tr:hover td{background:#f8fafc}
+.text-right{text-align:right!important}.text-center{text-align:center!important}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0;border-top:1px solid #e2e8f0;margin-top:4px}
+.nav{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.nav a{text-decoration:none;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:7px 14px;font-size:12px;color:#64748b;transition:all .2s}
+.nav a:hover{background:#eef2ff;border-color:#4361ee;color:#4361ee}
+.nav a.active{background:#4361ee;color:#fff;border-color:#4361ee}

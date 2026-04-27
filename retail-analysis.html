@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 零售分析报表</title>
+<link rel="stylesheet" href="retail-analysis.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+
+<div class="nav">
+  <a href="./">📊 零售看板</a>
+  <a href="sell-thru.html">📦 售罄率</a>
+  <a href="retail-analysis.html" class="active">📈 零售分析</a>
+</div>
+
+<div class="header">
+  <div>
+    <h1>📈 零售分析报表</h1>
+    <div class="sub">同环比 · 毛利分析 · 多条件筛选 · 昆明域高测试</div>
+  </div>
+  <div class="time-badge" id="updateTime">⏱ 加载中...</div>
+</div>
+
+<!-- 查询面板 -->
+<div class="filter-panel">
+  <div class="ftitle">🔍 查询条件</div>
+  <div class="filter-group">
+    <div class="item">
+      <label>📅 开始日期</label>
+      <input type="text" id="startDate" value="2026-03-01" style="width:125px">
+    </div>
+    <div class="item">
+      <label>📅 结束日期</label>
+      <input type="text" id="endDate" value="2026-04-27" style="width:125px">
+    </div>
+    <div class="item">
+      <label>🏬 门店（可多选）</label>
+      <div class="check-group" id="storeCheckGroup"></div>
+    </div>
+    <div class="item">
+      <label>👔 商品分类（单选）</label>
+      <div class="check-group">
+        <label><input type="radio" name="cat" value="all" checked> 全部</label>
+        <label><input type="radio" name="cat" value="shoes"> 鞋类</label>
+        <label><input type="radio" name="cat" value="clothes"> 服装</label>
+        <label><input type="radio" name="cat" value="accessories"> 配饰</label>
+      </div>
+    </div>
+    <div class="item">
+      <label>🔎 搜索单品</label>
+      <input type="text" id="searchText" placeholder="款号/品名" style="width:120px">
+    </div>
+    <div class="item" style="flex-direction:row;gap:6px;align-items:flex-end;padding-bottom:2px">
+      <button class="btn btn-primary" onclick="doQuery()">🔍 查询</button>
+      <button class="btn btn-outline" onclick="resetQuery()">↺ 重置</button>
+    </div>
+  </div>
+</div>
+
+<!-- KPI -->
+<div class="kpi-grid" id="kpiGrid"></div>
+
+<!-- 图表 -->
+<div class="row">
+  <div class="chart-card">
+    <div class="ctitle">📊 月度销售趋势 <span class="tag">本期 / 同比(去年) / 环比(上月)</span></div>
+    <div class="chart-container"><canvas id="trendChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="ctitle">🏪 门店销售排行 <span class="tag">成交金额 TOP15</span></div>
+    <div class="chart-container"><canvas id="storeChart"></canvas></div>
+  </div>
+</div>
+
+<div class="row3">
+  <div class="chart-card">
+    <div class="ctitle">💰 毛利率分析 <span class="tag">按门店 毛利率+毛利额</span></div>
+    <div class="chart-container"><canvas id="profitChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="ctitle">📈 每日销售趋势 <span class="tag">本期 vs 同期对比</span></div>
+    <div class="chart-container"><canvas id="dailyChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="ctitle">🏬 品类销售占比 <span class="tag">鞋服配</span></div>
+    <div class="chart-container"><canvas id="catChart"></canvas></div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="chart-card">
+    <div class="ctitle">🔁 同环比分析 <span class="tag">同比=上年同期</span></div>
+    <div class="chart-container" style="height:220px"><canvas id="yoyChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="ctitle">📊 销售结构 <span class="tag">零售类型分布</span></div>
+    <div class="chart-container" style="height:220px"><canvas id="structChart"></canvas></div>
+  </div>
+</div>
+
+<!-- 明细表 -->
+<div class="table-card">
+  <div style="font-size:13px;font-weight:600;margin-bottom:10px">📋 零售明细（含毛利估算）</div>
+  <table>
+    <thead><tr>
+      <th>单号</th><th>日期</th><th>门店</th>
+      <th class="text-right">零售金额</th><th class="text-right">成交金额</th>
+      <th class="text-right">成本(估)</th><th class="text-right">毛利(估)</th>
+      <th class="text-center">毛利率</th><th class="text-right">数量</th><th>款号</th><th>会员</th>
+    </tr></thead>
+    <tbody id="tableBody"><tr><td colspan="11" class="text-center" style="color:#94a3b8;padding:30px">加载中...</td></tr></tbody>
+  </table>
+  </div>
+
+<div class="footer">
+  毛利估算基于行业平均毛利率55%，实际以财务数据为准 &nbsp;|&nbsp; <span id="footerTime"></span>
+</div>
+
+<script src="retail-analysis.js"></script>
+</body>
+</html>
