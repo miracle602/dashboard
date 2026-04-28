@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 交叉报表</title>
+<script src="cross-data.js?v=20260428"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1500px;margin:0 auto}
+.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.nav .title{color:#fff;font-size:16px;font-weight:600}
+.header{background:linear-gradient(135deg,#0f4c5c,#1e6091);color:#fff;border-radius:16px;padding:20px 28px;margin-bottom:16px}
+.header .h1{font-size:22px;font-weight:700}.header .sub{font-size:12px;opacity:.7;margin-top:4px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.controls label{font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px}
+.controls select,.controls button{padding:6px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;background:#fff}
+.controls button{background:#4361ee;color:#fff;border:none;cursor:pointer}
+.cross-wrap{overflow:auto;border:1px solid #e2e8f0;border-radius:12px;background:#fff;max-height:75vh}
+.cross-table{font-size:12px;border-collapse:collapse;min-width:100%}
+.cross-table th{background:#f8fafc;color:#475569;font-weight:600;padding:8px 10px;border:1px solid #e2e8f0;white-space:nowrap;position:sticky;top:0;z-index:1}
+.cross-table th.corner{background:#eef2ff;z-index:2;left:0;min-width:100px}
+.cross-table th.row-header{position:sticky;left:0;z-index:1;background:#f8fafc;min-width:100px;text-align:left}
+.cross-table td{border:1px solid #e2e8f0;padding:6px 8px;text-align:right;white-space:nowrap}
+.cross-table td.click{cursor:pointer}
+.cross-table td.click:hover{background:#eef2ff}
+.cross-table td.total{background:#f8fafc;font-weight:600}
+.cross-table .drill-td{text-align:left!important;cursor:pointer;color:#4361ee}
+.cross-table .drill-td:hover{background:#eef2ff}
+.cross-table tr:hover td{background:#f8fafc}
+.cross-table tr:hover td.row-header{background:#e2e8f0}
+.val-btn{display:inline-flex;gap:2px}
+.val-btn span{padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer}
+.val-btn span.active{background:#4361ee;color:#fff}
+.val-btn span.inactive{background:#f1f5f9;color:#64748b}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:800px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;z-index:1}
+.modal-head .mtitle{font-size:14px;font-weight:600}.modal-head .close{cursor:pointer;border:none;background:#f1f5f9;width:28px;height:28px;border-radius:50%;font-size:16px}
+.modal-body{padding:16px 20px 20px}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0}
+</style>
+</head>
+<body>
+<div class="nav">
+  <span class="title">📊 伯俊ERP BI</span>
+  <a href="./">零售看板</a>
+  <a href="sell-thru.html">售罄率</a>
+  <a href="retail-analysis.html">零售分析</a>
+  <a href="bi-analysis.html">五维分析</a>
+  <a href="cross-table.html" class="active">交叉报表</a>
+</div>
+<div class="header">
+  <div class="h1">📊 交叉报表 (帆软风格)</div>
+  <div class="sub">选择行/列/值维度，点击数据点钻取明细</div>
+</div>
+
+<div class="controls">
+  <label>行: <select id="rowSelect"><option value="store">门店</option><option value="cat" selected>品类</option><option value="month">月份</option></select></label>
+  <label>列: <select id="colSelect"><option value="month" selected>月份</option><option value="store">门店</option><option value="year">年份</option></select></label>
+  <label>值: <span class="val-btn" id="valBtns"><span class="active" data-v="amt" onclick="setVal('amt')">金额</span><span class="inactive" data-v="qty" onclick="setVal('qty')">件数</span><span class="inactive" data-v="orders" onclick="setVal('orders')">单数</span></span></label>
+  <button onclick="render(true)">刷新</button>
+</div>
+
+<div class="cross-wrap"><table class="cross-table" id="crossTable"></table></div>
+<div class="footer">伯俊科技(云南)有限公司 · 点击单元格钻取明细</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal"><div class="modal-head"><span class="mtitle" id="modalTitle">明细</span><button class="close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modalBody"></div></div>
+</div>
+
+<script>
+var C = CROSS;
+var currVal = 'amt';
+
+function fmt(v){return'¥'+(v||0).toLocaleString('zh-CN',{maximumFractionDigits:2,minimumFractionDigits:0});}
+
+function setVal(v){
+  currVal = v;
+  document.querySelectorAll('#valBtns span').forEach(function(s){
+    s.className = s.dataset.v === v ? 'active' : 'inactive';
+  });
+  render(true);
+}
+
+// 获取不同维度的数据
+function getData(rowDim, colDim){
+  var rows = [], cols = [];
+  
+  if(rowDim === 'store') rows = Object.keys(C.store_year).sort();
+  else if(rowDim === 'cat') rows = C.cats.filter(function(c){return c && c !== '其他' && c !== '小配件赠品' && c !== 'yyy配件10' && c !== 'MC晴雨伞' && c !== '椅子';});
+  else if(rowDim === 'month') rows = C.months;
+  
+  if(colDim === 'year') cols = C.years;
+  else if(colDim === 'month') cols = C.months;
+  else if(colDim === 'store') cols = Object.keys(C.store_year).sort();
+  else if(colDim === 'cat') cols = C.cats.filter(function(c){return c && c !== '其他' && c !== '小配件赠品';});
+  
+  var matrix = {};
+  
+  if(rowDim === 'store' && colDim === 'year'){
+    rows.forEach(function(sid){
+      if(!matrix[sid]) matrix[sid]={};
+      cols.forEach(function(yr){
+        var d = C.store_year[sid] && C.store_year[sid][yr];
+        matrix[sid][yr] = d ? d[currVal] : 0;
+      });
+    });
+  }
+  else if(rowDim === 'store' && colDim === 'month'){
+    rows.forEach(function(sid){
+      if(!matrix[sid]) matrix[sid]={};
+      cols.forEach(function(ym){
+        var d = C.month_store[ym] && C.month_store[ym][sid];
+        matrix[sid][ym] = d ? d[currVal] : 0;
+      });
+    });
+  }
+  else if(rowDim === 'store' && colDim === 'cat'){
+    rows.forEach(function(sid){
+      if(!matrix[sid]) matrix[sid]={};
+      cols.forEach(function(c){
+        var d = C.store_cat[sid] && C.store_cat[sid][c];
+        matrix[sid][c] = d ? d[currVal] : 0;
+        if(matrix[sid][c] === undefined) matrix[sid][c] = 0;
+      });
+    });
+  }
+  else if(rowDim === 'cat' && colDim === 'month'){
+    rows.forEach(function(c){
+      if(!matrix[c]) matrix[c]={};
+      cols.forEach(function(ym){
+        var d = C.month_cat[ym] && C.month_cat[ym][c];
+        matrix[c][ym] = d ? d[currVal] : 0;
+      });
+    });
+  }
+  else if(rowDim === 'cat' && colDim === 'store'){
+    rows.forEach(function(c){
+      if(!matrix[c]) matrix[c]={};
+      cols.forEach(function(sid){
+        var d = C.store_cat[sid] && C.store_cat[sid][c];
+        matrix[c][sid] = d ? d[currVal] : 0;
+        if(matrix[c][sid] === undefined) matrix[c][sid] = 0;
+      });
+    });
+  }
+  else if(rowDim === 'month' && colDim === 'store'){
+    rows.forEach(function(ym){
+      if(!matrix[ym]) matrix[ym]={};
+      cols.forEach(function(sid){
+        var d = C.month_store[ym] && C.month_store[ym][sid];
+        matrix[ym][sid] = d ? d[currVal] : 0;
+      });
+    });
+  }
+  else if(rowDim === 'month' && colDim === 'cat'){
+    rows.forEach(function(ym){
+      if(!matrix[ym]) matrix[ym]={};
+      cols.forEach(function(c){
+        var d = C.month_cat[ym] && C.month_cat[ym][c];
+        matrix[ym][c] = d ? d[currVal] : 0;
+      });
+    });
+  }
+  else if(rowDim === 'cat' && colDim === 'year'){
+    rows.forEach(function(c){
+      if(!matrix[c]) matrix[c]={};
+      cols.forEach(function(yr){
+        // 从year汇总计算... 暂时放0
+        matrix[c][yr] = 0;
+      });
+    });
+  }
+  
+  return {rows:rows, cols:cols, matrix:matrix};
+}
+
+function getLabel(dim, key){
+  if(dim === 'store') return C.stores[key] || '未知('+key+')';
+  if(dim === 'cat') return key;
+  if(dim === 'month') return key.substring(0,4)+'.'+key.substring(4,6);
+  if(dim === 'year') return key+'年';
+  return key;
+}
+
+function render(canDrill){
+  var rowDim = document.getElementById('rowSelect').value;
+  var colDim = document.getElementById('colSelect').value;
+  var data = getData(rowDim, colDim);
+  var rows = data.rows, cols = data.cols, matrix = data.matrix;
+  var el = document.getElementById('crossTable');
+  
+  var html = '<thead><tr><th class="corner">行\\列</th>';
+  cols.forEach(function(c){
+    html += '<th>' + getLabel(colDim, c) + '</th>';
+  });
+  html += '<th class="total">合计</th></tr></thead><tbody>';
+  
+  rows.forEach(function(r, ri){
+    html += '<tr><td class="row-header">' + getLabel(rowDim, r) + '</td>';
+    var rowTotal = 0;
+    cols.forEach(function(c){
+      var v = matrix[r] && matrix[r][c] !== undefined ? matrix[r][c] : 0;
+      v = Math.round(v * 100) / 100;
+      rowTotal += v;
+      if(canDrill && rowDim !== 'year' && colDim !== 'year'){
+        html += '<td class="click" onclick="drill(\''+rowDim+'\',\''+colDim+'\',\''+r+'\',\''+c+'\')">' +
+          (currVal === 'amt' ? fmt(v) : currVal === 'qty' || currVal === 'orders' ? (v || 0).toLocaleString() : v) + '</td>';
+      } else {
+        html += '<td>' + (currVal === 'amt' ? fmt(v) : (v || 0).toLocaleString()) + '</td>';
+      }
+    });
+    html += '<td class="total">' + (currVal === 'amt' ? fmt(rowTotal) : Math.round(rowTotal).toLocaleString()) + '</td></tr>';
+  });
+  
+  // 列合计
+  html += '<tr><td class="row-header total">合计</td>';
+  cols.forEach(function(c){
+    var colTotal = 0;
+    rows.forEach(function(r){
+      var v = matrix[r] && matrix[r][c] !== undefined ? matrix[r][c] : 0;
+      colTotal += v;
+    });
+    html += '<td class="total">' + (currVal === 'amt' ? fmt(colTotal) : Math.round(colTotal).toLocaleString()) + '</td>';
+  });
+  html += '<td class="total"></td></tr>';
+  
+  html += '</tbody>';
+  el.innerHTML = html;
+}
+
+// 钻取
+function drill(rowDim, colDim, rowKey, colKey){
+  var d;
+  if(rowDim === 'month' || colDim === 'month'){
+    var ym = rowDim === 'month' ? rowKey : colKey;
+    d = CROSS?.retail_detail?.filter ? null : null; // 没有引用全量数据，需要bi-analysis的bundl
+  
+  // 从五维数据拿明细
+  openDetail('交叉点钻取', '<p style="color:#94a3b8;padding:20px">完整钻取需要引用real-data-bundle.js数据包</p><p style="font-size:12px;color:#94a3b8">请在页面中也加载real-data-bundle.js</p>');
+  return;
+  }
+  openDetail('交叉点明细', '<p style="color:#94a3b8">数据加载中...</p>');
+}
+
+function openDetail(title, html){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').className = 'modal-overlay show';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').className = 'modal-overlay';
+  document.body.style.overflow = 'auto';
+}
+document.addEventListener('keydown', function(e){if(e.key==='Escape') closeModal();});
+
+render(true);
+</script>
+</body>
+</html>
