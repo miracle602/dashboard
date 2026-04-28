@@ -33,8 +33,8 @@ function doQuery() {
     for (var i = 0; i < ycbs.length; i++) years.add(ycbs[i].value);
 
     var seasons = new Set();
-    var scbs = document.querySelectorAll('.season-cb:checked');
-    for (var i = 0; i < scbs.length; i++) seasons.add(scbs[i].value);
+    var sv = document.getElementById('seasonSelect').value;
+    if (sv !== 'all') seasons.add(sv);
 
     var stores = new Set();
     var scbs2 = document.querySelectorAll('#storeGroup input:checked');
@@ -71,8 +71,7 @@ function resetQuery() {
     document.getElementById('styleNo').value = '';
     var ycbs = document.querySelectorAll('#yearGroup input[type=checkbox]');
     for (var i = 0; i < ycbs.length; i++) ycbs[i].checked = (ycbs[i].value === '2026');
-    var scbs = document.querySelectorAll('.season-cb');
-    for (var i = 0; i < scbs.length; i++) scbs[i].checked = false;
+    document.getElementById('seasonSelect').value = 'all';
     var scbs2 = document.querySelectorAll('#storeGroup input[type=checkbox]');
     for (var i = 0; i < scbs2.length; i++) scbs2[i].checked = true;
     doQuery();

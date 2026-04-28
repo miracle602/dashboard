@@ -10,11 +10,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
-
 <div class="nav">
-  <a href="./">📊 零售看板</a>
+  <span class="title">📊 伯俊ERP</span>
+  <a href="index.html">📊 零售看板</a>
   <a href="sell-thru.html">📦 售罄率</a>
   <a href="retail-analysis.html" class="active">📈 零售分析</a>
+  <a href="retail-report.html">📋 零售报告</a>
+  <a href="ops-report.html">📑 经营性报表</a>
+  <a href="bi-analysis.html">📊 BI分析</a>
+  <a href="cross-table.html">📋 交叉分析</a>
+  <a href="stock-warning.html">⚠️ 库存预警</a>
 </div>
 
 <div class="header">
@@ -62,19 +67,16 @@
       </div>
     </div>
     <div class="item">
-      <label>🍂 季节（可多选）</label>
-      <div class="check-group" id="seasonGroup">
-        <label><input type="checkbox" value="春夏" class="season-cb"> 春夏</label>
-        <label><input type="checkbox" value="秋冬" class="season-cb"> 秋冬</label>
-        <label><input type="checkbox" value="春季" class="season-cb"> 春季</label>
-        <label><input type="checkbox" value="夏季" class="season-cb"> 夏季</label>
-        <label><input type="checkbox" value="秋季" class="season-cb"> 秋季</label>
-        <label><input type="checkbox" value="冬季" class="season-cb"> 冬季</label>
-      </div>
-      <div style="display:flex;gap:4px;margin-top:2px;">
-        <span class="btn btn-sm btn-outline" onclick="toggleAllSeason(true)">全选</span>
-        <span class="btn btn-sm btn-outline" onclick="toggleAllSeason(false)">清空</span>
-      </div>
+      <label>🍂 季节</label>
+      <select id="seasonSelect" style="min-width:130px">
+        <option value="all">全部季节</option>
+        <option value="春夏">春夏</option>
+        <option value="秋冬">秋冬</option>
+        <option value="春季">春季</option>
+        <option value="夏季">夏季</option>
+        <option value="秋季">秋季</option>
+        <option value="冬季">冬季</option>
+      </select>
     </div>
   </div>
   
