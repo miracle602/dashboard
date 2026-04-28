@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 经营性分析报表</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;max-width:1500px;margin:0 auto}
+.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px;transition:all .2s}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.header{background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #475569;border-radius:16px;padding:24px 28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.header .h1{font-size:22px;font-weight:700;color:#f1f5f9;display:flex;align-items:center;gap:8px}
+.header .h1 small{font-size:13px;font-weight:400;color:#64748b}
+.header .sub{font-size:12px;color:#64748b;margin-top:4px}
+.header .period{font-size:11px;color:#64748b;background:#1e293b;padding:4px 12px;border-radius:8px;border:1px solid #334155}
+.section{margin-bottom:24px}
+.section .stitle{font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section .stitle::before{content:'';display:inline-block;width:3px;height:16px;background:#4361ee;border-radius:2px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:18px}
+.kpi-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px 16px}
+.kpi-card .label{font-size:11px;color:#64748b;margin-bottom:3px;display:flex;align-items:center;gap:4px}
+.kpi-card .val{font-size:24px;font-weight:700;color:#f1f5f9}
+.kpi-card .sub{font-size:11px;color:#64748b;margin-top:3px}
+.kpi-card .up{color:#10b981}.kpi-card .down{color:#ef4444}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:1100px){.row2,.row3{grid-template-columns:1fr}}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px}
+.card .ctitle{font-size:13px;font-weight:600;color:#e2e8f0;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card .ctitle .tag{font-size:10px;font-weight:400;background:#1e3a5f;color:#60a5fa;padding:1px 7px;border-radius:8px}
+.card canvas{max-height:280px;max-width:100%}
+
+/* 表格 */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:8px 8px;background:#0f172a;color:#64748b;font-weight:600;border-bottom:1px solid #334155;white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid #1e293b;white-space:nowrap}
+tr:hover td{background:#1e293b}
+tr.top-row{background:#1e3a5f!important}
+tr.top-row td{color:#93c5fd}
+.text-right{text-align:right!important}.text-center{text-align:center!important}
+.progress-bar{width:100%;height:4px;background:#334155;border-radius:2px;overflow:hidden;margin-top:3px}
+.progress-bar .fill{height:100%;border-radius:2px;transition:width .5s}
+.fill.green{background:#10b981}.fill.yellow{background:#f59e0b}.fill.red{background:#ef4444}.fill.blue{background:#4361ee}
+.badge{display:inline-block;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:500}
+.badge.green{background:#064e3b;color:#34d399}.badge.yellow{background:#78350f;color:#fbbf24}.badge.red{background:#7f1d1d;color:#fca5a5}
+.value-up{color:#34d399}.value-down{color:#f87171}
+
+/* 经营分析注释 */
+.insight{border-left:3px solid #4361ee;background:#1e3a5f;border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:12px;color:#94a3b8;line-height:1.6}
+.insight strong{color:#e2e8f0}
+
+/* 门店标签 */
+.store-tag{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10px;background:#1e293b;color:#64748b;margin:0 2px}
+.store-tag.top1{background:#f59e0b20;color:#fbbf24;border:1px solid #f59e0b40}
+
+.footer{text-align:center;color:#475569;font-size:11px;padding:20px 0;border-top:1px solid #1e293b;margin-top:10px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:#0f172a}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:2px}
+
+/* 折叠筛选 */
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-btn{background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:#4361ee;border-color:#4361ee;color:#fff}
+.filter-btn.muted{background:#0f172a;border-color:#1e293b;color:#475569}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="./">📊 零售看板</a>
+  <a href="sell-thru.html">📦 售罄率</a>
+  <a href="retail-analysis.html">📈 零售分析</a>
+  <a href="ops-report.html" class="active">📋 经营性报表</a>
+</div>
+
+<div class="header">
+  <div>
+    <div class="h1">📋 鞋服零售 · 经营性分析报表</div>
+    <div class="sub">数据来源：Oracle 数据库直连 · 伯俊ERP M_RETAIL</div>
+  </div>
+  <div class="period" id="headerPeriod">加载中...</div>
+</div>
+
+<!-- 年份筛选 -->
+<div class="filter-bar">
+  <span style="font-size:11px;color:#64748b;margin-right:4px">📍 年份：</span>
+  <button class="filter-btn active" onclick="setYear(this,'all')">全部</button>
+  <button class="filter-btn" onclick="setYear(this,'2026')">2026</button>
+  <button class="filter-btn" onclick="setYear(this,'2025')">2025</button>
+  <button class="filter-btn" onclick="setYear(this,'2024')">2024</button>
+  <button class="filter-btn" onclick="setYear(this,'2023')">2023</button>
+</div>
+
+<!-- ===== 板块1：经营概览 ===== -->
+<div class="section">
+  <div class="stitle">经营概览</div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="insight" id="insight1">分析中...</div>
+</div>
+
+<!-- ===== 板块2：月度趋势 ===== -->
+<div class="section">
+  <div class="stitle">月度经营趋势</div>
+  <div class="row2">
+    <div class="card">
+      <div class="ctitle">📈 销售额趋势 <span class="tag">本月/上月/同比</span></div>
+      <canvas id="trendChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">🏬 门店排行 <span class="tag">成交金额 TOP20</span></div>
+      <div class="tbl-wrap" id="storeTable"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 板块3：门店经营排名 ===== -->
+<div class="section">
+  <div class="stitle">门店经营排名</div>
+  <div class="tbl-wrap" id="storeRankTable" style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:0"></div>
+</div>
+
+<!-- ===== 板块4：产品结构分析 ===== -->
+<div class="section">
+  <div class="stitle">产品结构分析</div>
+  <div class="row3">
+    <div class="card">
+      <div class="ctitle">📊 品类占比 <span class="tag">按销售额</span></div>
+      <canvas id="catChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">💰 品类毛利率</div>
+      <div id="catTable"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">📦 件单价排行</div>
+      <div id="upPriceTable"></div>
+    </div>
+  </div>
+  
+  <div class="card" style="margin-top:14px">
+    <div class="ctitle">🏆 畅销榜 TOP30 <span class="tag">按成交金额</span></div>
+    <div class="tbl-wrap" id="topTable"></div>
+  </div>
+  
+  <div class="insight" id="insight2"></div>
+</div>
+
+<!-- ===== 板块5：会员贡献 ===== -->
+<div class="section">
+  <div class="stitle">会员消费分析</div>
+  <div class="kpi-grid" id="vipKpi"></div>
+  <div class="tbl-wrap" style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:0">
+    <table><thead><tr><th>排名</th><th>会员ID</th><th>消费金额</th><th>笔数</th><th>件数</th><th>件单价</th><th>占比</th></tr></thead><tbody id="vipTable"></tbody></table>
+  </div>
+</div>
+
+<div class="footer">
+  伯俊科技(云南)有限公司 · 经营性分析报表 · 数据来源于伯俊ERP · <span id="footerTime"></span>
+</div>
+
+<script>
+// ========== 数据 ==========
+var D = null;
+var curYear = 'all';
+var allYears = [];
+
+function init(){
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET','ops-data.json?'+Date.now(),true);
+  xhr.onload = function(){
+    D = JSON.parse(xhr.responseText);
+    allYears = Object.keys(D.years_total).sort();
+    renderAll();
+  };
+  xhr.send();
+}
+
+function renderAll(){
+  renderKPI();
+  renderTrend();
+  renderStoreRank();
+  renderStoreTable();
+  renderCatChart();
+  renderCatTable();
+  renderUpPriceTable();
+  renderTopTable();
+  renderVIP();
+  renderInsights();
+  document.getElementById('footerTime').textContent = new Date().toLocaleString('zh-CN');
+}
+
+function getFiltered(){
+  if(!D) return null;
+  var f = JSON.parse(JSON.stringify(D));
+  if(curYear !== 'all'){
+    // 过滤月度趋势
+    f.monthly_trend = D.monthly_trend.filter(function(m){return m.month.substring(0,4)===curYear;});
+    // 过滤门店排名（从原始数据里重新算）
+    var yrData = getYearData(curYear);
+    f.store_rank = yrData.storeRank;
+    f.retail_meta = yrData.meta;
+    f.current_month = {};
+    var ym = curYear + '04';
+    if(D.months && D.months[ym]){
+      var cm = D.months[ym];
+      var pm = D.months[String(Number(curYear)) + '03'] || {};
+      f.current_month = {amt:cm.amt,qty:cm.qty,orders:cm.orders,prev_amt:pm.amt||0,prev_qty:pm.qty||0,mom:pm.amt?Math.round((cm.amt-pm.amt)/pm.amt*100*10)/10:0};
+    }
+  }
+  return f;
+}
+
+function getYearData(yr){
+  // 重新扫描该年份数据
+  var total={orders:0,amt:0,qty:0}, byStore={};
+  D.monthly_trend.forEach(function(m){
+    if(m.month.substring(0,4)===yr){
+      total.orders+=m.orders; total.amt+=m.amt; total.qty+=m.qty;
+    }
+  });
+  // 从门店排名的月度数据中提取
+  D.store_rank.forEach(function(s){
+    var o=0,a=0,q=0;
+    if(s.monthly){
+      Object.keys(s.monthly).forEach(function(mo){
+        if(mo.substring(0,4)===yr){o+=s.monthly[mo].orders||s.monthly[mo].qty?(s.monthly[mo].amt>0?1:0):0; a+=s.monthly[mo].amt; q+=s.monthly[mo].qty;}
+      });
+    }
+    // fallback to store_amt ratio
+    if(a>0) byStore[s.id]={orders:o,amt:a,qty:q};
+  });
+  var stList = Object.entries(byStore).map(function(e){return D.store_rank.find(function(s){return s.id===e[0];})||{id:e[0],name:'未知',orders:e[1].orders,amt:e[1].amt,qty:e[1].qty,amt_list:0,ups:0,up_price:0,vip_pct:0,monthly:{}};
+  }).sort(function(a,b){return b.amt-a.amt;});
+  return {meta:{total_orders:total.orders,total_amt:Math.round(total.amt*100)/100,total_qty:total.qty,stores_active:stList.length},storeRank:stList};
+}
+
+// ===== KPI =====
+function renderKPI(){
+  var f = getFiltered();
+  if(!f) return;
+  var m = f.retail_meta;
+  var cm = f.current_month;
+  var total = {orders:0,amt:0,qty:0};
+  f.monthly_trend.forEach(function(t){total.orders+=t.orders;total.amt+=t.amt;total.qty+=t.qty;});
+  
+  var items = [
+    {label:'💵 总销售额',val:'¥'+(total.amt/10000).toFixed(1)+'万',sub:total.orders+'单'},
+    {label:'📦 总件数',val:total.qty,sub:'件单价 ¥'+(total.qty?Math.round(total.amt/total.qty):0)},
+    {label:'🏪 活跃门店',val:f.store_rank.length,sub:'共卖出门店数'},
+    {label:'📆 本月销售额',val:'¥'+(cm.amt/10000).toFixed(1)+'万',sub:cm.orders+'单 | '+cm.qty+'件'},
+    {label:'📉 环比上月',val:(cm.mom>=0?'+':'')+cm.mom+'%',cls:cm.mom>=0?'up':'down',sub:'上月 ¥'+(cm.prev_amt/10000).toFixed(1)+'万'},
+    {label:'👤 消费会员',val:f.vip_stats.count+'人',sub:'贡献 ¥'+(f.vip_stats.total_amt/10000).toFixed(1)+'万'}
+  ];
+  var html = '';
+  items.forEach(function(it){
+    html += '<div class="kpi-card"><div class="label">'+it.label+'</div><div class="val'+(it.cls?' '+it.cls:'')+'">'+it.val+'</div><div class="sub">'+it.sub+'</div></div>';
+  });
+  document.getElementById('kpiGrid').innerHTML = html;
+  document.getElementById('headerPeriod').textContent = (curYear==='all'?total.orders+'条记录':curYear+'年')+'｜更新于 '+new Date().toLocaleString('zh-CN');
+}
+
+// ===== 月度趋势 =====
+var chartCache = {};
+function renderTrend(){
+  var f = getFiltered();
+  if(!f) return;
+  if(chartCache.trend) {chartCache.trend.destroy();}
+  var ds = f.monthly_trend;
+  var labels = ds.map(function(d){return d.label;});
+  var vals = ds.map(function(d){return Math.round(d.amt/10000*100)/100;});
+  var ctx = document.getElementById('trendChart');
+  if(!ctx) return;
+  chartCache.trend = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:labels,
+      datasets:[{
+        label:'销售额(万)',
+        data:vals,
+        backgroundColor:'rgba(67,97,238,.7)',
+        borderColor:'#4361ee',
+        borderWidth:1,
+        borderRadius:4,
+        barPercentage:.6
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,grid:{color:'rgba(51,65,85,.5)'},ticks:{callback:function(v){return v+'万'},color:'#64748b',font:{size:10}}},
+        x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxTicksLimit:20}}
+      }
+    }
+  });
+}
+
+// ===== 门店排行（卡片内表格） =====
+function renderStoreRank(){
+  var f = getFiltered();
+  if(!f) return;
+  var st = f.store_rank.slice(0,40);
+  var html = '<table><thead><tr><th>#</th><th>门店</th><th class="text-right">销售额</th><th class="text-right">件数</th><th class="text-right">件单价</th><th class="text-right">折扣率</th><th class="text-right">笔数</th><th class="text-right">会员占比</th><th style="width:120px">占比</th></tr></thead><tbody>';
+  var maxAmt = st.length ? st[0].amt : 1;
+  st.forEach(function(s,i){
+    var pct = maxAmt>0 ? Math.round(s.amt/maxAmt*100) : 0;
+    var cls = i===0?'top-row':'';
+    html += '<tr class="'+cls+'"><td>'+(i+1)+'</td><td><strong>'+s.name+'</strong></td><td class="text-right">¥'+(s.amt/10000).toFixed(1)+'万</td><td class="text-right">'+s.qty+'</td><td class="text-right">¥'+s.up_price+'</td><td class="text-right">'+(s.ups?s.ups+'%':'—')+'</td><td class="text-right">'+s.orders+'</td><td class="text-right">'+s.vip_pct+'%</td><td><div class="progress-bar"><div class="fill blue" style="width:'+pct+'%"></div></div></td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('storeRankTable').innerHTML = html;
+}
+
+// ===== 门店小表（卡片内） =====
+function renderStoreTable(){
+  var f = getFiltered();
+  if(!f) return;
+  var st = f.store_rank.slice(0,10);
+  var html = '<table><thead><tr><th>门店</th><th class="text-right">销售额</th><th class="text-right">件数</th><th style="width:80px">占比</th></tr></thead><tbody>';
+  var maxAmt = st.length ? st[0].amt : 1;
+  st.forEach(function(s,i){
+    var pct = maxAmt>0 ? Math.round(s.amt/maxAmt*100) : 0;
+    html += '<tr><td>'+(i===0?'<span class="store-tag top1">🥇</span> ':'')+s.name+'</td><td class="text-right">¥'+(s.amt/10000).toFixed(1)+'万</td><td class="text-right">'+s.qty+'</td><td><div class="progress-bar"><div class="fill blue" style="width:'+pct+'%"></div></div></td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('storeTable').innerHTML = html;
+}
+
+// ===== 品类占比 =====
+function renderCatChart(){
+  var f = getFiltered();
+  if(!f) return;
+  if(chartCache.cat) chartCache.cat.destroy();
+  var cats = f.cat_breakdown;
+  var names = Object.keys(cats);
+  var vals = names.map(function(n){return Math.round(cats[n].amt);});
+  var colors = ['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607','#ff9f1c','#06d6a0','#118ab2'];
+  var ctx = document.getElementById('catChart');
+  if(!ctx) return;
+  chartCache.cat = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:names,
+      datasets:[{data:vals,backgroundColor:colors.slice(0,names.length),borderColor:'#1e293b',borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{size:10},padding:8,boxWidth:10}}}
+    }
+  });
+}
+
+function renderCatTable(){
+  var f = getFiltered();
+  if(!f) return;
+  var cats = f.cat_breakdown;
+  var total = Object.values(cats).reduce(function(s,c){return s+c.amt;},0);
+  var rows = Object.entries(cats).sort(function(a,b){return b[1].amt-a[1].amt;});
+  var html = '<table><thead><tr><th>品类</th><th class="text-right">销售额</th><th class="text-right">占比</th><th class="text-right">件数</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var pct = total>0 ? (r[1].amt/total*100).toFixed(1) : 0;
+    html += '<tr><td>'+r[0]+'</td><td class="text-right">¥'+(r[1].amt/10000).toFixed(1)+'万</td><td class="text-right">'+pct+'%</td><td class="text-right">'+r[1].qty+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('catTable').innerHTML = html;
+}
+
+// ===== 件单价排行 =====
+function renderUpPriceTable(){
+  var f = getFiltered();
+  if(!f) return;
+  var st = f.store_rank.slice(0).sort(function(a,b){return b.up_price-a.up_price;}).filter(function(s){return s.up_price>0&&s.qty>=5;}).slice(0,20);
+  var html = '<table><thead><tr><th>门店</th><th class="text-right">件单价</th><th class="text-right">件数</th><th class="text-right">折扣率</th></tr></thead><tbody>';
+  st.forEach(function(s,i){
+    html += '<tr><td>'+s.name+'</td><td class="text-right">¥'+s.up_price+'</td><td class="text-right">'+s.qty+'</td><td class="text-right">'+(s.ups?s.ups+'%':'—')+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('upPriceTable').innerHTML = html;
+}
+
+// ===== 畅销榜 =====
+function renderTopTable(){
+  var f = getFiltered();
+  if(!f) return;
+  var prods = f.products_top.slice(0,30);
+  var html = '<table><thead><tr><th>#</th><th>款号</th><th>品名</th><th>类目</th><th class="text-right">吊牌价</th><th class="text-right">销售额</th><th class="text-right">件数</th><th class="text-right">折扣</th><th style="width:100px">占比</th></tr></thead><tbody>';
+  var maxAmt = prods.length ? prods[0].amt : 1;
+  prods.forEach(function(p,i){
+    var pct = Math.round(p.amt/maxAmt*100);
+    html += '<tr'+(i===0?' class="top-row"':'')+'><td>'+(i+1)+'</td><td>'+p.name+'</td><td>'+p.value+'</td><td><span class="badge green">'+p.cat+'</span></td><td class="text-right">¥'+p.price+'</td><td class="text-right">¥'+(p.amt/10000).toFixed(1)+'万</td><td class="text-right">'+p.qty+'</td><td class="text-right">'+(p.discount?p.discount+'%':'')+'</td><td><div class="progress-bar"><div class="fill yellow" style="width:'+pct+'%"></div></div></td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('topTable').innerHTML = html;
+}
+
+// ===== VIP =====
+function renderVIP(){
+  var f = getFiltered();
+  if(!f) return;
+  var vip = f.vip_stats;
+  var total = f.retail_meta;
+  var pct = total.total_amt>0 ? (vip.total_amt/total.total_amt*100).toFixed(1) : 0;
+  document.getElementById('vipKpi').innerHTML = 
+    '<div class="kpi-card"><div class="label">👤 消费会员数</div><div class="val">'+vip.count+'</div><div class="sub">总客户中占比</div></div>'+
+    '<div class="kpi-card"><div class="label">💰 会员消费额</div><div class="val">¥'+(vip.total_amt/10000).toFixed(1)+'万</div><div class="sub">占比 '+pct+'%</div></div>'+
+    '<div class="kpi-card"><div class="label">📦 会员消费笔数</div><div class="val">'+vip.total_orders+'</div><div class="sub">占总订单 '+(total.total_orders>0?(vip.total_orders/total.total_orders*100).toFixed(1):0)+'%</div></div>';
+  
+  var topVips = vip.vip_list.slice(0,30);
+  var html = '';
+  var maxAmt = topVips.length ? topVips[0].amt : 1;
+  topVips.forEach(function(v,i){
+    var p = maxAmt>0 ? Math.round(v.amt/maxAmt*100) : 0;
+    html += '<tr'+(i===0?' class="top-row"':'')+'><td>'+(i+1)+'</td><td>'+v.name+'<br><span style="font-size:10px;color:#475569">'+v.id+'</span></td><td class="text-right">¥'+(v.amt/10000).toFixed(2)+'万</td><td class="text-right">'+v.orders+'</td><td class="text-right">'+v.qty+'</td><td class="text-right">¥'+(v.qty?Math.round(v.amt/v.qty):0)+'</td><td><div class="progress-bar"><div class="fill green" style="width:'+p+'%"></div></div></td></tr>';
+  });
+  document.getElementById('vipTable').innerHTML = html;
+}
+
+// ===== 洞察 =====
+function renderInsights(){
+  var f = getFiltered();
+  if(!f) return;
+  var st = f.store_rank;
+  var top = st.length?st[0]:null;
+  var second = st.length>1?st[1]:null;
+  var cm = f.current_month;
+  var cats = Object.entries(f.cat_breakdown).sort(function(a,b){return b[1].amt-a[1].amt;});
+  var topCat = cats.length?cats[0]:null;
+  
+  var i1 = '';
+  i1 += '<strong>📍 核心发现</strong><br>';
+  i1 += '· 选择期间共产生 <strong>'+(f.retail_meta.total_orders||'...')+'</strong> 笔零售订单，成交总额 <strong>¥'+(f.retail_meta.total_amt/10000).toFixed(1)+'万</strong>，共 <strong>'+(f.retail_meta.total_qty)+'</strong> 件商品。<br>';
+  if(top){
+    var topPct = st.length>1?Math.round(top.amt/st.reduce(function(s,x){return s+x.amt;},0)*100):0;
+    i1 += '· 主力门店 <strong>「'+top.name+'」</strong> 贡献 <strong>¥'+(top.amt/10000).toFixed(1)+'万</strong>（占比 '+topPct+'%），';
+    if(second) i1 += '第二名 <strong>「'+second.name+'」</strong> ¥'+(second.amt/10000).toFixed(1)+'万；';
+    i1 += '<br>';
+  }
+  if(cm.mom !== undefined){
+    var momText = cm.mom>=0 ? '<span class="value-up">+'+cm.mom+'% ↗</span>' : '<span class="value-down">'+cm.mom+'% ↘</span>';
+    i1 += '· 本月销售额 ¥'+(cm.amt/10000).toFixed(1)+'万，环比上月 ' + momText + '。';
+  }
+  if(topCat){
+    i1 += '· 品类结构上，<strong>「'+topCat[0]+'」</strong> 贡献最大（¥'+(topCat[1].amt/10000).toFixed(1)+'万），';
+    if(cats.length>1) i1 += '其次是「'+cats[1][0]+'」';
+    i1 += '。<br>';
+  }
+  document.getElementById('insight1').innerHTML = i1;
+  
+  // 畅销洞察
+  var prods = f.products_top;
+  if(prods.length){
+    var p1 = prods[0];
+    var i2 = '<strong>🏆 畅销商品</strong><br>';
+    i2 += '· 第一畅销款 <strong>「'+p1.name+'」</strong>（'+p1.value+'）成交 <strong>¥'+(p1.amt/10000).toFixed(1)+'万</strong>，共 <strong>'+p1.qty+'</strong> 件，折扣 '+p1.discount+'%。';
+    var p2 = prods[1];
+    if(p2) i2 += '<br>· 第二畅销款 <strong>「'+p2.name+'」</strong> 成交 ¥'+(p2.amt/10000).toFixed(1)+'万，'+p2.qty+'件。';
+    // 折扣异常
+    var lowDisc = prods.filter(function(p){return p.discount && p.discount<50 && p.amt>1000;});
+    if(lowDisc.length>0){
+      i2 += '<br>⚠️ <strong>折扣异常商品</strong>：'+lowDisc.slice(0,5).map(function(p){return '「'+p.name+'」('+p.discount+'%)';}).join('、')+(lowDisc.length>5?'等'+lowDisc.length+'款':'')+'，建议关注毛利率。';
+    }
+    document.getElementById('insight2').innerHTML = i2;
+  }
+}
+
+// ===== 年份切换 =====
+function setYear(el, yr){
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  curYear = yr;
+  // 清除图表缓存
+  Object.keys(chartCache).forEach(function(k){if(chartCache[k]) chartCache[k].destroy();});
+  renderAll();
+}
+
+// 启动
+init();
+</script>
+</body>
+</html>
