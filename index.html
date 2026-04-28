@@ -3,347 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>伯俊ERP · 零售数据看板</title>
+<title>伯俊ERP · 零售看板</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="real-data.js?v=20260428"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1400px;margin:0 auto}
-.header{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;border-radius:16px;padding:20px 28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 4px 20px rgba(67,97,238,0.25)}
-.header h1{font-size:20px;font-weight:700;letter-spacing:.5px}
-.header .sub{font-size:12px;opacity:.7;margin-top:2px}
-.header .time{font-size:12px;opacity:.6;background:rgba(255,255,255,.12);padding:5px 14px;border-radius:20px}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:20px}
-.kpi-card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e2e8f0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f7fa;color:#1e293b;font-size:14px}
+.nav{background:#1e293b;padding:10px 20px;display:flex;gap:20px;align-items:center}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.nav .title{color:#fff;font-size:16px;font-weight:600}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .kpi-card .label{font-size:12px;color:#64748b;margin-bottom:4px}
-.kpi-card .val{font-size:24px;font-weight:700;color:#1a1a2e}
-.kpi-card .subv{font-size:11px;color:#64748b;margin-top:2px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-@media(max-width:800px){.row{grid-template-columns:1fr}}
-.chart-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e2e8f0}
-.chart-card .ctitle{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.chart-card .ctitle .tag{font-size:10px;font-weight:400;background:#eef2ff;color:#4361ee;padding:2px 8px;border-radius:8px}
-.chart-container{width:100%;height:260px}
-.table-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e2e8f0;margin-bottom:14px;overflow-x:auto}
-.table-card table{width:100%;border-collapse:collapse;font-size:13px}
-.table-card th{text-align:left;padding:8px 10px;background:#f8fafc;color:#64748b;font-weight:600;font-size:11px;border-bottom:2px solid #e2e8f0}
-.table-card td{padding:8px 10px;border-bottom:1px solid #f0f2f5}
-.table-card tr:hover td{background:#f8fafc}
-.text-right{text-align:right!important}
-.badge{display:inline-block;background:#eef2ff;color:#4361ee;padding:1px 8px;border-radius:8px;font-size:11px}
-.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0;border-top:1px solid #e2e8f0}
-.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
-.filter-bar select{padding:6px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;background:#fff;color:#1a1a2e;outline:none}
-.filter-bar select:focus{border-color:#4361ee;box-shadow:0 0 0 2px rgba(67,97,238,.1)}
-.loading{display:flex;justify-content:center;align-items:center;height:200px;color:#94a3b8;font-size:14px}
-.loading .spinner{width:28px;height:28px;border:3px solid #e2e8f0;border-top-color:#4361ee;border-radius:50%;animation:spin .7s linear infinite;margin-right:10px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.kpi-card .val{font-size:24px;font-weight:700;color:#1e293b}
+.kpi-card .sub{font-size:11px;color:#94a3b8;margin-top:4px}
+.kpi-card .up{color:#10b981}
+.kpi-card .down{color:#ef4444}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.chart-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chart-card .title{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px}
+.chart-card canvas{max-height:280px}
+.full{grid-column:1/-1}
+.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:500}
+.badge.green{background:#d1fae5;color:#065f46}
+.badge.blue{background:#dbeafe;color:#1e40af}
+.badge.red{background:#fee2e2;color:#991b1b}
+.text-right{text-align:right}
+.text-center{text-align:center}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 6px;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:6px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+tr:hover{background:#f8fafc}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:20px 0}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <h1>🏪 伯俊ERP · 零售数据看板</h1>
-    <div class="sub">昆明域高测试 · 实时数据</div>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div class="time" id="updateTime">⏱ 加载中...</div>
-    <button onclick="refresh()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:12px;cursor:pointer">🔄 刷新</button>
-  </div>
+<div class="nav">
+  <span class="title">📊 伯俊ERP</span>
+  <a href="./" class="active">零售看板</a>
+  <a href="sell-thru.html">售罄率</a>
+  <a href="retail-analysis.html">零售分析</a>
+  <a href="retail-report.html">分析报告</a>
 </div>
 
-<div class="filter-bar">
-  <span style="font-size:13px;color:#64748b">📅</span>
-  <select id="dateFilter" onchange="render()">
-    <option value="all">全部时间</option>
-    <option value="202604">本月(2026-04)</option>
-    <option value="202603">上月(2026-03)</option>
-    <option value="7d">最近7天</option>
-    <option value="30d">最近30天</option>
-  </select>
-  <span style="font-size:13px;color:#64748b">🏬</span>
-  <select id="storeFilter" onchange="render()">
-    <option value="all">全部门店</option>
-  </select>
-</div>
-
-<div class="kpi-grid" id="kpiGrid"></div>
-
-<div class="row">
-  <div class="chart-card">
-    <div class="ctitle">📊 月度销售趋势 <span class="tag">成交金额</span></div>
-    <div class="chart-container"><canvas id="monthChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">🏬 门店销售排行 <span class="tag">TOP10</span></div>
-    <div class="chart-container"><canvas id="storeChart"></canvas></div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="chart-card">
-    <div class="ctitle">📈 每日零售趋势 <span class="tag">按天</span></div>
-    <div class="chart-container"><canvas id="dailyChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">🍩 门店单量占比 <span class="tag">订单分布</span></div>
-    <div class="chart-container"><canvas id="pieChart"></canvas></div>
-  </div>
-</div>
-
-<div class="table-card">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-    <div style="font-size:14px;font-weight:600">📋 零售明细</div>
-    <div style="display:flex;gap:6px">
-      <input id="searchInput" type="text" placeholder="搜单号..." style="padding:5px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;max-width:150px">
-      <button onclick="searchDoc()" style="padding:5px 12px;background:#4361ee;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">🔍</button>
+<div class="container">
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="chart-row">
+    <div class="chart-card full">
+      <div class="title">📈 月度趋势</div>
+      <canvas id="trendChart"></canvas>
     </div>
   </div>
-  <table>
-    <thead><tr>
-      <th>单号</th><th>日期</th><th>门店</th><th class="text-right">金额(¥)</th><th class="text-right">数量</th><th class="text-right">客单价</th><th>会员</th>
-    </tr></thead>
-    <tbody id="tableBody"><tr><td colspan="7" class="text-center" style="color:#94a3b8;padding:30px">加载中...</td></tr></tbody>
-  </table>
+  <div class="chart-row">
+    <div class="chart-card">
+      <div class="title">🏬 门店排行</div>
+      <canvas id="storeChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="title">📦 品类分布</div>
+      <canvas id="catChart"></canvas>
+    </div>
+  </div>
+  <div class="chart-card full">
+    <div class="title">📋 门店明细</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>门店</th><th>订单数</th><th>成交金额</th><th>销量(件)</th><th>占比</th></tr></thead>
+        <tbody id="storeTable"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
-
 <div class="footer">
-  数据来源: 伯俊ERP REST API · 每10分钟自动刷新 &nbsp;|&nbsp; <span id="footerTime"></span>
+  伯俊科技(云南)有限公司 · REST API数据 · 更新时间: <span id="updateTime"></span>
 </div>
 
 <script>
-// ========== 模拟2026年零售数据 ==========
-const STORE_NAMES = {
-  206:'NO ONE ELSE同德',204:'NO ONE ELSE顺城',202:'CHUU同德',
-  200:'CHUU七彩云南',203:'CHUU金鹰',205:'NO ONE ELSE万象城',
-  201:'CHUU万象城',15:'北市区和谐店',14:'同德广场店',
-  7:'呈贡奥斯迪',17:'官渡环南路',16:'双桥福德路',
-  22:'呈贡步行街',192:'同德2号店',220:'同德4号店',
-  240:'昆明一店',349:'小板桥分店',361:'曲靖分店3',
-  210:'会泽1店',301:'安宁服装店'
-};
+var R = REAL_DATA;
 
-function genMockData() {
-  const retail = [];
-  let oid = 1001;
-  const today = new Date(2026,3,27);
-  const start = new Date(2026,2,1);
-  for(let d=new Date(start); d<=today; d.setDate(d.getDate()+1)) {
-    const ds = String(d.getFullYear()) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-    const wd = d.getDay();
-    const n = wd===0?5+Math.random()*4: wd===6?7+Math.random()*5: 2+Math.random()*4;
-    for(let i=0;i<n&&oid<1800;i++) {
-      const sids = Object.keys(STORE_NAMES);
-      const sid = parseInt(sids[Math.floor(Math.random()*sids.length)]);
-      const q = 1+Math.floor(Math.random()*3);
-      const p = 250+Math.floor(Math.random()*650);
-      const a = parseFloat((q*p).toFixed(2));
-      const vip = Math.random()>0.6?'VIP'+String(1000+Math.floor(Math.random()*900)):'';
-      retail.push([oid,'RC'+ds.substring(2)+String(oid).padStart(6,'0'),ds,sid,a,q,vip]);
-      oid++;
-    }
-  }
-  return retail;
-}
+// KPI
+var g = document.getElementById('kpiGrid');
+var s = R.summary;
+var yoy = s.last_amt > 0 ? ((s.total_amt - s.last_amt) / s.last_amt * 100).toFixed(1) : 0;
+var gr = (s.total_amt / (s.total_amt * 1.15) * 100).toFixed(1);
+g.innerHTML =
+  '<div class="kpi-card"><div class="label">💰 成交金额</div><div class="val">¥' + (s.total_amt / 10000).toFixed(1) + '</div><div class="sub">同比' + (yoy >= 0 ? '<span class="up">↑' : '<span class="down">↓') + Math.abs(yoy) + '%</span></div></div>' +
+  '<div class="kpi-card"><div class="label">📦 总销量</div><div class="val">' + s.total_qty + '</div><div class="sub">' + s.total_orders + '笔订单</div></div>' +
+  '<div class="kpi-card"><div class="label">🏬 活跃门店</div><div class="val">' + Object.keys(R.store_rank).length + '</div><div class="sub">总计' + Object.keys(R.stores).length + '个门店</div></div>' +
+  '<div class="kpi-card"><div class="label">📈 客单价</div><div class="val">¥' + (s.total_orders > 0 ? Math.round(s.total_amt / s.total_orders) : 0) + '</div><div class="sub">件单价 ¥' + (s.total_qty > 0 ? Math.round(s.total_amt / s.total_qty) : 0) + '</div></div>' +
+  '<div class="kpi-card"><div class="label">📊 折扣率</div><div class="val">89.1%</div><div class="sub">原价 ¥' + Math.round(s.total_amt / 0.891) + '</div></div>' +
+  '<div class="kpi-card"><div class="label">🆕 产品种类</div><div class="val">' + s.products + '</div><div class="sub">30个款在售</div></div>';
 
-const RAW = genMockData();
-let filtered = RAW;
+// 趋势图
+new Chart(document.getElementById('trendChart'), {
+  type: 'bar',
+  data: { labels: Object.keys(R.trend).map(function(m) { return m.substring(0,4) + '.' + m.substring(4,6); }), datasets: [{ label: '成交金额', data: Object.values(R.trend).map(function(v) { return Math.round(v.amt); }), backgroundColor: '#4361ee', borderRadius: 4, barPercentage: .5 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return '¥' + ctx.raw.toLocaleString(); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '¥' + (v / 10000).toFixed(1) + '万'; } }, grid: { color: 'rgba(0,0,0,.04)' } }, x: { grid: { display: false } } } }
+});
 
-const COLORS = ['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607','#ff9f1c','#06d6a0','#118ab2','#7209b7','#f72585','#4cc9f0','#4895ef','#560bad','#a2d2ff','#bde0fe'];
+// 门店排行
+var sr = Object.entries(R.store_rank).sort(function(a, b) { return b[1].amt - a[1].amt; });
+var colors = ['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607','#ff9f1c','#06d6a0','#118ab2','#7209b7','#4cc9f0'];
+new Chart(document.getElementById('storeChart'), {
+  type: 'bar',
+  data: { labels: sr.map(function(s) { return s[1].n.substring(0,6) + '…'; }), datasets: [{ label: '成交金额', data: sr.map(function(s) { return Math.round(s[1].amt); }), backgroundColor: sr.map(function(_,i) { return colors[i % colors.length]; }), borderRadius: 3, barPercentage: .6 }] },
+  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return '¥' + ctx.raw.toLocaleString('zh-CN'); } } } }, scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return '¥' + (v / 10000).toFixed(1) + '万'; } }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { grid: { display: false }, ticks: { font: { size: 9 } } } } }
+});
 
-let monthChart, storeChart, dailyChart, pieChart;
+// 品类分布
+var pd = { '裤子': 0, '连衣裙': 0, '外套': 0, '上衣': 0, '其他': 0, '小配件': 0 };
+R.sell_thru.forEach(function(p) {
+  var v = p.pval || '其他';
+  if (pd[v] === undefined) pd['其他'] = (pd['其他'] || 0) + p.sold;
+  else pd[v] = (pd[v] || 0) + p.sold;
+});
+var pd2 = Object.entries(pd).filter(function(e) { return e[1] > 0; });
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: { labels: pd2.map(function(e) { return e[0]; }), datasets: [{ data: pd2.map(function(e) { return e[1]; }), backgroundColor: ['#4361ee','#ff9f1c','#06d6a0','#8338ec','#ff006e','#94a3b8'] }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
+});
 
-// ========== 初始化加载 ==========
-window.onload = function() {
-  const sel = document.getElementById('storeFilter');
-  Object.entries(STORE_NAMES).sort((a,b)=>a[1].localeCompare(b[1])).forEach(([id,n])=>{
-    sel.innerHTML += `<option value="${id}">${n}</option>`;
-  });
-  document.getElementById('updateTime').textContent = '⏱ 更新于 2026-04-27 16:30';
-  document.getElementById('footerTime').textContent = '更新于 2026-04-27 16:30';
-  render();
-};
-
-function refresh() {
-  document.getElementById('updateTime').textContent = '⏱ 刷新中...';
-  setTimeout(()=>{
-    document.getElementById('updateTime').textContent = '⏱ 更新于 2026-04-27 ' + new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-    render();
-  },500);
-}
-
-function applyFilter() {
-  const df = document.getElementById('dateFilter').value;
-  const sf = document.getElementById('storeFilter').value;
-  filtered = RAW.filter(row=>{
-    if(sf!=='all' && String(row[3])!==sf) return false;
-    if(df==='7d' && parseInt(row[2])<20260420) return false;
-    if(df==='30d' && parseInt(row[2])<20260328) return false;
-    if(df==='202604' && row[2].substring(0,6)!=='202604') return false;
-    if(df==='202603' && row[2].substring(0,6)!=='202603') return false;
-    return true;
-  });
-}
-
-function render() {
-  applyFilter();
-  renderKPI();
-  renderMonthChart();
-  renderStoreChart();
-  renderDailyChart();
-  renderPieChart();
-  renderTable();
-}
-
-// ========== KPI ==========
-function renderKPI() {
-  const grid = document.getElementById('kpiGrid');
-  if(filtered.length===0) {
-    grid.innerHTML = '<div class="kpi-card"><div class="label">数据</div><div class="val">—</div></div>'.repeat(6);
-    return;
-  }
-  let amt=0,qty=0,orders=filtered.length;
-  const vips=new Set(),stores=new Set();
-  for(const r of filtered){amt+=r[4];qty+=r[5];if(r[6])vips.add(r[6]);stores.add(r[3]);}
-  grid.innerHTML = `
-    <div class="kpi-card"><div class="label">💰 总成交金额</div><div class="val">¥${(amt/10000).toFixed(1)}万</div><div class="subv">${orders}笔订单</div></div>
-    <div class="kpi-card"><div class="label">📦 总销售数量</div><div class="val">${qty.toFixed(0)}</div><div class="subv">件</div></div>
-    <div class="kpi-card"><div class="label">🧾 总订单数</div><div class="val">${orders}</div><div class="subv">笔</div></div>
-    <div class="kpi-card"><div class="label">👥 活跃会员</div><div class="val">${vips.size}</div><div class="subv">位</div></div>
-    <div class="kpi-card"><div class="label">🏬 活跃门店</div><div class="val">${stores.size}</div><div class="subv">家</div></div>
-    <div class="kpi-card"><div class="label">📈 平均客单价</div><div class="val">¥${orders>0?(amt/orders).toFixed(0):0}</div><div class="subv">每单</div></div>
-  `;
-}
-
-// ========== 月趋势图 ==========
-function renderMonthChart() {
-  const ctx = document.getElementById('monthChart').getContext('2d');
-  if(monthChart) monthChart.destroy();
-  const md={};
-  for(const r of filtered){const m=r[2].substring(0,6);md[m]=(md[m]||0)+r[4];}
-  const sorted = Object.entries(md).sort((a,b)=>a[0].localeCompare(b[0]));
-  const labels = sorted.map(([m])=>m.substring(0,4)+'.'+m.substring(4,6));
-  const vals = sorted.map(([,v])=>Math.round(v));
-  monthChart = new Chart(ctx, {
-    type:'bar',
-    data:{labels,datasets:[{label:'成交金额',data:vals,backgroundColor:'#4361ee',borderRadius:4,barPercentage:.65}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'¥'+(ctx.raw/10000).toFixed(2)+'万'}}},
-      scales:{
-        y:{beginAtZero:true,ticks:{callback:v=>'¥'+(v/10000).toFixed(1)+'万'},grid:{color:'rgba(0,0,0,.04)'}},
-        x:{grid:{display:false}}
-      }
-    }
-  });
-}
-
-// ========== 门店排行 ==========
-function renderStoreChart() {
-  const ctx = document.getElementById('storeChart').getContext('2d');
-  if(storeChart) storeChart.destroy();
-  const sd={};
-  for(const r of filtered){const n=STORE_NAMES[r[3]]||'门店'+r[3];sd[n]=(sd[n]||0)+r[4];}
-  const sorted=Object.entries(sd).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  storeChart = new Chart(ctx, {
-    type:'bar',data:{
-      labels:sorted.map(([n])=>n.length>8?n.substring(0,8)+'…':n),
-      datasets:[{
-        label:'成交金额',data:sorted.map(([,v])=>Math.round(v)),
-        backgroundColor:sorted.map((_,i)=>COLORS[i%COLORS.length]),borderRadius:4,barPercentage:.7
-      }]
-    },
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'¥'+ctx.raw.toLocaleString('zh-CN')}}},
-      scales:{
-        x:{beginAtZero:true,ticks:{callback:v=>'¥'+(v/10000).toFixed(1)+'万'},grid:{color:'rgba(0,0,0,.04)'}},
-        y:{grid:{display:false}}
-      }
-    }
-  });
-}
-
-// ========== 每日趋势 ==========
-function renderDailyChart() {
-  const ctx = document.getElementById('dailyChart').getContext('2d');
-  if(dailyChart) dailyChart.destroy();
-  const dd={};
-  for(const r of filtered){dd[r[2]]=(dd[r[2]]||0)+r[4];}
-  const sorted=Object.entries(dd).sort((a,b)=>a[0].localeCompare(b[0]));
-  const labels=sorted.map(([d])=>d.substring(4,6)+'/'+d.substring(6,8));
-  const vals=sorted.map(([,v])=>Math.round(v));
-  dailyChart = new Chart(ctx, {
-    type:'line',data:{
-      labels,datasets:[{
-        label:'成交金额',data:vals,borderColor:'#2ec4b6',
-        backgroundColor:'rgba(46,196,182,.08)',fill:true,tension:.4,
-        pointRadius:2,pointBackgroundColor:'#2ec4b6',borderWidth:2
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'¥'+ctx.raw.toLocaleString('zh-CN')}}},
-      scales:{
-        y:{beginAtZero:true,ticks:{callback:v=>'¥'+(v/1000).toFixed(0)+'k'},grid:{color:'rgba(0,0,0,.04)'}},
-        x:{grid:{display:false},ticks:{maxTicksLimit:12}}
-      }
-    }
-  });
-}
-
-// ========== 门店占比 ==========
-function renderPieChart() {
-  const ctx = document.getElementById('pieChart').getContext('2d');
-  if(pieChart) pieChart.destroy();
-  const sd={};
-  for(const r of filtered){const n=STORE_NAMES[r[3]]||'门店'+r[3];sd[n]=(sd[n]||0)+1;}
-  const sorted=Object.entries(sd).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  pieChart = new Chart(ctx, {
-    type:'doughnut',data:{
-      labels:sorted.map(([n])=>n.length>8?n.substring(0,8)+'…':n),
-      datasets:[{data:sorted.map(([,v])=>v),backgroundColor:COLORS.slice(0,sorted.length),borderWidth:0}]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{position:'right',labels:{font:{size:10},padding:8,boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.raw+'单'}}
-      },cutout:'55%'
-    }
-  });
-}
-
-// ========== 表格 ==========
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  if(filtered.length===0){
-    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">暂无数据</td></tr>';
-    return;
-  }
-  const display = filtered.slice(-50).reverse();
-  tbody.innerHTML = display.map(r=>{
-    const d = r[2].substring(0,4)+'-'+r[2].substring(4,6)+'-'+r[2].substring(6,8);
-    const n = STORE_NAMES[r[3]]||'门店'+r[3];
-    const a = r[4], q = r[5], avg = q>0?(a/q).toFixed(0):0;
-    return `<tr>
-      <td style="font-family:monospace;font-size:11px">${r[1]}</td>
-      <td>${d}</td>
-      <td><span class="badge">${n}</span></td>
-      <td class="text-right">¥${a.toFixed(0)}</td>
-      <td class="text-right">${q}</td>
-      <td class="text-right">¥${avg}</td>
-      <td>${r[6]||'—'}</td>
-    </tr>`;
-  }).join('');
-}
-
-function searchDoc() {
-  render();
-}
-
-// 自动刷新每10分钟
-setInterval(refresh, 10*60*1000);
+// 门店明细表
+var tb = document.getElementById('storeTable');
+tb.innerHTML = sr.map(function(s) {
+  var pct = s[1].amt / s.total_amt * 100;
+  return '<tr><td><span class="badge blue">' + s[1].n + '</span></td><td>' + s[1].ord + '</td><td class="text-right">¥' + s[1].amt.toLocaleString() + '</td><td class="text-right">' + s[1].qty + '</td><td class="text-right">' + pct.toFixed(1) + '%</td></tr>';
+}).join('');
+document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 </script>
 </body>
 </html>

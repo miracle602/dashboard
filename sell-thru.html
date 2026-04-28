@@ -5,11 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>伯俊ERP · 售罄率报表</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="real-data.js?v=20260428"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1400px;margin:0 auto}
+.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.nav .title{color:#fff;font-size:16px;font-weight:600}
 .header{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;border-radius:16px;padding:20px 28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 4px 20px rgba(230,57,70,.25)}
-.header h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+.header h1{font-size:20px;font-weight:700}
 .header .sub{font-size:12px;opacity:.7;margin-top:2px}
 .header .time{font-size:12px;opacity:.6;background:rgba(255,255,255,.12);padding:5px 14px;border-radius:20px}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:20px}
@@ -18,403 +24,142 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 .kpi-card .val{font-size:24px;font-weight:700}
 .kpi-card .val.green{color:#059669}
 .kpi-card .val.yellow{color:#d97706}
-.kpi-card .val.red{color:#dc2626}
-.kpi-card .subv{font-size:11px;color:#64748b;margin-top:2px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-@media(max-width:800px){.row{grid-template-columns:1fr}}
-.chart-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e2e8f0}
-.chart-card .ctitle{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.chart-card .ctitle .tag{font-size:10px;font-weight:400;background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:8px}
-.chart-card .ctitle .tag.green{background:#d1fae5;color:#059669}
-.chart-card .ctitle .tag.red{background:#fee2e2;color:#dc2626}
-.chart-container{width:100%;height:260px}
-.table-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e2e8f0;margin-bottom:14px;overflow-x:auto}
-.table-card table{width:100%;border-collapse:collapse;font-size:13px}
-.table-card th{text-align:left;padding:8px 10px;background:#f8fafc;color:#64748b;font-weight:600;font-size:11px;border-bottom:2px solid #e2e8f0;white-space:nowrap}
-.table-card td{padding:8px 10px;border-bottom:1px solid #f0f2f5}
-.table-card tr:hover td{background:#f8fafc}
-.text-right{text-align:right!important}
-.text-center{text-align:center!important}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #e2e8f0}
+.chart-card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:#1e293b}
+.chart-card canvas{max-height:300px}
+.full{grid-column:1/-1}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.toolbar input,.toolbar select{padding:6px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;background:#fff}
+.toolbar button{padding:6px 14px;border:none;border-radius:8px;background:#4361ee;color:#fff;font-size:13px;cursor:pointer}
+.toolbar button:hover{background:#3651d4}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 6px;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:6px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+tr:hover{background:#f8fafc}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
-.badge.green{background:#d1fae5;color:#059669}
-.badge.yellow{background:#fef3c7;color:#d97706}
-.badge.red{background:#fee2e2;color:#dc2626}
-.badge.blue{background:#eef2ff;color:#4361ee}
-.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
-.filter-bar select{padding:6px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;background:#fff;color:#1a1a2e;outline:none}
-.filter-bar select:focus{border-color:#4361ee}
-.progress{height:6px;border-radius:3px;background:#f0f2f5;overflow:hidden;min-width:80px}
+.badge.high{background:#d1fae5;color:#065f46}
+.badge.mid{background:#fef3c7;color:#92400e}
+.badge.low{background:#fee2e2;color:#991b1b}
+.progress{width:100%;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden}
 .progress .bar{height:100%;border-radius:3px;transition:width .5s}
-.progress .bar.green{background:#059669}
-.progress .bar.yellow{background:#d97706}
-.progress .bar.red{background:#dc2626}
-.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0;border-top:1px solid #e2e8f0}
-.nav{display:flex;gap:8px;margin-bottom:16px}
-.nav a{text-decoration:none;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 16px;font-size:13px;color:#4361ee;font-weight:500;transition:all .2s}
-.nav a:hover{background:#eef2ff;border-color:#4361ee}
-.nav a.active{background:#4361ee;color:#fff;border-color:#4361ee}
+.progress .bar.green{background:#10b981}
+.progress .bar.yellow{background:#f59e0b}
+.progress .bar.red{background:#ef4444}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:20px 0}
 </style>
 </head>
 <body>
 
 <div class="nav">
-  <a href="https://miracle602.github.io/dashboard/">📊 零售看板</a>
-  <a href="https://miracle602.github.io/dashboard/sell-thru.html" class="active">📦 售罄率报表</a>
+  <span class="title">📊 伯俊ERP</span>
+  <a href="./">零售看板</a>
+  <a href="sell-thru.html" class="active">售罄率</a>
+  <a href="retail-analysis.html">零售分析</a>
+  <a href="retail-report.html">分析报告</a>
 </div>
 
 <div class="header">
-  <div>
-    <h1>📦 售罄率分析报表</h1>
-    <div class="sub">昆明域高测试 · Sell-Through Rate Analysis</div>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <div class="time" id="updateTime">⏱ 加载中...</div>
-    <button onclick="refresh()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:12px;cursor:pointer">🔄 刷新</button>
-  </div>
-</div>
-
-<div class="filter-bar">
-  <span style="font-size:13px;color:#64748b">📊</span>
-  <select id="sortFilter" onchange="render()">
-    <option value="rate">按售罄率排序</option>
-    <option value="sold">按销量排序</option>
-    <option value="stock">按库存量排序</option>
-  </select>
-  <span style="font-size:13px;color:#64748b">🏬</span>
-  <select id="storeFilter" onchange="render()">
-    <option value="all">全部</option>
-  </select>
-  <span style="font-size:13px;color:#64748b">📅</span>
-  <select id="dateFilter" onchange="render()">
-    <option value="all">全部时间</option>
-    <option value="202604">本月(2026-04)</option>
-    <option value="202603">上月(2026-03)</option>
-  </select>
+  <div><h1>📈 售罄率分析报告</h1><div class="sub">2026年1-4月 · 伯俊ERP</div></div>
+  <div class="time" id="updateTime">加载中...</div>
 </div>
 
 <div class="kpi-grid" id="kpiGrid"></div>
 
-<div class="row">
-  <div class="chart-card">
-    <div class="ctitle">📊 售罄率分布 <span class="tag">按产品</span></div>
-    <div class="chart-container"><canvas id="rateChart"></canvas></div>
-  </div>
-  <div class="chart-card">
-    <div class="ctitle">📦 库存 vs 销量 <span class="tag">TOP15</span></div>
-    <div class="chart-container"><canvas id="stockVsSoldChart"></canvas></div>
+<div class="toolbar">
+  <input type="text" id="searchInput" placeholder="搜索款号/品名" style="width:180px">
+  <select id="rateFilter"><option value="all">全部</option><option value="high">高售罄(≥80%)</option><option value="mid">中等(50-80%)</option><option value="low">低售罄(&lt;50%)</option></select>
+  <button onclick="filterTable()">筛选</button>
+  <span style="font-size:12px;color:#94a3b8" id="resultCount"></span>
+</div>
+
+<div class="chart-grid">
+  <div class="chart-card full">
+    <h3>🎯 产品售罄率 TOP30</h3>
+    <canvas id="sellThruChart"></canvas>
   </div>
 </div>
 
-<div class="chart-card" style="margin-bottom:14px">
-  <div class="ctitle">📈 售罄率排行榜 <span class="tag green">高售罄</span><span class="tag red" style="margin-left:4px">低售罄</span></div>
-  <div class="chart-container"><canvas id="rankingChart" style="height:320px"></canvas></div>
-</div>
-
-<div class="table-card">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-    <div style="font-size:14px;font-weight:600">📋 产品售罄明细</div>
-    <div style="display:flex;gap:6px">
-      <input id="searchInput" type="text" placeholder="搜款号/品名..." style="padding:5px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;max-width:150px">
-      <button onclick="search()" style="padding:5px 12px;background:#4361ee;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">🔍</button>
-    </div>
+<div class="chart-card full" style="border-radius:12px">
+  <h3>📋 产品明细</h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>排名</th><th>款号</th><th>品名</th><th>吊牌价</th><th>销售数量</th><th>采购数量</th><th>售罄率</th><th>进度条</th></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
   </div>
-  <table>
-    <thead><tr>
-      <th>款号</th><th>品名</th><th>吊牌价</th><th class="text-right">采购入库</th><th class="text-right">零售</th><th class="text-right">批发</th><th class="text-right">总销量</th><th class="text-center">售罄率</th><th>状态</th>
-    </tr></thead>
-    <tbody id="tableBody"><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:30px">加载中...</td></tr></tbody>
-  </table>
 </div>
 
-<div class="footer">
-  售罄率 = 总销量 ÷ 采购入库量 × 100% &nbsp;|&nbsp; 数据来源: 伯俊ERP &nbsp;|&nbsp; <span id="footerTime"></span>
-</div>
+<div class="footer">伯俊科技(云南)有限公司 · REST API数据</div>
 
 <script>
-// ========== 模拟数据 ==========
-const STORE_NAMES = {1:'总部仓库',14:'同德广场店',15:'北市区和谐店',7:'呈贡奥斯迪',16:'双桥福德路',17:'官渡环南路',22:'呈贡步行街',192:'同德2号店',240:'昆明一店',349:'小板桥分店',361:'曲靖分店3',210:'会泽1店',301:'安宁服装店',200:'CHUU七彩云南',202:'CHUU同德',203:'CHUU金鹰',201:'CHUU万象城',204:'NO ONE ELSE顺城',205:'NO ONE ELSE万象城',206:'NO ONE ELSE同德'};
+var ALL_DATA = REAL_DATA.sell_thru || [];
+var FD = ALL_DATA.slice();
 
-// 生成真实感的产品数据 - 基于实际API查询到的产品+模拟2026年数据
-const MOCK_PRODUCTS = [
-  {name:'WX1YXT6278', value:'春季套装', price:399, purchase:600, retail:180, sale:0},
-  {name:'WX1ZCM0001', value:'鸭舌帽', price:199, purchase:100, retail:70, sale:0},
-  {name:'WX1ZCB0002', value:'帆布包', price:499, purchase:100, retail:60, sale:0},
-  {name:'WX2WHX362', value:'运动鞋', price:373, purchase:700, retail:0, sale:40},
-  {name:'WQ1WHX889', value:'休闲鞋', price:3281, purchase:50, retail:12, sale:5},
-  {name:'WX2YHT123', value:'短袖T恤', price:259, purchase:500, retail:180, sale:60},
-  {name:'WX2YHT456', value:'连衣裙', price:459, purchase:300, retail:120, sale:30},
-  {name:'WX2YHT789', value:'牛仔裤', price:359, purchase:400, retail:150, sale:45},
-  {name:'WX2ZCM100', value:'围巾', price:159, purchase:200, retail:85, sale:0},
-  {name:'WX2ZCM200', value:'手套', price:129, purchase:150, retail:55, sale:0},
-  {name:'WX3YHT001', value:'卫衣', price:329, purchase:350, retail:130, sale:20},
-  {name:'WX3YHT002', value:'风衣', price:599, purchase:200, retail:60, sale:15},
-  {name:'WX3YHT003', value:'半身裙', price:289, purchase:250, retail:95, sale:25},
-  {name:'WX3ZCM001', value:'腰带', price:189, purchase:180, retail:72, sale:0},
-  {name:'WX4YHT001', value:'羽绒服', price:899, purchase:150, retail:30, sale:10},
-  {name:'WX4YHT002', value:'针织衫', price:349, purchase:300, retail:110, sale:35},
-  {name:'WX4ZCM001', value:'棒球帽', price:149, purchase:120, retail:48, sale:0},
-  {name:'WX5YHT001', value:'西装外套', price:699, purchase:180, retail:45, sale:20},
-  {name:'WX5YHT002', value:'休闲裤', price:329, purchase:280, retail:100, sale:30},
-  {name:'WX5ZCM001', value:'墨镜', price:259, purchase:90, retail:35, sale:0},
-  {name:'WX6YHT001', value:'雪纺衫', price:279, purchase:220, retail:88, sale:15},
-  {name:'WX6YHT002', value:'百褶裙', price:319, purchase:160, retail:55, sale:10},
-  {name:'WX6ZCM001', value:'手表', price:399, purchase:60, retail:18, sale:5},
-  {name:'WX7YHT001', value:'POLO衫', price:299, purchase:350, retail:140, sale:50},
-  {name:'WX7YHT002', value:'蕾丝衫', price:269, purchase:180, retail:72, sale:20},
-  {name:'WX8YHT001', value:'牛仔外套', price:499, purchase:200, retail:55, sale:15},
-  {name:'WX8YHT002', value:'打底裤', price:159, purchase:400, retail:180, sale:50},
-  {name:'WX8ZCM001', value:'钱包', price:299, purchase:80, retail:28, sale:5},
-  {name:'WX9YHT001', value:'针织开衫', price:389, purchase:250, retail:80, sale:25},
-  {name:'WX9YHT002', value:'连体裤', price:429, purchase:120, retail:35, sale:10},
-  {name:'WX9YHT003', value:'T恤', price:199, purchase:600, retail:300, sale:100},
-  {name:'WX9ZCM001', value:'发带', price:89, purchase:200, retail:110, sale:0},
-  {name:'WX0YHT001', value:'衬衫', price:339, purchase:300, retail:110, sale:40},
-  {name:'WX0YHT002', value:'马甲', price:259, purchase:150, retail:45, sale:10},
-  {name:'WX0ZCM001', value:'胸针', price:129, purchase:100, retail:45, sale:0},
-  {name:'WX1YHT001', value:'皮夹克', price:799, purchase:100, retail:20, sale:8},
-  {name:'WX1YHT002', value:'阔腿裤', price:359, purchase:200, retail:65, sale:15},
-  {name:'WX1ZCM002', value:'太阳帽', price:119, purchase:150, retail:65, sale:0},
-  {name:'WX2YHT003', value:'吊带衫', price:169, purchase:250, retail:130, sale:20},
-  {name:'WX2ZCM003', value:'钥匙扣', price:69, purchase:300, retail:200, sale:0},
-  {name:'WX3YHT004', value:'西装裤', price:459, purchase:150, retail:35, sale:12},
-  {name:'WX3ZCM002', value:'耳环', price:99, purchase:200, retail:120, sale:0},
-  {name:'WX4YHT003', value:'毛呢大衣', price:999, purchase:80, retail:12, sale:5},
-  {name:'WX4ZCM002', value:'项链', price:159, purchase:150, retail:75, sale:0},
-  {name:'WX5YHT003', value:'牛仔短裤', price:229, purchase:300, retail:130, sale:25},
-  {name:'WX5ZCM002', value:'手链', price:89, purchase:200, retail:95, sale:0},
-];
-
-const COLORS = ['#059669','#10b981','#34d399','#d97706','#f59e0b','#fbbf24','#dc2626','#ef4444','#f87171','#6366f1','#8b5cf6','#a78bfa','#4361ee','#3a86ff','#8338ec'];
-
-let rateChart, stockChart, rankingChart;
-let filteredData = MOCK_PRODUCTS;
-
-window.onload = function() {
-  document.getElementById('updateTime').textContent = '⏱ 更新于 2026-04-27 16:30';
-  document.getElementById('footerTime').textContent = '更新于 2026-04-27 16:30';
-  render();
-};
-
-function refresh() {
-  document.getElementById('updateTime').textContent = '⏱ 刷新中...';
-  setTimeout(()=>{
-    document.getElementById('updateTime').textContent = '⏱ 更新于 2026-04-27 ' + new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-    render();
-  },500);
-}
-
-function getRateClass(rate) {
-  if(rate >= 60) return 'green';
-  if(rate >= 30) return 'yellow';
-  return 'red';
-}
-
-function getRateLabel(rate) {
-  if(rate >= 60) return '✅ 畅销';
-  if(rate >= 30) return '⚠️ 正常';
-  return '🔴 滞销';
-}
+function rateColor(r) { return r >= 80 ? 'badge high' : r >= 50 ? 'badge mid' : 'badge low'; }
+function barColor(r) { return r >= 80 ? 'green' : r >= 50 ? 'yellow' : 'red'; }
 
 function render() {
-  const sort = document.getElementById('sortFilter').value;
-  const searchText = document.getElementById('searchInput').value.trim();
-  
-  filteredData = MOCK_PRODUCTS.filter(p => {
-    if(searchText && !p.name.includes(searchText) && !p.value.includes(searchText)) return false;
-    return true;
+  var totalSold = 0, totalPurchased = 0, highCount = 0, midCount = 0, lowCount = 0;
+  FD.forEach(function(p) {
+    totalSold += p.sold; totalPurchased += p.purchased;
+    if (p.rate >= 80) highCount++; else if (p.rate >= 50) midCount++; else lowCount++;
   });
-  
-  if(sort === 'sold') filteredData.sort((a,b) => (b.retail+b.sale) - (a.retail+a.sale));
-  else if(sort === 'stock') filteredData.sort((a,b) => b.purchase - a.purchase);
-  else filteredData.sort((a,b) => {
-    const ra = a.retail+a.sale > 0 ? (a.retail+a.sale)/a.purchase*100 : 0;
-    const rb = b.retail+b.sale > 0 ? (b.retail+b.sale)/b.purchase*100 : 0;
-    return rb - ra;
-  });
-  
-  renderKPI();
-  renderRateChart();
-  renderStockVsSoldChart();
-  renderRankingChart();
-  renderTable();
-}
+  var overallRate = totalPurchased > 0 ? (totalSold / totalPurchased * 100).toFixed(1) : 0;
+  var totalAmt = FD.reduce(function(s, p) { return s + (p.sold * (p.price || 0)); }, 0);
 
-function renderKPI() {
-  let totalPur=0, totalSold=0, totalItems=0;
-  let high=0, normal=0, low=0;
-  for(const p of filteredData) {
-    const sold = p.retail + p.sale;
-    totalPur += p.purchase;
-    totalSold += sold;
-    if(sold > 0) totalItems++;
-    const rate = sold > 0 ? sold/p.purchase*100 : 0;
-    if(rate >= 60) high++;
-    else if(rate >= 30) normal++;
-    else if(sold > 0) low++;
-  }
-  const overallRate = totalPur > 0 ? (totalSold/totalPur*100).toFixed(1) : 0;
-  
-  document.getElementById('kpiGrid').innerHTML = `
-    <div class="kpi-card">
-      <div class="label">📦 采购入库总量</div>
-      <div class="val">${totalPur.toLocaleString()}</div>
-      <div class="subv">件</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">🛒 总销量</div>
-      <div class="val">${totalSold.toLocaleString()}</div>
-      <div class="subv">件</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">📊 综合售罄率</div>
-      <div class="val ${getRateClass(overallRate)}">${overallRate}%</div>
-      <div class="subv">${totalItems}个产品有销售</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">✅ 畅销(≥60%)</div>
-      <div class="val green">${high}</div>
-      <div class="subv">个产品</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">⚠️ 正常(30-60%)</div>
-      <div class="val yellow">${normal}</div>
-      <div class="subv">个产品</div>
-    </div>
-    <div class="kpi-card">
-      <div class="label">🔴 滞销(&lt;30%)</div>
-      <div class="val red">${low}</div>
-      <div class="subv">个产品</div>
-    </div>
-  `;
-}
+  var kg = document.getElementById('kpiGrid');
+  kg.innerHTML =
+    '<div class="kpi-card"><div class="label">📦 产品总数</div><div class="val">' + FD.length + '</div></div>' +
+    '<div class="kpi-card"><div class="label">🎯 综合售罄率</div><div class="val ' + (overallRate >= 50 ? 'green' : '') + '">' + overallRate + '%</div></div>' +
+    '<div class="kpi-card"><div class="label">📊 高售罄(≥80%)</div><div class="val green">' + highCount + '</div></div>' +
+    '<div class="kpi-card"><div class="label">📊 中售罄(50-80%)</div><div class="val yellow">' + midCount + '</div></div>' +
+    '<div class="kpi-card"><div class="label">📊 低售罄(<50%)</div><div class="val" style="color:#991b1b">' + lowCount + '</div></div>' +
+    '<div class="kpi-card"><div class="label">💰 吊牌价总额</div><div class="val">¥' + Math.round(totalAmt / 10000).toLocaleString() + '万</div></div>';
 
-function renderRateChart() {
-  const ctx = document.getElementById('rateChart').getContext('2d');
-  if(rateChart) rateChart.destroy();
-  
-  let h=0,n=0,l=0,z=0;
-  for(const p of filteredData) {
-    const sold = p.retail + p.sale;
-    if(sold === 0) { z++; continue; }
-    const rate = sold/p.purchase*100;
-    if(rate >= 60) h++;
-    else if(rate >= 30) n++;
-    else l++;
-  }
-  
-  rateChart = new Chart(ctx, {
-    type:'doughnut',
-    data:{
-      labels:[`畅销 ≥60% (${h})`,`正常 30-60% (${n})`,`滞销 <30% (${l})`],
-      datasets:[{data:[h,n,l],backgroundColor:['#059669','#d97706','#dc2626'],borderWidth:0}]
+  document.getElementById('resultCount').textContent = '共 ' + FD.length + ' 个款号';
+
+  // 售罄率图(TOP30)
+  var top30 = FD.slice(0, 30);
+  // Chart.js destroy if exists
+  if (window.scChart) window.scChart.destroy();
+  var ctx = document.getElementById('sellThruChart').getContext('2d');
+  window.scChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: top30.map(function(p) { return (p.pname || '').substring(0, 10); }),
+      datasets: [{ label: '售罄率%', data: top30.map(function(p) { return p.rate; }), backgroundColor: top30.map(function(p) { return p.rate >= 80 ? '#10b981' : p.rate >= 50 ? '#f59e0b' : '#ef4444'; }), borderRadius: 3, barPercentage: .6 }]
     },
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'55%',
-      plugins:{
-        legend:{position:'bottom',labels:{font:{size:11},padding:12,boxWidth:12}},
-        tooltip:{callbacks:{label:ctx=>ctx.label}}
-      }
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.raw + '%'; } } } },
+      scales: { x: { beginAtZero: true, max: 100, ticks: { callback: function(v) { return v + '%'; } }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { grid: { display: false }, ticks: { font: { size: 9 } } } }
     }
   });
-}
 
-function renderStockVsSoldChart() {
-  const ctx = document.getElementById('stockVsSoldChart').getContext('2d');
-  if(stockChart) stockChart.destroy();
-  
-  const top = filteredData.filter(p => p.purchase > 0).sort((a,b) => b.purchase - a.purchase).slice(0,15);
-  
-  stockChart = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels:top.map(p => p.name),
-      datasets:[
-        {label:'采购入库',data:top.map(p=>p.purchase),backgroundColor:'#93c5fd',borderRadius:3,barPercentage:.7},
-        {label:'已销售',data:top.map(p=>p.retail+p.sale),backgroundColor:'#059669',borderRadius:3,barPercentage:.7}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12,padding:10}}},
-      scales:{
-        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'}},
-        x:{grid:{display:false},ticks:{font:{size:10}}}
-      }
-    }
-  });
-}
-
-function renderRankingChart() {
-  const ctx = document.getElementById('rankingChart').getContext('2d');
-  if(rankingChart) rankingChart.destroy();
-  
-  const withSales = filteredData.filter(p => p.retail+p.sale > 0).sort((a,b) => {
-    const ra = (a.retail+a.sale)/a.purchase*100;
-    const rb = (b.retail+b.sale)/b.purchase*100;
-    return rb - ra;
-  });
-  
-  rankingChart = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels: withSales.map(p => p.name),
-      datasets:[{
-        label:'售罄率',
-        data: withSales.map(p => parseFloat(((p.retail+p.sale)/p.purchase*100).toFixed(1))),
-        backgroundColor: withSales.map(p => {
-          const r = (p.retail+p.sale)/p.purchase*100;
-          return r >= 60 ? '#059669' : r >= 30 ? '#d97706' : '#dc2626';
-        }),
-        borderRadius:4,barPercentage:.7
-      }]
-    },
-    options:{
-      indexAxis:'y',
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>'售罄率: '+ctx.raw+'%'}}
-      },
-      scales:{
-        x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,.04)'}},
-        y:{grid:{display:false},ticks:{font:{size:10}}}
-      }
-    }
-  });
-}
-
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  if(filteredData.length===0){
-    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:30px">暂无数据</td></tr>';
-    return;
-  }
-  
-  tbody.innerHTML = filteredData.map(p => {
-    const sold = p.retail + p.sale;
-    const rate = sold > 0 ? (sold/p.purchase*100).toFixed(1) : 0;
-    const rClass = getRateClass(rate);
-    return `<tr>
-      <td style="font-family:monospace;font-size:12px">${p.name}</td>
-      <td>${p.value}</td>
-      <td>¥${p.price}</td>
-      <td class="text-right">${p.purchase.toLocaleString()}</td>
-      <td class="text-right">${p.retail.toLocaleString()}</td>
-      <td class="text-right">${p.sale.toLocaleString()}</td>
-      <td class="text-right"><strong>${sold.toLocaleString()}</strong></td>
-      <td class="text-center">
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center">
-          <span style="font-weight:600;color:${rClass==='green'?'#059669':rClass==='yellow'?'#d97706':'#dc2626'}">${rate}%</span>
-          <div class="progress"><div class="bar ${rClass}" style="width:${Math.min(rate,100)}%"></div></div>
-        </div>
-      </td>
-      <td><span class="badge ${rClass}">${getRateLabel(rate)}</span></td>
-    </tr>`;
+  // 表格
+  var tb = document.getElementById('tableBody');
+  tb.innerHTML = FD.map(function(p, i) {
+    return '<tr><td>' + (i + 1) + '</td><td style="font-family:monospace;font-size:11px">' + (p.pname || '—') + '</td><td>' + (p.pval || '—') + '</td><td>¥' + (p.price || 0).toLocaleString() + '</td><td class="text-right">' + p.sold + '</td><td class="text-right">' + p.purchased + '</td><td><span class="' + rateColor(p.rate) + '">' + p.rate + '%</span></td><td style="width:120px"><div class="progress"><div class="bar ' + barColor(p.rate) + '" style="width:' + Math.min(p.rate, 100) + '%"></div></div></td></tr>';
   }).join('');
 }
 
-function search() { render(); }
-setInterval(refresh, 10*60*1000);
+function filterTable() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  var rf = document.getElementById('rateFilter').value;
+  FD = ALL_DATA.filter(function(p) {
+    if (q && (p.pname || '').toLowerCase().indexOf(q) < 0 && (p.pval || '').toLowerCase().indexOf(q) < 0) return false;
+    if (rf === 'high' && p.rate < 80) return false;
+    if (rf === 'mid' && (p.rate < 50 || p.rate >= 80)) return false;
+    if (rf === 'low' && p.rate >= 50) return false;
+    return true;
+  });
+  render();
+}
+
+render();
+document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 </script>
 </body>
 </html>
