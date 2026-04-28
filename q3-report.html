@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 季度销售报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="q3-data.js?v=20260428"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1100px;margin:0 auto}
+.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.nav .title{color:#fff;font-size:16px;font-weight:600}
+.report-header{background:linear-gradient(135deg,#1e3a5f,#2d6a9f);color:#fff;border-radius:16px;padding:24px 28px;margin-bottom:16px}
+.report-header .r1{font-size:24px;font-weight:700}
+.report-header .r2{font-size:13px;opacity:.7;margin-top:6px;line-height:1.6}
+.report-header .r3{font-size:11px;opacity:.5;margin-top:8px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:16px 18px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kpi-card .kl{font-size:11px;color:#64748b;margin-bottom:3px}
+.kpi-card .kv{font-size:22px;font-weight:700}
+.kpi-card .ks{font-size:11px;color:#94a3b8;margin-top:3px}
+.kpi-card .up{color:#10b981}.kpi-card .down{color:#ef4444}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}}
+.chart-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0}
+.chart-card .ct{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px}
+.chart-card canvas{max-height:260px}
+.full{grid-column:1/-1}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 6px;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:6px;border-bottom:1px solid #f1f5f9}
+tr:hover{background:#f8fafc}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.badge.blue{background:#dbeafe;color:#1e40af}.badge.green{background:#d1fae5;color:#065f46}
+.insight{border-radius:12px;padding:16px 18px;margin-bottom:16px;border:1px solid #e2e8f0}
+.insight.pos{border-left:4px solid #10b981;background:#f0fdf4}.insight.neg{border-left:4px solid #ef4444;background:#fef2f2}.insight.neu{border-left:4px solid #f59e0b;background:#fffbeb}
+.insight .it{font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px}.insight .ib{font-size:13px;color:#1e293b}
+.text-right{text-align:right}.text-center{text-align:center}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0}
+</style>
+</head>
+<body>
+<div class="nav">
+  <span class="title">📊 伯俊ERP</span>
+  <a href="./">看板</a>
+  <a href="bi-analysis.html">分析</a>
+  <a href="stock-warning.html">库存</a>
+  <a href="q3-report.html" class="active">季度报告</a>
+</div>
+
+<div class="report-header">
+  <div class="r1">📊 2026年2-4月 季报</div>
+  <div class="r2">近3个月销售分析 · 同比环比 · 毛利率 · 品类门店排行</div>
+  <div class="r3" id="headerTime">加载中...</div>
+</div>
+
+<div id="content"></div>
+
+<div class="footer">伯俊科技(云南)有限公司 · 毛利率按45%成本率估算 · 数据来源REST API</div>
+
+<script>
+var D = Q3M.s;
+var s = Q3M.summary;
+function fmt(v){return'¥'+(v||0).toLocaleString('zh-CN',{maximumFractionDigits:2,minimumFractionDigits:0});}
+function arrow(v){return v>=0?'<span class="up">↑'+Math.abs(v)+'%</span>':'<span class="down">↓'+Math.abs(v)+'%</span>';}
+
+var el = document.getElementById('content');
+document.getElementById('headerTime').textContent = '生成时间: ' + new Date().toLocaleString('zh-CN',{hour:'2-digit',minute:'2-digit'}) + ' · 2026年2月1日-4月27日';
+
+el.innerHTML = 
+// KPI
+'<div class="kpi-row">'+
+  '<div class="kpi-card"><div class="kl">💰 成交金额</div><div class="kv">' + fmt(s.amt) + '</div><div class="ks">同比' + arrow(s.yoy_sale) + ' · 环比' + arrow(s.mom_sale) + '</div></div>'+
+  '<div class="kpi-card"><div class="kl">📦 销售件数</div><div class="kv">' + s.qty + '</div><div class="ks">同比' + arrow(s.yoy_qty) + ' · 环比' + arrow(s.mom_qty) + '</div></div>'+
+  '<div class="kpi-card"><div class="kl">📊 毛利率</div><div class="kv" style="color:#10b981">' + s.gross_rate + '%</div><div class="ks">毛利额' + fmt(s.gross_profit) + '</div></div>'+
+  '<div class="kpi-card"><div class="kl">🏬 活跃门店</div><div class="kv">' + s.stores + '家</div><div class="ks">共' + s.store_total + '家门店</div></div>'+
+  '<div class="kpi-card"><div class="kl">👤 VIP占比</div><div class="kv">' + (s.amt>0?(s.vip_amt/s.amt*100).toFixed(1):0) + '%</div><div class="ks">' + s.vip_count + '位VIP消费</div></div>'+
+  '<div class="kpi-card"><div class="kl">📈 折扣率</div><div class="kv">' + s.discount + '%</div><div class="ks">去年同期' + s.discount_last + '%</div></div>'+
+'</div>'+
+
+// 洞察
+'<div class="insight '+(s.yoy_sale<0?'neg':'pos')+'"><div class="it">📌 核心洞察</div><div class="ib">'+
+  '近3个月成交' + fmt(s.amt) + '，' + (s.yoy_sale<0?'同比下滑'+Math.abs(s.yoy_sale)+'%':'同比增长'+s.yoy_sale+'%') +
+  '，' + (s.mom_sale>0?'环比增长'+s.mom_sale+'%':'环比下滑'+Math.abs(s.mom_sale)+'%') +
+  '。毛利率' + s.gross_rate + '%' +
+  (s.gross_rate>=50?'（健康水平）':'（需优化成本）') +
+  '。VIP贡献占比' + (s.amt>0?(s.vip_amt/s.amt*100).toFixed(1):0) + '%' + (s.vip_amt/s.amt>0.5?'，VIP忠诚度高。': '，需加强会员运营。') +
+'</div></div>'+
+
+// 月度趋势图
+'<div class="chart-card full"><div class="ct">📈 月度销售对比 (2026年 vs 2025年同期)</div><canvas id="trendChart"></canvas></div>'+
+
+'<div class="chart-row">'+
+  '<div class="chart-card"><div class="ct">🏬 门店排行</div><canvas id="storeChart"></canvas></div>'+
+  '<div class="chart-card"><div class="ct">🧥 品类分布</div><canvas id="catChart"></canvas></div>'+
+'</div>'+
+
+// 门店明细表
+'<div class="chart-card full"><div class="ct">📋 门店销售明细</div><div class="tbl-wrap"><table><thead><tr><th>门店</th><th>订单数</th><th>成交金额</th><th>销售件数</th><th>客单价</th><th>占比</th></tr></thead><tbody>'+
+  Object.entries(Q3M.stores).sort(function(a,b){return b[1].amt-a[1].amt;}).map(function(s){
+    var pct = s[1].amt/s.amt*100;
+    return '<tr><td><span class="badge blue">'+s[1].name+'</span></td><td>'+s[1].orders+'</td><td>'+fmt(s[1].amt)+'</td><td>'+s[1].qty+'</td><td>¥'+Math.round(s[1].amt/s[1].orders)+'</td><td>'+pct.toFixed(1)+'%</td></tr>';
+  }).join('')+
+'</tbody></table></div></div>'+
+
+// 品类明细
+'<div class="chart-card full"><div class="ct">🧥 品类销售明细</div><div class="tbl-wrap"><table><thead><tr><th>品类</th><th>销售件数</th><th>成交金额</th><th>占比</th></tr></thead><tbody>'+
+  Object.entries(Q3M.cats).sort(function(a,b){return b[1].amt-a[1].amt;}).map(function(c){
+    var pct = c[1].amt/s.amt*100;
+    return '<tr><td>'+c[0]+'</td><td>'+c[1].qty+'件</td><td>'+fmt(c[1].amt)+'</td><td>'+pct.toFixed(1)+'%</td></tr>';
+  }).join('')+
+'</tbody></table></div></div>';
+
+// ====== 趋势图 ======
+var months = Object.keys(Q3M.months).sort();
+var labels = months.map(function(m){return m.substring(4,6)+'月';});
+var data26 = months.map(function(m){return Math.round(Q3M.months[m].amt);});
+var data25 = months.map(function(m){
+  var ym = '2025'+m.substring(4,6);
+  return Q3M.months_last[ym] ? Math.round(Q3M.months_last[ym].amt) : null;
+});
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'bar', data: {
+    labels: labels,
+    datasets: [
+      {label:'2026年(今年)', data:data26, backgroundColor:'#4361ee', borderRadius:3, barPercentage:.6},
+      {label:'2025年(去年)', data:data25, backgroundColor:'rgba(67,97,238,.25)', borderRadius:3, barPercentage:.6}
+    ]
+  }, options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:6}}, tooltip:{callbacks:{label:function(ctx){return'¥'+ctx.raw.toLocaleString();}}}},
+    scales:{y:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v/10000).toFixed(1)+'万';}},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}
+  }
+});
+
+// ====== 门店图 ======
+var sr = Object.entries(Q3M.stores).sort(function(a,b){return b[1].amt-a[1].amt;});
+new Chart(document.getElementById('storeChart'), {
+  type: 'bar', data: {
+    labels: sr.map(function(s){return s[1].name.substring(0,6)+'…';}),
+    datasets:[{label:'成交金额',data:sr.map(function(s){return Math.round(s[1].amt);}),backgroundColor:['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607'],borderRadius:3,barPercentage:.6}]
+  }, options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:function(ctx){return'¥'+ctx.raw.toLocaleString();}}}},
+    scales:{x:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v/10000).toFixed(1)+'万';}},grid:{color:'rgba(0,0,0,.04)'}},y:{grid:{display:false},ticks:{font:{size:9}}}}
+  }
+});
+
+// ====== 品类图 ======
+var cl = Object.entries(Q3M.cats).sort(function(a,b){return b[1].amt-a[1].amt;}).slice(0,8);
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut', data: {
+    labels: cl.map(function(c){return c[0];}),
+    datasets:[{data:cl.map(function(c){return c[1].amt;}),backgroundColor:['#4361ee','#ff9f1c','#06d6a0','#8338ec','#ff006e','#fb5607','#118ab2','#94a3b8']}]
+  }, options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}}, tooltip:{callbacks:{label:function(ctx){return fmt(ctx.raw);}}}}
+  }
+});
+</script>
+</body>
+</html>
