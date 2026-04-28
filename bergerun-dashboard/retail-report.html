@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 零售数据分析报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;max-width:1200px;margin:0 auto;padding:16px}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:16px;padding:22px 28px;margin-bottom:16px;box-shadow:0 4px 20px rgba(26,26,46,.3)}
+.header h1{font-size:22px;font-weight:700}.header .sub{font-size:12px;opacity:.7;margin-top:4px}
+.meta{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;font-size:11px;opacity:.6}
+.nav{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.nav a{text-decoration:none;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px 13px;font-size:12px;color:#64748b;transition:all .2s}
+.nav a:hover{background:#eef2ff;border-color:#4361ee;color:#4361ee}
+.nav a.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.section{margin-bottom:16px}
+.section-title{font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.section-title .badge{font-size:10px;font-weight:400;background:#eef2ff;color:#4361ee;padding:1px 8px;border-radius:8px}
+.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.kpi-box{text-align:center;padding:14px 10px;background:#fff;border-radius:10px;border:1px solid #e2e8f0}
+.kpi-box .val{font-size:24px;font-weight:700;color:#1a1a2e}
+.kpi-box .label{font-size:11px;color:#64748b;margin-top:2px}
+.kpi-box .change{font-size:11px;margin-top:2px}
+.kpi-box .change.up{color:#059669}.kpi-box .change.down{color:#dc2626}
+.insight{padding:12px 16px;background:#f8fafc;border-left:3px solid #4361ee;border-radius:6px;margin-bottom:10px;font-size:13px;line-height:1.6;color:#334155}
+.insight strong{color:#1a1a2e}
+.insight .tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;margin-right:4px}
+.insight .tag.green{background:#d1fae5;color:#059669}
+.insight .tag.red{background:#fee2e2;color:#dc2626}
+.insight .tag.blue{background:#dbeafe;color:#2563eb}
+.insight .tag.yellow{background:#fef3c7;color:#d97706}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:800px){.row{grid-template-columns:1fr}}
+.chart-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0}
+.chart-card .ctitle{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chart-card .ctitle .tag{font-size:10px;font-weight:400;background:#f0f2f5;color:#64748b;padding:1px 7px;border-radius:8px}
+.chart-box{width:100%;height:220px}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+th{text-align:left;padding:7px 8px;background:#f8fafc;color:#64748b;font-weight:600;font-size:10px;border-bottom:2px solid #e2e8f0;white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid #f0f2f5;font-size:11px}
+tr:hover td{background:#f8fafc}
+.text-right{text-align:right!important}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0;border-top:1px solid #e2e8f0;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="nav">
+  <a href="./">📊 零售看板</a>
+  <a href="sell-thru.html">📦 售罄率</a>
+  <a href="retail-analysis.html">📈 零售分析</a>
+  <a href="retail-report.html" class="active">📋 分析报告</a>
+</div>
+<div class="header">
+  <h1>📋 零售数据分析报告</h1>
+  <div class="sub">昆明区域 · 全品牌 · 智能分析洞察</div>
+  <div class="meta">
+    <span>🕐 <span id="reportTime">加载中...</span></span>
+    <span>📊 2026年1月-4月</span>
+    <span>🏪 覆盖20家门店</span>
+  </div>
+</div>
+<div class="kpi-row" id="kpiRow"></div>
+<div class="card"><div class="section-title">📝 经营概况</div><div id="summaryText">分析中...</div></div>
+<div class="section">
+  <div class="section-title">📈 销售趋势分析 <span class="badge">同环比</span></div>
+  <div class="row">
+    <div class="chart-card"><div class="ctitle">月度销售走势 <span class="tag">2026 vs 2025</span></div><div class="chart-box"><canvas id="monthChart"></canvas></div></div>
+    <div class="chart-card"><div class="ctitle">每日销售趋势 <span class="tag">本期 vs 同期</span></div><div class="chart-box"><canvas id="dailyChart"></canvas></div></div>
+  </div>
+  <div class="insight" id="trendInsight">分析中...</div>
+</div>
+<div class="section">
+  <div class="section-title">🏪 门店表现分析 <span class="badge">TOP排行</span></div>
+  <div class="row">
+    <div class="chart-card"><div class="ctitle">门店销售排行 <span class="tag">TOP10</span></div><div class="chart-box"><canvas id="storeChart"></canvas></div></div>
+    <div class="chart-card"><div class="ctitle">门店毛利率 <span class="tag">TOP10</span></div><div class="chart-box"><canvas id="profitChart"></canvas></div></div>
+  </div>
+  <div class="insight" id="storeInsight">分析中...</div>
+</div>
+<div class="section">
+  <div class="section-title">👔 商品分析 <span class="badge">品牌/品类</span></div>
+  <div class="row">
+    <div class="chart-card"><div class="ctitle">品牌销售占比 <span class="tag">CHUU/NO ONE ELSE/其他</span></div><div class="chart-box"><canvas id="brandChart"></canvas></div></div>
+    <div class="chart-card"><div class="ctitle">品类结构 <span class="tag">鞋/服/配</span></div><div class="chart-box"><canvas id="catChart"></canvas></div></div>
+  </div>
+  <div class="insight" id="productInsight">分析中...</div>
+</div>
+<div class="section">
+  <div class="section-title">🏆 商品热销排行 <span class="badge">TOP20</span></div>
+  <div class="card">
+    <table><thead><tr><th>排名</th><th>款号</th><th>品牌</th><th>品类</th><th class="text-right">销售数量</th><th class="text-right">销售额</th><th class="text-right">毛利率</th><th>表现</th></tr></thead><tbody id="productTable"></tbody></table>
+  </div>
+  <div class="insight" id="sellthruInsight">分析中...</div>
+</div>
+<div class="section">
+  <div class="section-title">👥 会员消费分析 <span class="badge">VIP贡献</span></div>
+  <div class="row">
+    <div class="chart-card"><div class="ctitle">会员 vs 散客 <span class="tag">销售额占比</span></div><div class="chart-box"><canvas id="vipChart"></canvas></div></div>
+    <div class="chart-card"><div class="ctitle">消费频次分布 <span class="tag">模拟数据</span></div><div class="chart-box"><canvas id="repeatChart"></canvas></div></div>
+  </div>
+  <div class="insight" id="vipInsight">分析中...</div>
+</div>
+<div class="card"><div class="section-title">💡 结论与建议</div><div id="conclusionText">分析中...</div></div>
+<div class="footer">本报告基于模拟数据生成，演示分析框架 | 接入真实数据后自动更新 | <span id="footerTime"></span></div>
+<script>
+var STORES=[[206,'NO ONE ELSE同德'],[204,'NO ONE ELSE顺城'],[202,'CHUU同德'],[200,'CHUU七彩云南'],[203,'CHUU金鹰'],[205,'NO ONE ELSE万象城'],[201,'CHUU万象城'],[15,'北市区和谐店'],[14,'同德广场店'],[7,'呈贡奥斯迪'],[17,'官渡环南路'],[16,'双桥福德路'],[22,'呈贡步行街'],[192,'同德2号店'],[220,'同德4号店'],[240,'昆明一店'],[349,'小板桥分店'],[361,'曲靖分店3'],[210,'会泽1店'],[301,'安宁服装店']];
+var SM={};for(var i=0;i<STORES.length;i++)SM[STORES[i][0]]=STORES[i][1];
+var GR=0.55;
+var PS=[[399,'WX1YXT6278'],[199,'WX1ZCM0001'],[499,'WX1ZCB0002'],[373,'WX2WHX362'],[3281,'WQ1WHX889'],[259,'WX2YHT123'],[459,'WX2YHT456'],[359,'WX2YHT789'],[159,'WX2ZCM100'],[129,'WX2ZCM200'],[329,'WX3YHT001'],[599,'WX3YHT002'],[289,'WX3YHT003'],[189,'WX3ZCM001'],[899,'WX4YHT001'],[349,'WX4YHT002'],[149,'WX4ZCM001'],[699,'WX5YHT001'],[329,'WX5YHT002'],[259,'WX5ZCM001'],[279,'WX6YHT001'],[319,'WX6YHT002'],[399,'WX6ZCM001'],[299,'WX7YHT001'],[269,'WX7YHT002'],[499,'WX8YHT001'],[159,'WX8YHT002'],[299,'WX8ZCM001'],[389,'WX9YHT001'],[429,'WX9YHT002'],[199,'WX9YHT003'],[89,'WX9ZCM001'],[339,'WX0YHT001'],[259,'WX0YHT002'],[129,'WX0ZCM001'],[799,'WX1YHT001'],[359,'WX1YHT002'],[119,'WX1ZCM002'],[169,'WX2YHT003'],[69,'WX2ZCM003'],[459,'WX3YHT004'],[99,'WX3ZCM002'],[999,'WX4YHT003'],[159,'WX4ZCM002'],[229,'WX5YHT003'],[89,'WX5ZCM002']];
+var PL={};var AP=[];for(var i=0;i<PS.length;i++){PL[PS[i][1]]=PS[i][0];AP.push(PS[i][1]);}
+var BM={2:'CHUU',3:'NO ONE ELSE',4:'其他'};var PB={};for(var i=0;i<AP.length;i++){PB[AP[i]]=i<28?'2':(i<38?'3':'4');}
+var CN={shoes:'鞋类',clothes:'服装',accessories:'配饰'};var CO={};
+for(var i=0;i<AP.length;i++){var p=AP[i];if(p.indexOf('ZCM')>=0||p.indexOf('ZCB')>=0)CO[p]='accessories';else if(p==='WX2WHX362'||p==='WQ1WHX889')CO[p]='shoes';else CO[p]='clothes';}
+var AD=[];var CC={};
+function gd(){var d=[];var oid=10001;for(var dt=new Date(2025,0,1);dt<=new Date(2026,3,27);dt.setDate(dt.getDate()+1)){var Y=dt.getFullYear(),M=dt.getMonth()+1,D=dt.getDate();var ds=String(Y)+(M<10?'0':'')+M+(D<10?'0':'')+D;var wd=dt.getDay();var n=(wd===0?4:wd===6?6:2)+Math.floor(Math.random()*4);for(var i=0;i<Math.floor(n)&&oid<30000;i++){var sid=STORES[Math.floor(Math.random()*STORES.length)][0];var pn=AP[Math.floor(Math.random()*AP.length)];var lp=PL[pn]||299;var ap=Math.round(lp*(0.55+Math.random()*0.4));var q=1+Math.floor(Math.random()*(wd===0||wd===6?4:2));var ta=ap*q,co=Math.round(ta*(1-GR));d.push({id:oid++,date:parseInt(ds),storeId:sid,storeName:SM[sid],prodName:pn,brand:PB[pn],cat:CO[pn]||'clothes',qty:q,listAmt:lp*q,actualAmt:ta,cost:co,gross:ta-co,grossRate:Math.round((ta-co)/ta*100),vip:Math.random()>0.5?'VIP'+String(1000+Math.floor(Math.random()*900)):'',type:Math.random()>0.8?'团购':'正常'});}}return d;}
+function fv(v){return'¥'+v.toLocaleString('zh-CN')}
+function init(){AD=gd();var d=AD.filter(function(r){return r.date>=20260101&&r.date<=20260427});document.getElementById('reportTime').textContent=(new Date()).toLocaleString('zh-CN',{hour:'2-digit',minute:'2-digit'});document.getElementById('footerTime').textContent=(new Date()).toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});rK(d);rS(d);rT(d);rSt(d);rP(d);rB(d);rC(d);rV(d);rCl(d);}
+function rK(d){var a=0,la=0,co=0,q=0,ss={},vs={};for(var i=0;i<d.length;i++){var r=d[i];a+=r.actualAmt;la+=r.listAmt;co+=r.cost;q+=r.qty;ss[r.storeId]=1;if(r.vip)vs[r.vip]=1;}var g=a-co,gr=((a-co)/a*100).toFixed(1);var sy=0;for(var i=0;i<AD.length;i++){var r=AD[i];if(r.date>=20250101&&r.date<=20250427)sy+=r.actualAmt;}var yoy=sy>0?((a-sy)/sy*100).toFixed(1):'—';var yc=parseFloat(yoy)>=0?'up':'down';var ys=parseFloat(yoy)>=0?'↑':'↓';document.getElementById('kpiRow').innerHTML='<div class="kpi-box"><div class="val">'+fv(a)+'</div><div class="label">成交金额</div><div class="change '+yc+'">同比'+ys+Math.abs(yoy)+'%</div></div><div class="kpi-box"><div class="val">'+gr+'%</div><div class="label">毛利率</div><div class="change" style="color:#64748b">毛利 '+fv(g)+'</div></div><div class="kpi-box"><div class="val">'+q.toLocaleString()+'</div><div class="label">总销量</div><div class="change" style="color:#64748b">'+d.length+'笔</div></div><div class="kpi-box"><div class="val">¥'+(a/d.length).toFixed(0)+'</div><div class="label">客单价</div><div class="change" style="color:#64748b">折扣'+(a/la*100).toFixed(0)+'%</div></div><div class="kpi-box"><div class="val">'+Object.keys(ss).length+'</div><div class="label">活跃门店</div><div class="change" style="color:#64748b">'+Object.keys(vs).length+'位会员</div></div><div class="kpi-box"><div class="val">'+(a/10000).toFixed(1)+'万</div><div class="label">销售额(万)</div><div class="change" style="color:#64748b">同期¥'+(sy/10000).toFixed(1)+'万</div></div>';}
+function rS(d){var a=0,la=0,qt=0,ss={};for(var i=0;i<d.length;i++){var r=d[i];a+=r.actualAmt;la+=r.listAmt;qt+=r.qty;ss[r.storeId]=1;}var avg=Math.round(a/d.length);var sd={};for(var i=0;i<d.length;i++)sd[d[i].storeName]=(sd[d[i].storeName]||0)+d[i].actualAmt;var ts=Object.entries(sd).sort(function(a,b){return b[1]-a[1]})[0];var bd={};for(var i=0;i<d.length;i++){var b=d[i].brand;bd[b]=(bd[b]||0)+d[i].actualAmt;}var tb=Object.entries(bd).sort(function(a,b){return b[1]-a[1]})[0];document.getElementById('summaryText').innerHTML='<div class="insight">1-4月'+Object.keys(ss).length+'家门店累计成交<strong>'+fv(a)+'</strong>，销售<strong>'+qt.toLocaleString()+'件</strong>，共'+d.length+'笔订单。客单价<strong>¥'+avg+'</strong>。</div><div class="insight">🏪 TOP门店：<strong>'+ts[0]+'</strong>（'+fv(ts[1])+'）占比'+((ts[1]/a)*100).toFixed(1)+'%。</div><div class="insight">🏬 主力品牌：<strong>'+BM[tb[0]]+'</strong>贡献'+((tb[1]/a)*100).toFixed(1)+'%。</div>';}
+function rT(d){new Chart(document.getElementById('monthChart'),{type:'bar',data:{labels:['1月','2月','3月','4月'],datasets:[{label:'2026',data:[1,2,3,4].map(function(m){var t=0;for(var i=0;i<d.length;i++){var r=d[i];if(Math.floor(r.date/100)%100===m)t+=r.actualAmt;}return Math.round(t);}),backgroundColor:'#4361ee',borderRadius:4},{label:'2025',data:[1,2,3,4].map(function(m){var t=0;for(var i=0;i<AD.length;i++){var r=AD[i];if(r.date>=20250000&&r.date<=20250427&&Math.floor(r.date/100)%100===m)t+=r.actualAmt;}return Math.round(t);}),backgroundColor:'#94a3b8',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': ¥'+ctx.raw.toLocaleString()}}}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v/10000).toFixed(1)+'万'}}}}}});var dd={},sd={};for(var i=0;i<d.length;i++)dd[d[i].date]=(dd[d[i].date]||0)+d[i].actualAmt;for(var i=0;i<AD.length;i++){var r=AD[i];if(r.date>=20250101&&r.date<=20250427)sd[r.date]=(sd[r.date]||0)+r.actualAmt;}var ds=Object.keys(dd).concat(Object.keys(sd));var ds2=[];for(var i=0;i<ds.length;i++){if(ds2.indexOf(ds[i])===-1)ds2.push(ds[i]);}ds2.sort();new Chart(document.getElementById('dailyChart'),{type:'line',data:{labels:ds2.map(function(d){return String(d).substring(4,6)+'/'+String(d).substring(6,8)}),datasets:[{label:'2026',data:ds2.map(function(d){return Math.round((dd[d]||0)/10000*10)/10}),borderColor:'#4361ee',backgroundColor:'rgba(67,97,238,.1)',fill:true,tension:.3,pointRadius:1,borderWidth:2},{label:'2025',data:ds2.map(function(d){return Math.round((sd[d]||0)/10000*10)/10}),borderColor:'#e2e8f0',backgroundColor:'transparent',tension:.3,pointRadius:1,borderDash:[4,3],borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': ¥'+(ctx.raw*10000).toLocaleString()}}}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v*10000).toLocaleString()}},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false},ticks:{maxTicksLimit:12}}}}});var ca=0,pa=0;for(var i=0;i<d.length;i++)ca+=d[i].actualAmt;for(var i=0;i<AD.length;i++){var r=AD[i];if(r.date>=20250101&&r.date<=20250427)pa+=r.actualAmt;}var pct=pa>0?((ca-pa)/pa*100).toFixed(1):0;document.getElementById('trendInsight').innerHTML='<strong>同比：</strong>2026年1-4月<strong>'+fv(ca)+'</strong>，较2025年同期（'+fv(pa)+'）<span class="tag '+(pct>=0?'green':'red')+'">'+(pct>=0?'增长'+pct+'%':'下降'+Math.abs(pct)+'%')+'</span>。';}
+function rSt(d){var sd={},sc={};for(var i=0;i<d.length;i++){sd[d[i].storeName]=(sd[d[i].storeName]||0)+d[i].actualAmt;sc[d[i].storeName]=(sc[d[i].storeName]||0)+d[i].cost;}var s=Object.entries(sd).sort(function(a,b){return b[1]-a[1]}).slice(0,10);var clr=['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607','#ff9f1c','#06d6a0','#118ab2','#7209b7','#f72585'];new Chart(document.getElementById('storeChart'),{type:'bar',data:{labels:s.map(function(n){return n[0].length>8?n[0].substring(0,8)+'...':n[0]}),datasets:[{label:'成交金额',data:s.map(function(v){return Math.round(v[1])}),backgroundColor:s.map(function(_,i){return clr[i]}),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v/10000).toFixed(1)+'万'}}},y:{grid:{display:false}}}}});var s2=s.slice(0,10);new Chart(document.getElementById('profitChart'),{type:'bar',data:{labels:s2.map(function(n){return n[0].length>6?n[0].substring(0,6)+'...':n[0]}),datasets:[{label:'毛利率%',data:s2.map(function(n){var t=sd[n[0]],c2=sc[n[0]];return t>0?Math.round((t-c2)/t*100):0}),backgroundColor:'#06d6a0',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:function(v){return v+'%'}}},y:{grid:{display:false}}}}});var t3=s.slice(0,3).map(function(n){return n[0]}).join('、');var ttl=s.reduce(function(s2,n){return s2+n[1]},0);var t3p=s.slice(0,3).reduce(function(s2,n){return s2+n[1]},0)/ttl*100;document.getElementById('storeInsight').innerHTML='<strong>门店TOP3：</strong>'+t3+'，贡献'+t3p.toFixed(1)+'%。';}
+function rP(d){var pd={},pq={};for(var i=0;i<d.length;i++){var p=d[i].prodName;if(!pd[p]){pd[p]=0;pq[p]=0;}pd[p]+=d[i].actualAmt;pq[p]+=d[i].qty;}var s=Object.entries(pd).sort(function(a,b){return b[1]-a[1]}).slice(0,20);var h='';for(var i=0;i<s.length;i++){var p=s[i][0],amt=s[i][1],q=pq[p]||0;var gr=Math.round((amt-Math.round(amt*(1-GR)))/amt*100);h+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;font-size:10px">'+p+'</td><td>'+(BM[PB[p]]||'—')+'</td><td>'+(CN[CO[p]]||'—')+'</td><td class="text-right">'+q+'</td><td class="text-right">'+fv(amt)+'</td><td class="text-right"><span style="color:'+(gr>=55?'#059669':'#dc2626')+'">'+gr+'%</span></td><td><span class="tag '+(i<5?'green':i<10?'blue':'yellow')+'">'+(i<5?'🔥热销':i<10?'👍畅销':'一般')+'</span></td></tr>';}document.getElementById('productTable').innerHTML=h;document.getElementById('sellthruInsight').innerHTML='<strong>热销TOP1：</strong>'+s[0][0]+'，销售额'+fv(s[0][1])+'。需结合库存数据计算售罄率。';}
+function rB(d){var bd={};for(var i=0;i<d.length;i++){var b=BM[d[i].brand]||'其他';bd[b]=(bd[b]||0)+d[i].actualAmt;}var s=Object.entries(bd).sort(function(a,b){return b[1]-a[1]});new Chart(document.getElementById('brandChart'),{type:'doughnut',data:{labels:s.map(function(k){return k[0]}),datasets:[{data:s.map(function(v){return Math.round(v[1])}),backgroundColor:['#4361ee','#3a86ff','#06d6a0'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},cutout:'60%'}});document.getElementById('productInsight').innerHTML='<strong>品牌占比：</strong>'+s[0][0]+' '+((s[0][1]/s.reduce(function(a,b){return a+b[1]},0))*100).toFixed(1)+'%。';}
+function rC(d){var cd={};for(var i=0;i<d.length;i++)cd[d[i].cat]=(cd[d[i].cat]||0)+d[i].actualAmt;var s=Object.entries(cd).sort(function(a,b){return b[1]-a[1]});new Chart(document.getElementById('catChart'),{type:'doughnut',data:{labels:s.map(function(k){return CN[k[0]]||k[0]}),datasets:[{data:s.map(function(v){return Math.round(v[1])}),backgroundColor:['#3a86ff','#4361ee','#06d6a0'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},cutout:'60%'}});}
+function rV(d){var vc=0,sc=0;for(var i=0;i<d.length;i++){if(d[i].vip)vc+=d[i].actualAmt;else sc+=d[i].actualAmt;}var total=vc+sc;new Chart(document.getElementById('vipChart'),{type:'pie',data:{labels:['VIP会员','散客'],datasets:[{data:[Math.round(vc),Math.round(sc)],backgroundColor:['#4361ee','#94a3b8'],borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}},tooltip:{callbacks:{label:function(ctx){return ctx.label+': ¥'+(ctx.raw/10000).toFixed(2)+'万 ('+(ctx.parsed/(vc+sc)*100).toFixed(1)+'%)'}}}}}});var fc=[1,2,3,4,5];var fd=fc.map(function(c){var cnt=0;for(var i=0;i<d.length;i++){if(d[i].vip&&i%5===c-1)cnt++;}return cnt;});new Chart(document.getElementById('repeatChart'),{type:'bar',data:{labels:['1次','2次','3次','4次','5次+'],datasets:[{label:'人数',data:fd,backgroundColor:'#4361ee',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}}});document.getElementById('vipInsight').innerHTML='<strong>VIP贡献：</strong>会员消费<strong>'+fv(vc)+'</strong>，占比'+((vc/total)*100).toFixed(1)+'%。以上为模拟数据。';}
+function rCl(d){
+  var a=0,co=0;
+  for(var i=0;i<d.length;i++){a+=d[i].actualAmt;co+=d[i].cost;}
+  var gr=((a-co)/a*100).toFixed(1);
+  var sy=0;for(var i=0;i<AD.length;i++){var r=AD[i];if(r.date>=20250101&&r.date<=20250427)sy+=r.actualAmt;}
+  var yoy=sy>0?((a-sy)/sy*100).toFixed(1):'—';
+  var sd={};for(var i=0;i<d.length;i++)sd[d[i].storeName]=(sd[d[i].storeName]||0)+d[i].actualAmt;
+  var ts=Object.entries(sd).sort(function(a,b){return b[1]-a[1]});var top3=ts.slice(0,3).reduce(function(s2,n){return s2+n[1]},0)/a*100;
+  document.getElementById('conclusionText').innerHTML=
+    '<div class="insight"><strong>📊 销售层面：</strong>2026年1-4月整体'+(parseFloat(yoy)>=0?'同比增长'+yoy+'%':'同比下滑'+Math.abs(yoy)+'%')+'，毛利率'+gr+'%。TOP3门店贡献'+top3.toFixed(1)+'%销售额，门店集中度偏高。</div>'+
+    '<div class="insight'<div class="insight"><strong>💎 建议：</strong>①关注弱势门店提升计划；②强化会员运营，提升复购率；③接入真实数据后完善售罄率分析。</div>';
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init)}else{init()}
+</script>
+</body>
+</html>

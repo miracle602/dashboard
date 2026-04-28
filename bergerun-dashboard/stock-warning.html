@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 库存预警</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="inventory-data.js?v=20260428"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1500px;margin:0 auto}
+.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.nav .title{color:#fff;font-size:16px;font-weight:600}
+.header{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border-radius:16px;padding:20px 28px;margin-bottom:16px}
+.header .h1{font-size:22px;font-weight:700}.header .sub{font-size:12px;opacity:.7;margin-top:4px}.header .meta{font-size:11px;opacity:.5;margin-top:6px}
+
+/* 门店tab */
+.store-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.store-tab{padding:8px 14px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-size:12px;transition:all .2s}
+.store-tab:hover{border-color:#dc2626}
+.store-tab.active{background:#dc2626;color:#fff;border-color:#dc2626}
+.store-tab .scount{font-size:10px;opacity:.6;margin-left:4px}
+
+/* 品类卡片 */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px}
+.cat-card{background:#fff;border-radius:12px;padding:14px;border:1px solid #e2e8f0;cursor:pointer;transition:all .2s}
+.cat-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.08);border-color:#94a3b8}
+.cat-card .ctitle{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:6px}
+.cat-card .cinfo{font-size:11px;color:#64748b;margin-bottom:6px}
+.cat-card .cbar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-bottom:4px}
+.cat-card .cbar .fill{height:100%;border-radius:3px;transition:width .5s}
+/* 尺码矩阵 */
+.size-grid{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
+.size-tag{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:500}
+.size-tag.stock-high{background:#d1fae5;color:#065f46}
+.size-tag.stock-warn{background:#fef3c7;color:#92400e}
+.size-tag.stock-low{background:#fee2e2;color:#991b1b}
+.size-tag.stock-none{background:#f1f5f9;color:#cbd5e1}
+/* 产品表格 */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #e2e8f0}
+.kpi-card .label{font-size:11px;color:#64748b;margin-bottom:2px}
+.kpi-card .val{font-size:20px;font-weight:700}
+.kpi-card .sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.kpi-card .warn{color:#ef4444}.kpi-card .ok{color:#10b981}.kpi-card .mid{color:#f59e0b}
+
+.product-list{overflow-y:auto;max-height:600px}
+.prod-card{background:#fff;border-radius:10px;padding:10px 14px;margin-bottom:6px;border:1px solid #e2e8f0}
+.prod-card.expanded{border-color:#4361ee;box-shadow:0 0 0 1px #4361ee}
+.prod-card .phead{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.prod-card .phead .pname{font-size:13px;font-weight:600;color:#1e293b}
+.prod-card .phead .pprice{font-size:12px;color:#64748b}
+.prod-card .phead .psold{font-size:12px;font-weight:600}
+.prod-card .sizes{margin-top:6px;display:none}
+.prod-card.expanded .sizes{display:block}
+.prod-card .sizes table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
+.prod-card .sizes th{padding:4px 6px;text-align:left;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;font-size:10px}
+.prod-card .sizes td{padding:4px 6px;border-bottom:1px solid #f1f5f9}
+.size-cell{padding:2px 6px;border-radius:3px;font-size:10px;font-weight:500;text-align:center;min-width:30px}
+.panel{display:none}.panel.active{display:block}
+.breadcrumb{font-size:11px;color:#64748b;margin-bottom:10px}
+.breadcrumb span{cursor:pointer;color:#4361ee;text-decoration:underline}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0}
+</style>
+</head>
+<body>
+<div class="nav">
+  <span class="title">📊 伯俊ERP</span>
+  <a href="./">零售看板</a>
+  <a href="bi-analysis.html">分析</a>
+  <a href="stock-warning.html" class="active">库存预警</a>
+</div>
+<div class="header">
+  <div class="h1">📦 库存预警 · 门店尺码级</div>
+  <div class="sub">「剩余库存 = 采购 - 销售」| 点击品类钻取到款号 → 展开尺码明细</div>
+  <div class="meta" id="headerMeta">加载中...</div>
+</div>
+
+<!-- 门店选择 -->
+<div class="store-tabs" id="storeTabs"></div>
+
+<!-- 面板: 总览 & 钻取 -->
+<div id="overviewPanel" class="panel active"></div>
+<div id="drillPanel" class="panel"></div>
+
+<div class="footer" id="footerNote">伯俊科技(云南)有限公司 · 库存预警逻辑: 采购量 - 销售量 = 剩余库存（尺码级）</div>
+
+<script>
+var D = INV_DATA;
+var currentStore = null;
+var currentStoreName = '';
+var drillHistory = [];
+
+function fmt(v){return '¥'+(v||0).toLocaleString('zh-CN',{maximumFractionDigits:2,minimumFractionDigits:0});}
+
+// ====== 门店标签 ======
+function renderStoreTabs(){
+  var ss = Object.entries(D.store_sizes).sort(function(a,b){return b[1].products?Object.keys(b[1].products).length:0 - Object.keys(a[1].products).length;});
+  var el = document.getElementById('storeTabs');
+  el.innerHTML = '<div class="store-tab '+(currentStore===null?'active':'')+'" onclick="selectStore(null)">📊 全部</div>'+
+    ss.map(function(s){
+      var cnt = Object.keys(s[1].products||{}).length;
+      return '<div class="store-tab '+(currentStore==s[0]?'active':'')+'" onclick="selectStore(\''+s[0]+'\',\''+s[1].name+'\')">'+
+        (s[1].name.substring(0,8))+' <span class="scount">'+cnt+'款</span></div>';
+    }).join('');
+}
+
+function selectStore(sid, sname){
+  currentStore = sid;
+  currentStoreName = sname || '';
+  drillHistory = [];
+  renderStoreTabs();
+  showOverview();
+  document.getElementById('headerMeta').textContent = sname ? '📍 '+sname : '所有门店';
+}
+
+// ====== 总览 ======
+function showOverview(){
+  var p = document.getElementById('overviewPanel');
+  p.className = 'panel active';
+  document.getElementById('drillPanel').className = 'panel';
+  
+  var catData = D.cat_sizes;
+  var catList = Object.keys(catData).filter(function(c){return c && c !== '其他' && c !== '小配件赠品' && c !== 'yyy配件10' && c !== 'MC晴雨伞' && c !== '椅子';});
+  
+  var html = '<div class="kpi-grid">'+
+    '<div class="kpi-card"><div class="label">🧥 品类数</div><div class="val">'+catList.length+'</div></div>'+
+    '<div class="kpi-card"><div class="label">📦 总销量</div><div class="val">'+D.retail_summary.qty+'</div><div class="sub">'+D.retail_summary.orders+'单</div></div>'+
+    '<div class="kpi-card"><div class="label">💰 成交金额</div><div class="val">'+fmt(D.retail_summary.amt)+'</div></div>'+
+    '<div class="kpi-card"><div class="label">🔴 缺码预警</div><div class="val warn">'+catList.length+'类</div><div class="sub">最近30天需补充</div></div>'+
+  '</div>';
+  
+  html += '<div class="cat-grid">';
+  catList.forEach(function(c){
+    var cd = catData[c];
+    var prods = Object.entries(cd.products||{});
+    var totalQty = cd.total_qty || 0;
+    var totalAmt = cd.total_amt || 0;
+    // 尺码缺口估算
+    var maxSize = Math.min(prods.length, 4);
+    var avgPerSize = Math.round(totalQty / Math.max(prods.length, 1));
+    var wLevel = totalQty < 10 ? 'warn' : totalQty < 30 ? 'mid' : 'ok';
+    
+    html += '<div class="cat-card" onclick="drillToCat(\''+c+'\')">'+
+      '<div class="ctitle">🧥 '+c+'</div>'+
+      '<div class="cinfo">' + prods.length + '个款 · 合计' + totalQty + '件 · ' + fmt(totalAmt) + '</div>'+
+      '<div class="cbar"><div class="fill" style="width:100%;background:'+(wLevel==='warn'?'#ef4444':wLevel==='mid'?'#f59e0b':'#10b981')+'"></div></div>'+
+      '<div class="size-grid">';
+    
+    // 取前8个尺码做示意
+    prods.slice(0, 8).forEach(function(p){
+      var sizes = Object.keys(p[1].sizes||{});
+      sizes.slice(0, 4).forEach(function(sz){
+        var sq = p[1].sizes[sz];
+        var cls = sq > 10 ? 'stock-high' : sq > 3 ? 'stock-warn' : 'stock-low';
+        html += '<span class="size-tag '+cls+'">'+sz+':'+sq+'</span>';
+      });
+    });
+    
+    html += '</div></div>';
+  });
+  html += '</div>';
+  
+  p.innerHTML = html;
+}
+
+// ====== 钻取到品类 ======
+function drillToCat(catName){
+  drillHistory.push('overview');
+  
+  // 从store_sizes获取该品类在该门店的产品
+  var source = currentStore ? {[currentStore]: D.store_sizes[currentStore]} : D.store_sizes;
+  var allProds = {};
+  
+  Object.entries(source).forEach(function(se){
+    var sid = se[0], sd = se[1];
+    Object.entries(sd.products||{}).forEach(function(pe){
+      if(pe[1].pval === catName){
+        var pid = pe[0];
+        if(!allProds[pid]) allProds[pid] = {pname:pe[1].pname, pval:pe[1].pval, pprice:pe[1].pprice, stores:{}};
+        allProds[pid].stores[sid] = {name:sd.name, sizes:pe[1].sizes};
+      }
+    });
+  });
+  
+  var p = document.getElementById('drillPanel');
+  p.className = 'panel active';
+  document.getElementById('overviewPanel').className = 'panel';
+  
+  var prods = Object.entries(allProds);
+  var totalQty = 0, totalAmt = 0;
+  prods.forEach(function(pe){
+    Object.entries(pe[1].stores).forEach(function(se){
+      Object.entries(se[1].sizes).forEach(function(sze){
+        totalQty += sze[1];
+        totalAmt += sze[1] * (pe[1].pprice || 0);
+      });
+    });
+  });
+  
+  var html = '<div class="breadcrumb"><span onclick="backToOverview()">🔙 品类总览</span> &gt; 🧥 '+catName+'</div>'+
+    '<div class="kpi-grid">'+
+      '<div class="kpi-card"><div class="label">🧥 品类</div><div class="val" style="font-size:16px">'+catName+'</div></div>'+
+      '<div class="kpi-card"><div class="label">📦 款号数</div><div class="val">'+prods.length+'</div></div>'+
+      '<div class="kpi-card"><div class="label">📦 总销量</div><div class="val">'+totalQty+'件</div></div>'+
+      '<div class="kpi-card"><div class="label">💰 总金额</div><div class="val">'+fmt(totalAmt)+'</div></div>'+
+    '</div>'+
+    '<div class="product-list">';
+  
+  prods.sort(function(a,b){return b[1].pprice - a[1].pprice;});
+  
+  prods.forEach(function(pe){
+    var pid = pe[0], pd = pe[1];
+    // 收集所有尺码
+    var allSizes = {};
+    Object.entries(pd.stores).forEach(function(se){
+      Object.entries(se[1].sizes).forEach(function(sze){
+        if(!allSizes[sze[0]]) allSizes[sze[0]] = 0;
+        allSizes[sze[0]] += sze[1];
+      });
+    });
+    
+    var szList = Object.entries(allSizes).sort(function(a,b){return b[1]-a[1];});
+    var total = szList.reduce(function(s,x){return s+x[1];},0);
+    
+    html += '<div class="prod-card" onclick="toggleExpand(this)">'+
+      '<div class="phead"><span class="pname">'+pd.pname+'</span><span class="pprice">¥'+(pd.pprice||0).toLocaleString()+'</span><span class="psold">'+total+'件</span></div>'+
+      '<div class="sizes">'+
+        '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px">';
+    
+    szList.sort(function(a,b){
+      // 按数字大小排序尺码
+      var na = parseFloat(a[0]) || 100;
+      var nb = parseFloat(b[0]) || 100;
+      if(na === 100 && a[0].charCodeAt(0)) na = a[0].charCodeAt(0);
+      if(nb === 100 && b[0].charCodeAt(0)) nb = b[0].charCodeAt(0);
+      return na - nb;
+    });
+    
+    szList.forEach(function(sz){
+      var cls = sz[1] >= 10 ? 'stock-high' : sz[1] >= 3 ? 'stock-warn' : 'stock-low';
+      html += '<span class="size-tag '+cls+'" style="padding:3px 8px;font-size:11px">'+sz[0]+'<br><b>'+sz[1]+'件</b></span>';
+    });
+    
+    html += '</div>';
+    
+    // 分门店尺码表
+    if(Object.keys(pd.stores).length > 1){
+      html += '<table><thead><tr><th>门店</th>';
+      szList.forEach(function(sz){ html += '<th>'+sz[0]+'</th>'; });
+      html += '<th>合计</th></tr></thead><tbody>';
+      
+      Object.entries(pd.stores).forEach(function(se){
+        html += '<tr><td><span style="font-size:10px">'+se[1].name+'</span></td>';
+        var st = 0;
+        szList.forEach(function(sz){
+          var v = se[1].sizes[sz[0]] || 0;
+          var cls = v >= 10 ? 'size-cell stock-high' : v >= 3 ? 'size-cell stock-warn' : 'size-cell stock-low';
+          html += '<td><span class="'+cls+'">'+v+'</span></td>';
+          st += v;
+        });
+        html += '<td><b>'+st+'</b></td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    
+    html += '</div></div>';
+  });
+  
+  html += '</div>';
+  p.innerHTML = html;
+}
+
+function backToOverview(){
+  drillHistory = [];
+  document.getElementById('overviewPanel').className = 'panel active';
+  document.getElementById('drillPanel').className = 'panel';
+}
+
+function toggleExpand(el){
+  el.classList.toggle('expanded');
+}
+
+// 初始化
+renderStoreTabs();
+showOverview();
+document.getElementById('headerMeta').textContent = '所有门店 · 点击品类钻取到款号尺码';
+</script>
+</body>
+</html>

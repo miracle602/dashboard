@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伯俊ERP · 五维分析</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="real-data-bundle.js?v=20260428"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;padding:16px;max-width:1500px;margin:0 auto}
+.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px}
+.nav a:hover{background:#334155;color:#fff}
+.nav a.active{background:#4361ee;color:#fff}
+.nav .title{color:#fff;font-size:16px;font-weight:600}
+.header{background:linear-gradient(135deg,#1e3a5f,#2d6a9f);color:#fff;border-radius:16px;padding:20px 28px;margin-bottom:16px}
+.header .h1{font-size:22px;font-weight:700}.header .sub{font-size:12px;opacity:.7;margin-top:4px}.header .meta{font-size:11px;opacity:.5;margin-top:6px}
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 16px;cursor:pointer;text-align:center;flex:1;min-width:120px;transition:all .2s}
+.tab:hover{border-color:#4361ee}
+.tab.active{background:#4361ee;color:#fff;border-color:#4361ee}
+.tab .emoji{font-size:20px;display:block;margin-bottom:2px}.tab .name{font-size:11px;font-weight:600}.tab .count{font-size:10px;opacity:.6;margin-top:1px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1px solid #e2e8f0}
+.kpi-card .label{font-size:11px;color:#64748b;margin-bottom:2px}.kpi-card .val{font-size:22px;font-weight:700;color:#1e293b}.kpi-card .sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.kpi-card .up{color:#10b981}.kpi-card .down{color:#ef4444}
+.panel{display:none}.panel.active{display:block}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:900px){.chart-row{grid-template-columns:1fr}}
+.chart-card{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1px solid #e2e8f0}
+.chart-card .ctitle{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px}
+.chart-card canvas{max-height:280px}
+.full{grid-column:1/-1}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 6px;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:6px;border-bottom:1px solid #f1f5f9;white-space:nowrap;white-space:nowrap}
+tr:hover{background:#f8fafc}
+.click{cursor:pointer}.click:hover{background:#eef2ff}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.badge.blue{background:#dbeafe;color:#1e40af}.badge.green{background:#d1fae5;color:#065f46}.badge.red{background:#fee2e2;color:#991b1b}.badge.yellow{background:#fef3c7;color:#92400e}
+.progress{width:100%;height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.progress .bar{height:100%;border-radius:3px}.progress .bar.green{background:#10b981}.progress .bar.yellow{background:#f59e0b}.progress .bar.red{background:#ef4444}
+.text-right{text-align:right}.text-center{text-align:center}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:16px 0}
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:900px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:0}
+.modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0;z-index:1}
+.modal-head .mtitle{font-size:14px;font-weight:600;color:#1e293b}
+.modal-head .close{cursor:pointer;width:28px;height:28px;border-radius:50%;border:none;background:#f1f5f9;font-size:16px;line-height:28px;text-align:center;color:#64748b}
+.modal-head .close:hover{background:#e2e8f0}
+.modal-body{padding:16px 20px 20px}
+.modal-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.modal-kpi .mk{text-align:center;padding:10px;background:#f8fafc;border-radius:8px}
+.modal-kpi .mk .mv{font-size:18px;font-weight:700;color:#1e293b}
+.modal-kpi .mk .ml{font-size:10px;color:#64748b;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="nav">
+  <span class="title">📊 伯俊ERP BI</span>
+  <a href="./">零售看板</a>
+  <a href="sell-thru.html">售罄率</a>
+  <a href="retail-analysis.html">零售分析</a>
+  <a href="bi-analysis.html" class="active">五维分析</a>
+</div>
+<div class="header">
+  <div class="h1">🏪 鞋服零售 · 五维分析</div>
+  <div class="sub">零售 | VIP | 售罄 | 采购 | 批发 — 点击表格行/图表钻取</div>
+  <div class="meta" id="headerMeta">加载中...</div>
+</div>
+<div class="tab-bar" id="tabBar"></div>
+<div id="panels"></div>
+<div class="footer">伯俊科技(云南)有限公司 · REST API数据</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal"><div class="modal-head"><span class="mtitle" id="modalTitle">详情</span><button class="close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modalBody"></div></div>
+</div>
+
+<script>
+var B = REAL_BUNDLE;
+function fmt(v){return'¥'+(v||0).toLocaleString();}
+function pct(v,t){return t>0?(v/t*100).toFixed(1)+'%':'0%';}
+var charts={};
+
+function openModal(title,html){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalOverlay').className='modal-overlay show';
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modalOverlay').className='modal-overlay';
+  document.body.style.overflow='auto';
+}
+// 按Esc关
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+function init(){
+  var tb=document.getElementById('tabBar'),sb=document.getElementById('panels');
+  tb.innerHTML='';sb.innerHTML='';
+  var TABS=[
+    {id:'retail',em:'🛍️',name:'零售分析'},
+    {id:'vip',em:'👤',name:'VIP分析'},
+    {id:'sellthru',em:'📈',name:'售罄分析'},
+    {id:'purchase',em:'📥',name:'采购分析'},
+    {id:'sale',em:'📤',name:'批发分析'}
+  ];
+  TABS.forEach(function(t,i){
+    var el=document.createElement('div');el.className='tab'+(i===0?' active':'');
+    el.dataset.tab=t.id;el.innerHTML='<span class="emoji">'+t.em+'</span><span class="name">'+t.name+'</span>';
+    el.onclick=function(){document.querySelectorAll('.tab').forEach(function(x){x.className='tab'+(x.dataset.tab===t.id?' active':'');});
+      document.querySelectorAll('.panel').forEach(function(p){p.className='panel'+(p.id==='panel_'+t.id?' active':'');});
+    };tb.appendChild(el);
+    var p=document.createElement('div');p.className='panel'+(i===0?' active':'');p.id='panel_'+t.id;sb.appendChild(p);
+  });
+  renderRetail();renderVIP();renderSellThru();renderPurchase();renderSale();
+  var s=B.yr_total['2026'];
+  document.getElementById('headerMeta').textContent='2026年1-4月｜'+s.orders+'单｜'+fmt(s.amt)+'｜'+s.qty+'件';
+}
+
+// ========== 🛍️ 零售 ==========
+function renderRetail(){
+  var p=document.getElementById('panel_retail'),yr=B.yr_total['2026'];
+  p.innerHTML='<div class="kpi-grid">'+
+    '<div class="kpi-card"><div class="label">💰 成交金额</div><div class="val">'+fmt(yr.amt)+'</div><div class="sub">件单价 ¥'+Math.round(yr.amt/yr.qty)+'</div></div>'+
+    '<div class="kpi-card"><div class="label">📦 销售件数</div><div class="val">'+yr.qty+'</div><div class="sub">'+yr.orders+'笔订单</div></div>'+
+    '<div class="kpi-card"><div class="label">🏬 活跃门店</div><div class="val">'+Object.keys(B.store_stat).length+'</div><div class="sub">共'+Object.keys(B.stores).length+'个店</div></div>'+
+    '<div class="kpi-card"><div class="label">👤 消费VIP</div><div class="val">'+Object.keys(B.vip_stat).length+'</div><div class="sub">贡献'+pct(Object.values(B.vip_stat).reduce(function(s,v){return s+v.amt;},0),yr.amt)+'</div></div>'+
+  '</div>'+
+  '<div class="chart-row">'+
+    '<div class="chart-card full"><div class="ctitle">📈 三年趋势对比 (点击2026月份弹窗)</div><canvas id="tc3y"></canvas></div></div>'+
+  '<div class="chart-row">'+
+    '<div class="chart-card"><div class="ctitle">🏬 门店排行 (点击门店弹窗)</div><canvas id="scr"></canvas></div>'+
+    '<div class="chart-card"><div class="ctitle">🧥 品类销售分布</div><canvas id="catPie"></canvas></div>'+
+  '</div>'+
+  '<div class="chart-card full"><div class="ctitle">🏪 门店×品类交叉</div><div id="sct"></div></div>';
+
+  var tm=Object.keys(B.trend_raw).sort();
+  var d24=[],d25=[],d26=[];
+  tm.forEach(function(m){var a=B.trend_raw[m].amt,y=m.substring(0,4);d24.push(y==='2024'?a:null);d25.push(y==='2025'?a:null);d26.push(y==='2026'?a:null);});
+  var ctx=document.getElementById('tc3y');
+  if(ctx){
+    charts.tc3y=new Chart(ctx,{type:'bar',data:{labels:tm.map(function(m){return m.substring(0,4)+'.'+m.substring(4,6);}),datasets:[
+      {label:'2024',data:d24,backgroundColor:'rgba(67,97,238,.3)',barPercentage:.8,borderRadius:2},
+      {label:'2025',data:d25,backgroundColor:'rgba(255,159,28,.5)',barPercentage:.8,borderRadius:2},
+      {label:'2026',data:d26,backgroundColor:'#4361ee',barPercentage:.8,borderRadius:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      onClick:function(e,el){if(el.length>0){var idx=el[0].index,month=tm[idx];if(month&&String(month).substring(0,4)==='2026')openMonthDetail(month);}},
+      plugins:{legend:{position:'top',labels:{font:{size:9},boxWidth:10,padding:6}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v/10000).toFixed(0)+'万';}},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false},ticks:{font:{size:8},maxTicksLimit:18}}}}}
+    );
+  }
+  var sr=Object.entries(B.store_stat).sort(function(a,b){return b[1].amt-a[1].amt;});
+  var ctx2=document.getElementById('scr');
+  if(ctx2){
+    charts.scr=new Chart(ctx2,{type:'bar',data:{labels:sr.map(function(s){return s[1].name.substring(0,8)+'…';}),datasets:[{label:'成交金额',data:sr.map(function(s){return Math.round(s[1].amt);}),backgroundColor:['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607','#ff9f1c'],borderRadius:3,barPercentage:.6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      onClick:function(e,el){if(el.length>0){var idx=el[0].index;openStoreDetail(sr[idx][0],sr[idx][1].name);}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return'¥'+ctx.raw.toLocaleString();}}}},
+      scales:{x:{beginAtZero:true,ticks:{callback:function(v){return'¥'+(v/10000).toFixed(1)+'万';}},grid:{color:'rgba(0,0,0,.04)'}},y:{grid:{display:false},ticks:{font:{size:9}}}}}}
+    );
+  }
+  var cl=Object.keys(B.cat_detail);
+  if(charts.catPie)charts.catPie.destroy();
+  var ctx3=document.getElementById('catPie');
+  if(ctx3)charts.catPie=new Chart(ctx3,{type:'doughnut',data:{labels:cl,datasets:[{data:cl.map(function(c){return B.cat_detail[c].amt;}),backgroundColor:['#4361ee','#ff9f1c','#06d6a0','#8338ec','#ff006e','#94a3b8','#fb5607','#118ab2']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}}}}});
+  renderStoreCat();
+}
+function renderStoreCat(){
+  if(!B.store_cat){document.getElementById('sct').innerHTML='<p style="color:#94a3b8">暂无数据</p>';return;}
+  var st={},ca={};
+  B.store_cat.forEach(function(s){if(!st[s.store_id])st[s.store_id]={name:s.store_name,cats:{}};st[s.store_id].cats[s.cat]=(st[s.store_id].cats[s.cat]||0)+s.amt;ca[s.cat]=true;});
+  var cl=Object.keys(ca).sort(),sl=Object.entries(st).sort(function(a,b){return Object.values(b[1].cats).reduce(function(s,v){return s+v;},0)-Object.values(a[1].cats).reduce(function(s,v){return s+v;},0);});
+  var html='<div class="tbl-wrap"><table><thead><tr><th>门店</th>';cl.forEach(function(c){html+='<th class="text-right">'+c+'</th>';});html+='<th class="text-right">合计</th></tr></thead><tbody>';
+  sl.forEach(function(s){html+='<tr class="click" onclick="openStoreDetail('+s[0]+',\''+s[1].name+'\')"><td><span class="badge blue">'+s[1].name+'</span></td>';var t=0;
+    cl.forEach(function(c){var v=s[1].cats[c]||0;html+='<td class="text-right">'+(v>0?fmt(v):'—')+'</td>';t+=v;});html+='<td class="text-right" style="font-weight:600">'+fmt(t)+'</td></tr>';});
+  html+='</tbody></table></div>';document.getElementById('sct').innerHTML=html;
+}
+
+// ========== 弹窗钻取 ==========
+function openMonthDetail(ym){
+  var d=B.retail_detail.filter(function(r){return String(r.date).substring(0,6)===ym;});
+  if(!d.length)return;
+  var amt=d.reduce(function(s,r){return s+r.amt_actual;},0),qty=d.reduce(function(s,r){return s+r.qty;},0);
+  var name=ym.substring(0,4)+'年'+ym.substring(4,6)+'月';
+  var md='<div class="modal-kpi"><div class="mk"><div class="mv">'+fmt(amt)+'</div><div class="ml">成交金额</div></div><div class="mk"><div class="mv">'+qty+'</div><div class="ml">销售件数</div></div><div class="mk"><div class="mv">'+d.length+'</div><div class="ml">订单数</div></div><div class="mk"><div class="mv">'+d.filter(function(r){return r.vip_name;}).length+'</div><div class="ml">VIP消费</div></div></div>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>单号</th><th>日期</th><th>门店</th><th>金额</th><th>件数</th><th>VIP</th><th>商品</th></tr></thead><tbody>'+
+    d.sort(function(a,b){return b.date-a.date;}).slice(0,50).map(function(r){
+      var itemsDesc=r.items.map(function(it){return it.pname+'('+it.qty+'件)';}).join(', ')||'—';
+      return '<tr><td style="font-family:monospace;font-size:10px">'+r.docno+'</td><td>'+String(r.date).substring(0,4)+'-'+String(r.date).substring(4,6)+'-'+String(r.date).substring(6,8)+'</td><td><span class="badge blue">'+r.store+'</span></td><td>'+fmt(r.amt_actual)+'</td><td>'+r.qty+'</td><td>'+(r.vip_name?'<span class="badge green">'+r.vip_name+'</span>':'—')+'</td><td style="max-width:200px;overflow:hidden;font-size:10px">'+itemsDesc+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  openModal('📅 '+name,md);
+}
+
+function openStoreDetail(sid,sname){
+  var d=B.retail_detail.filter(function(r){return r.store_id==sid;});
+  if(!d.length)return;
+  var amt=d.reduce(function(s,r){return s+r.amt_actual;},0),qty=d.reduce(function(s,r){return s+r.qty;},0);
+  var scat={};d.forEach(function(r){r.items.forEach(function(it){if(!scat[it.pval])scat[it.pval]={qty:0,amt:0};scat[it.pval].qty+=it.qty;scat[it.pval].amt+=it.amt;});});
+  var md='<div class="modal-kpi"><div class="mk"><div class="mv">'+fmt(amt)+'</div><div class="ml">成交金额</div></div><div class="mk"><div class="mv">'+qty+'</div><div class="ml">销售件数</div></div><div class="mk"><div class="mv">'+d.length+'</div><div class="ml">订单数</div></div><div class="mk"><div class="mv">'+Object.keys(scat).length+'</div><div class="ml">品类数</div></div></div>'+
+    '<div class="tbl-wrap" style="margin-bottom:12px"><table><thead><tr><th>品类</th><th>件数</th><th>金额</th><th>占比</th></tr></thead><tbody>'+
+    Object.entries(scat).sort(function(a,b){return b[1].amt-a[1].amt;}).map(function(c){return '<tr><td>'+c[0]+'</td><td>'+c[1].qty+'件</td><td>'+fmt(c[1].amt)+'</td><td>'+pct(c[1].amt,amt)+'</td></tr>';}).join('')+'</tbody></table></div>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>单号</th><th>日期</th><th>金额</th><th>件数</th><th>VIP</th><th>商品</th></tr></thead><tbody>'+
+    d.sort(function(a,b){return b.date-a.date;}).slice(0,50).map(function(r){
+      var itemsDesc=r.items.map(function(it){return it.pname+'('+it.qty+'件)';}).join(', ')||'—';
+      return '<tr><td style="font-family:monospace;font-size:10px">'+r.docno+'</td><td>'+String(r.date).substring(0,4)+'-'+String(r.date).substring(4,6)+'-'+String(r.date).substring(6,8)+'</td><td>'+fmt(r.amt_actual)+'</td><td>'+r.qty+'</td><td>'+(r.vip_name?'<span class="badge green">'+r.vip_name+'</span>':'—')+'</td><td style="max-width:250px;font-size:10px">'+itemsDesc+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  openModal('🏪 '+sname,md);
+}
+
+// ========== 👤 VIP ==========
+function renderVIP(){
+  var vs=Object.entries(B.vip_stat),p=document.getElementById('panel_vip');
+  var ta=vs.reduce(function(s,v){return s+v[1].amt;},0),to=vs.reduce(function(s,v){return s+v[1].orders;},0);
+  p.innerHTML='<div class="kpi-grid">'+
+    '<div class="kpi-card"><div class="label">👥 消费VIP</div><div class="val">'+vs.length+'</div></div>'+
+    '<div class="kpi-card"><div class="label">💰 VIP贡献</div><div class="val">'+fmt(ta)+'</div><div class="sub">占比'+pct(ta,B.yr_total['2026'].amt)+'</div></div>'+
+    '<div class="kpi-card"><div class="label">🛍️ 消费次数</div><div class="val">'+to+'</div><div class="sub">人均'+Math.round(to/vs.length)+'次</div></div>'+
+    '<div class="kpi-card"><div class="label">📊 平均客单价</div><div class="val">¥'+Math.round(ta/to)+'</div></div>'+
+  '</div>'+
+  '<div class="chart-card full"><div class="ctitle">👑 VIP排行 (点击查看消费明细)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>VIP</th><th>次数</th><th>金额</th><th>件数</th><th>客单价</th><th>贡献</th></tr></thead><tbody>'+
+  vs.sort(function(a,b){return b[1].amt-a[1].amt;}).map(function(v,i){return '<tr class="click" onclick="openVIPDetail('+v[0]+')"><td>'+(i+1)+'</td><td>'+(v[1].name||'匿名')+'</td><td>'+v[1].orders+'</td><td>'+fmt(v[1].amt)+'</td><td>'+v[1].qty+'</td><td>¥'+Math.round(v[1].amt/v[1].orders)+'</td><td>'+pct(v[1].amt,ta)+'</td></tr>';}).join('')+
+  '</tbody></table></div></div>';
+}
+
+function openVIPDetail(vid){
+  var info=B.vip_stat[vid];if(!info)return;
+  var d=B.retail_detail.filter(function(r){return r.vip_name===info.name;});
+  if(!d.length)return;
+  var amt=d.reduce(function(s,r){return s+r.amt_actual;},0),qty=d.reduce(function(s,r){return s+r.qty;},0);
+  var scat={};d.forEach(function(r){r.items.forEach(function(it){scat[it.pval]=(scat[it.pval]||0)+it.qty;});});
+  var md='<div class="modal-kpi"><div class="mk"><div class="mv">'+fmt(amt)+'</div><div class="ml">消费金额</div></div><div class="mk"><div class="mv">'+qty+'</div><div class="ml">购买件数</div></div><div class="mk"><div class="mv">'+d.length+'</div><div class="ml">消费次数</div></div><div class="mk"><div class="mv">'+Object.keys(scat).length+'</div><div class="ml">购买品类</div></div></div>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>日期</th><th>门店</th><th>金额</th><th>件数</th><th>商品</th></tr></thead><tbody>'+
+    d.sort(function(a,b){return b.date-a.date;}).map(function(r){
+      var desc=r.items.map(function(it){return it.pname+'('+it.qty+'件)';}).join(', ')||'—';
+      return '<tr><td>'+String(r.date).substring(0,4)+'-'+String(r.date).substring(4,6)+'-'+String(r.date).substring(6,8)+'</td><td>'+r.store+'</td><td>'+fmt(r.amt_actual)+'</td><td>'+r.qty+'</td><td style="font-size:10px;max-width:250px">'+desc+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  openModal('👤 '+info.name,md);
+}
+
+// ========== 📈 售罄 ==========
+function renderSellThru(){
+  var p=document.getElementById('panel_sellthru');
+  var st=B.sell_thru.slice(0,100);
+  var h=st.filter(function(s){return s.rate>=50;}).length,m=st.filter(function(s){return s.rate>=30&&s.rate<50;}).length,l=st.filter(function(s){return s.rate<30&&s.rate>0;}).length;
+  var avg=st.length>0?st.reduce(function(s,x){return s+x.rate;},0)/st.length:0;
+  p.innerHTML='<div class="kpi-grid">'+
+    '<div class="kpi-card"><div class="label">📦 有销售产品</div><div class="val">'+st.length+'款</div></div>'+
+    '<div class="kpi-card"><div class="label">🎯 平均售罄率</div><div class="val">'+avg.toFixed(1)+'%</div></div>'+
+    '<div class="kpi-card"><div class="label">🟢 高(≥50%)</div><div class="val" style="color:#10b981">'+h+'</div></div>'+
+    '<div class="kpi-card"><div class="label">🔴 低(<30%)</div><div class="val" style="color:#ef4444">'+l+'</div></div>'+
+  '</div>'+
+  '<div class="chart-card full"><div class="ctitle">📋 产品售罄明细</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>款号</th><th>品名</th><th>吊牌价</th><th>销量</th><th>采购量</th><th>售罄率</th><th>进度</th></tr></thead><tbody>'+
+  st.sort(function(a,b){return b.rate-a.rate;}).map(function(s,i){
+    var rc=s.rate>=50?'green':s.rate>=30?'yellow':'red';
+    return '<tr><td>'+(i+1)+'</td><td style="font-family:monospace;font-size:11px">'+(s.pname||'—')+'</td><td>'+(s.pval||'—')+'</td><td>¥'+(s.price||0).toLocaleString()+'</td><td>'+s.sold+'</td><td>'+s.purchased+'</td><td><span class="badge '+rc+'">'+s.rate+'%</span></td><td style="width:100px"><div class="progress"><div class="bar '+rc+'" style="width:'+Math.min(s.rate,100)+'%"></div></div></td></tr>';
+  }).join('')+'</tbody></table></div></div>';
+}
+
+// ========== 📥 采购 ==========
+function renderPurchase(){
+  var p=document.getElementById('panel_purchase'),yr=B.yr_total['2026'];
+  p.innerHTML='<div class="kpi-grid">'+
+    '<div class="kpi-card"><div class="label">📦 采购总量</div><div class="val">'+(B.purchase_total||'—')+'件</div></div>'+
+    '<div class="kpi-card"><div class="label">🔄 存销比</div><div class="val">'+(yr.qty>0&&B.purchase_total?(B.purchase_total/yr.qty).toFixed(1):'—')+'</div></div>'+
+    '<div class="kpi-card"><div class="label">📊 综合售罄率</div><div class="val">'+(B.purchase_total>0?(yr.qty/B.purchase_total*100).toFixed(1):'—')+'%</div></div>'+
+  '</div>'+
+  '<div class="chart-card full" style="text-align:center;padding:60px;color:#94a3b8"><p style="font-size:32px;margin-bottom:12px">📋</p><p>采购分析数据待补充</p><p style="font-size:12px;margin-top:8px">通过Oracle数据库直连或Portal导出Excel补齐</p></div>';
+}
+
+// ========== 📤 批发 ==========
+function renderSale(){
+  var p=document.getElementById('panel_sale');
+  p.innerHTML='<div class="kpi-grid">'+
+    '<div class="kpi-card"><div class="label">📤 批发金额</div><div class="val">'+(B.sale_amt>0?fmt(B.sale_amt):'—')+'</div></div>'+
+    '<div class="kpi-card"><div class="label">📦 批发件数</div><div class="val">'+(B.sale_qty||'—')+'</div></div>'+
+  '</div>'+
+  '<div class="chart-card full" style="text-align:center;padding:60px;color:#94a3b8"><p style="font-size:32px;margin-bottom:12px">📤</p><p>批发分析数据待补充</p><p style="font-size:12px;margin-top:8px">通过Oracle数据库直连或Portal导出Excel补齐</p></div>';
+}
+
+init();
+</script>
+</body>
+</html>
