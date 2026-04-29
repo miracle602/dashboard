@@ -259,33 +259,52 @@ function rEx(){
 
 function rRep(){
   var ex=D.exams[U]||[],ms=D.mistakes[U]||[],el=document.getElementById('reportContent');
-  var ex2=ex.concat().sort(function(a,b){return a.d>b.d?-1:1});
-  // 各科平均卡片
-  var h='<div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto">';
+  var avg=ex.length?Math.round(ex.reduce(function(a,b){return a+b.c},0)/ex.length):0;
+  var mk=ms.filter(function(m){return m.m}).length;
+  // 顶部KPI
+  var h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">'+
+    '<div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:10px;color:#64748b">考试次数</div><div style="font-size:18px;font-weight:700;color:#4361ee">'+ex.length+'</div><div style="font-size:10px;color:#94a3b8">次</div></div>'+
+    '<div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:10px;color:#64748b">总平均</div><div style="font-size:18px;font-weight:700;color:#06d6a0">'+avg+'</div><div style="font-size:10px;color:#94a3b8">分</div></div>'+
+    '<div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:10px;color:#64748b">最高分</div><div style="font-size:18px;font-weight:700;color:#10b981">'+(ex.length?ex.reduce(function(a,b){return a.c>b.c?a:b}).c:'-')+'</div><div style="font-size:10px;color:#94a3b8">分</div></div>'+
+    '<div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:10px;color:#64748b">掌握率</div><div style="font-size:18px;font-weight:700;color:#f59e0b">'+(ms.length?Math.round(mk/ms.length*100):0)+'%</div><div style="font-size:10px;color:#94a3b8">'+mk+'/'+ms.length+'题</div></div>'+
+  '</div>';
+  // 各科平均
+  h+='<div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px"><div style="font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid #4361ee;padding-left:8px">📊 各科平均分</div><div style="display:flex;gap:8px;overflow-x:auto">';
   ['语文','数学','英语'].forEach(function(s){
     var fex=ex.filter(function(e){return e.s===s});
     if(fex.length===0)return;
-    var avg=Math.round(fex.reduce(function(a,b){return a+b.c},0)/fex.length);
-    var best=fex.reduce(function(a,b){return a.c>b.c?a:b});
+    var a=Math.round(fex.reduce(function(x,y){return x+y.c},0)/fex.length);
+    var b=fex.reduce(function(x,y){return x.c>y.c?x:y});
     var clr=s==='语文'?'#ff8fab':s==='数学'?'#4cc9f0':'#06d6a0';
-    h+='<div style="min-width:100px;background:#fff;border-radius:14px;padding:12px;border:1px solid #f1f5f9;flex-shrink:0"><div style="font-size:11px;color:#64748b;font-weight:700">'+s+'</div><div style="font-size:24px;font-weight:800;color:'+clr+'">'+avg+'</div><div style="font-size:10px;color:#94a3b8">最高'+best.c+'分·'+fex.length+'次</div></div>';
+    h+='<div style="min-width:80px;background:#fff;border-radius:10px;padding:10px;border:1px solid #f1f5f9;flex-shrink:0"><div style="font-size:10px;color:#64748b;font-weight:600">'+s+'</div><div style="font-size:22px;font-weight:800;color:'+clr+'">'+a+'</div><div style="font-size:10px;color:#94a3b8">最高'+b.c+'</div></div>';
   });
-  h+='</div>';
+  h+='</div></div>';
+  // 成绩趋势图
+  h+='<div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px"><div style="font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid #06d6a0;padding-left:8px">📈 成绩趋势</div><canvas id="scoreChart" style="height:160px"></canvas></div>';
   // 详细表格
-  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06)"><thead><tr style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff"><th style="padding:8px 10px;text-align:left;font-weight:600">日期</th><th style="padding:8px 10px;text-align:left;font-weight:600">年级</th><th style="padding:8px 10px;text-align:left;font-weight:600">学科</th><th style="padding:8px 10px;text-align:left;font-weight:600">类型</th><th style="padding:8px 10px;text-align:right;font-weight:600">分数</th></tr></thead><tbody>';
-  ex2.forEach(function(e){
-    var c=e.c>=90?'#10b981':e.c>=80?'#f59e0b':'#ef4444';
-    h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:7px 10px;color:#64748b">'+e.d+'</td><td style="padding:7px 10px">三年级</td><td style="padding:7px 10px;font-weight:600">'+e.s+'</td><td style="padding:7px 10px"><span style="font-size:10px;padding:2px 6px;border-radius:6px;background:#f1f5f9;color:#475569">'+e.t+'</span></td><td style="padding:7px 10px;text-align:right;font-weight:700;color:'+c+'">'+e.c+'</td></tr>';
+  var ex2=ex.concat().sort(function(a,b){return a.d>b.d?-1:1});
+  h+='<div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px"><div style="font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid #ff8fab;padding-left:8px">📋 全部成绩单</div><div style="overflow-x:auto"><table><thead><tr><th>日期</th><th>年级</th><th>学科</th><th>类型</th><th>分数</th></tr></thead><tbody>';
+  ex2.forEach(function(e){var c=e.c>=90?'#10b981':e.c>=80?'#f59e0b':'#ef4444';
+    h+='<tr><td>'+e.d+'</td><td>三年级</td><td style="font-weight:600">'+e.s+'</td><td><span style="font-size:10px;padding:1px 6px;border-radius:4px;background:#f1f5f9;color:#475569">'+e.t+'</span></td><td style="text-align:right;font-weight:700;color:'+c+'">'+e.c+'</td></tr>';
   });
-  var ay=Math.round(ex2.reduce(function(a,b){return a+b.c},0)/ex2.length);
-  h+='<tr style="background:#f8fafc;font-weight:700"><td style="padding:7px 10px" colspan="3">ð 总平均</td><td style="padding:7px 10px">'+ex2.length+'次</td><td style="padding:7px 10px;text-align:right;color:'+(ay>=90?'#10b981':ay>=80?'#f59e0b':'#ef4444')+'">'+ay+'分</td></tr>';
-  h+='</tbody></table></div>';
+  h+='</tbody></table></div></div>';
   // 错题摘要
-  var mk=ms.filter(function(m){return m.m}).length;
-  h+='<div style="margin-top:12px"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">❌ 错题摘要</div><div class="card" style="padding:12px"><div style="display:flex;gap:16px;flex-wrap:wrap"><div><span style="font-size:11px;color:#64748b">总错题</span><div style="font-size:18px;font-weight:700">'+ms.length+'题</div></div><div><span style="font-size:11px;color:#64748b">已掌握</span><div style="font-size:18px;font-weight:700;color:#10b981">'+mk+'题</div></div><div><span style="font-size:11px;color:#64748b">待复习</span><div style="font-size:18px;font-weight:700;color:#f59e0b">'+(ms.length-mk)+'题</div></div></div></div></div>';
+  h+='<div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid #f59e0b;padding-left:8px">❌ 错题掌握</div><div style="display:flex;gap:16px;margin-bottom:8px"><div><div style="font-size:10px;color:#64748b">总错题</div><div style="font-size:16px;font-weight:700">'+ms.length+'</div></div><div><div style="font-size:10px;color:#64748b">已掌握</div><div style="font-size:16px;font-weight:700;color:#10b981">'+mk+'</div></div><div><div style="font-size:10px;color:#64748b">待复习</div><div style="font-size:16px;font-weight:700;color:#f59e0b">'+(ms.length-mk)+'</div></div></div><div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;width:'+(ms.length?Math.round(mk/ms.length*100):0)+'%;background:#10b981;transition:width .5s"></div></div></div>';
   if(ex.length===0)h='<div class="empty">还没有成绩记录哦~</div>';el.innerHTML=h;
+  // 画图
+  if(window.Chart){
+    if(chartScore){chartScore.destroy();chartScore=null;}
+    if(ex2.length>0){
+      var ctx=document.getElementById('scoreChart');
+      var labels=ex2.map(function(e){return e.d.substring(5)}).reverse();
+      var data=ex2.map(function(e){return e.c}).reverse();
+      var colors=ex2.map(function(e){return e.s==="语文"?"#ff8fab":e.s==="数学"?"#4cc9f0":"#06d6a0"}).reverse();
+      chartScore=new Chart(ctx,{type:"line",data:{labels:labels,datasets:[{label:"分数",data:data,borderColor:"#4361ee",backgroundColor:"rgba(67,97,238,.1)",fill:true,tension:.3,pointBackgroundColor:colors,pointRadius:4,borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.raw+"分"}}}},
+      scales:{y:{min:50,max:100,ticks:{stepSize:10},grid:{color:"rgba(0,0,0,.04)"}},x:{grid:{display:false},ticks:{font:{size:9}}}}});
+    }
+  }
 }
-
 function showAddMenu(){
   if(confirm('添加什么？\n确定→错题  取消→成绩'))go('addMistake');else go('addExam');
 }
