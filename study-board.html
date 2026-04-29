@@ -50,18 +50,18 @@ tr:hover{background:#f8fafc}
   <div class="sub">考试成绩 · 错题分析 · 学习进度 · 一屏掌握</div>
 </div>
 
-<div class="kpi-row id="kpiRow"></div>
+<div class="kpi-row" id="kpiRow"></div>
 
 <div class="chart-row">
   <div class="chart-card full"><div class="ct">📈 考试成绩趋势</div><canvas id="trendChart"></canvas></div>
 </div>
 
 <div class="chart-row">
-  <div class="chart-card><div class="ct">📊 各科平均分对比</div><canvas id="avgChart"></canvas></div>
-  <div class="chart-card><div class="ct">🏆 考试类型分布</div><canvas id="typeChart"></canvas></div>
+  <div class="chart-card"><div class="ct">📊 各科平均分对比</div><canvas id="avgChart"></canvas></div>
+  <div class="chart-card"><div class="ct">🏆 考试类型分布</div><canvas id="typeChart"></canvas></div>
 </div>
 
-<div class="chart-card full><div class="ct">📋 成绩明细表</div><div class="tbl-wrap"><table><thead><tr><th>日期</th><th>年级</th><th>学科</th><th>类型</th><th>分数</th></tr></thead><tbody id="scoreTable"></tbody></table></div></div>
+<div class="chart-card full"><div class="ct">📋 成绩明细表</div><div class="tbl-wrap"><table><thead><tr><th>日期</th><th>年级</th><th>学科</th><th>类型</th><th>分数</th></tr></thead><tbody id="scoreTable"></tbody></table></div></div>
 
 <div class="chart-row">
   <div class="chart-card full"><div class="ct">❌ 错题本</div><div id="mistakeGrid" class="grid-3"></div></div>
@@ -69,7 +69,7 @@ tr:hover{background:#f8fafc}
 
 </div>
 <div class="footer">🌟 学习小星球 · 数据存在本地浏览器</div>
-<button class="fab" onclick="addData()">＋</button>
+<button class="fab" onclick="addData()">+</button>
 
 <script>
 var D={mistakes:{},exams:{}},U='default';
@@ -79,7 +79,7 @@ ld();
 if(!D.mistakes[U]||D.mistakes[U].length===0){
   D.mistakes[U]=[
     {s:'数学',q:'36+47=?',a:'83',r:'进位忘记加1',d:'2026/4/20',m:false},
-    {s:'语文',q:'\"已\"字怎么写？',a:'半开口的已',r:'和\"己\"搞混',d:'2026/4/22',m:false},
+    {s:'语文',q:'已字怎么写？',a:'半开口的已',r:'和己搞混',d:'2026/4/22',m:false},
     {s:'英语',q:'apple怎么拼？',a:'a-p-p-l-e',r:'少写一个p',d:'2026/4/25',m:true}
   ];
   D.exams[U]=[
@@ -101,7 +101,7 @@ function render(){
     '<div class="kpi-card"><div class="kl">🏆 考试次数</div><div class="kv" style="color:#4361ee">'+ex.length+'</div><div class="ks">次</div></div>'+
     '<div class="kpi-card"><div class="kl">📊 总平均分</div><div class="kv" style="color:#06d6a0">'+avg+'</div><div class="ks">分</div></div>'+
     '<div class="kpi-card"><div class="kl">🥇 最高分</div><div class="kv" style="color:#10b981">'+(ex.length?ex.reduce(function(a,b){return a.c>b.c?a:b}).c:'-')+'</div><div class="ks">分</div></div>'+
-    '<div class="kpi-card"><div class="kl">❌ 错题掌握</div><div class="kv" style="color:#f59e0b">'+(ms.length?Math.round(mk/ms.length*100):0)+'%</div><div class="ks">'+mk+'/'+ms.length+'题</div></div>';
+    '<div class="kpi-card"><div class="kl">❌ 掌握率</div><div class="kv" style="color:#f59e0b">'+(ms.length?Math.round(mk/ms.length*100):0)+'%</div><div class="ks">'+mk+'/'+ms.length+'题</div></div>';
   
   // 成绩表格
   var ex2=ex.concat().sort(function(a,b){return a.d>b.d?-1:1});
@@ -116,7 +116,7 @@ function render(){
   var mg=document.getElementById('mistakeGrid');mg.innerHTML='';
   ms.forEach(function(m){
     var cls=m.s==='数学'?'background:#4cc9f0':m.s==='语文'?'background:#ff8fab':'background:#06d6a0';
-    mg.innerHTML+='<div class="mi-card"><div><span class="ms" style="'+cls+'">'+m.s+'</span> <span style="font-size:10px;color:'+(m.m?'#10b981':'#f59e0b')+'">'+(m.m?'✅已掌握':'⏳待复习')+'</span></div><div class="mq">'+(m.q||'📷')+'</div><div class="mi-info">❌ '+m.r+' · '+m.d+'</div></div>';
+    mg.innerHTML+='<div class="mi-card"><div><span class="ms" style="'+cls+'">'+m.s+'</span> <span style="font-size:10px;color:'+(m.m?'#10b981':'#f59e0b')+'">'+(m.m?'已完成':'待复习')+'</span></div><div class="mq">'+(m.q||'')+'</div><div class="mi-info">'+m.r+' | '+m.d+'</div></div>';
   });
   
   drawCharts(ex, ms);
@@ -130,7 +130,6 @@ function drawCharts(ex, ms){
     var labels=ex2.map(function(e){return e.d.substring(5)});
     var data=ex2.map(function(e){return e.c});
     var colors=ex2.map(function(e){return e.s==='语文'?'#ff8fab':e.s==='数学'?'#4cc9f0':'#06d6a0'});
-    var borderColors=ex2.map(function(e){return e.s==='语文'?'#f06292':e.s==='数学'?'#26c6da':'#4db6ac'});
     charts.trendChart=new Chart(document.getElementById('trendChart'),{
       type:'line',
       data:{labels:labels,datasets:[{label:'分数',data:data,borderColor:'#4361ee',backgroundColor:'rgba(67,97,238,.08)',fill:true,tension:.3,pointBackgroundColor:colors,pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,borderWidth:2.5}]},
