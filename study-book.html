@@ -5,96 +5,57 @@
 <title>🌟 学习小星球</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--pink:#ff8fab;--orange:#ffb347;--yellow:#ffd166;--green:#06d6a0;--blue:#4cc9f0;--purple:#b388ff;--bg:#fef9ef;--card-bg:#fff;--shadow:0 4px 20px rgba(0,0,0,.08);--radius:20px;--nav-h:58px}
-body{font-family:'PingFang SC','Microsoft YaHei','Nunito',sans-serif;background:var(--bg);color:#2d3436;min-height:100vh;padding-bottom:80px;overflow-x:hidden}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#fef9ef;color:#2d3436;min-height:100vh;padding-bottom:80px;overflow-x:hidden}
 input,select,textarea,button{font-family:inherit}
-
-/* 登录 */
-.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#667eea,#764ba2);position:relative;overflow:hidden}
-.login-box{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:32px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.15);position:relative;z-index:1}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#667eea,#764ba2)}
+.login-box{background:rgba(255,255,255,.95);border-radius:32px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
 .login-box .logo{text-align:center;font-size:48px;margin-bottom:8px}
-.login-box h1{text-align:center;font-size:24px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.login-box h1{text-align:center;font-size:24px;font-weight:800;margin-bottom:4px;color:#1e293b}
 .login-box .sub{text-align:center;font-size:13px;color:#64748b;margin-bottom:24px}
-.login-box label{font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
 .login-box input{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:14px;font-size:15px;margin-bottom:14px;outline:none;background:#f9fafb}
 .login-box input:focus{border-color:#8b5cf6;background:#fff}
-.login-box .btn-login{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4)}
+.login-box .btn-login{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
 .login-box .btn-login:active{transform:scale(.96)}
 .login-box .error{font-size:12px;color:#ef4444;margin-bottom:8px;display:none}
 .login-box .register-link{text-align:center;margin-top:16px;font-size:13px;color:#64748b}
 .login-box .register-link span{color:#8b5cf6;font-weight:700;cursor:pointer}
-
-/* 主框架 */
-.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#fff;border-top:1px solid #f1f5f9;display:flex;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.04)}
-.nav .item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;cursor:pointer;transition:color .2s;gap:2px}
+.nav{position:fixed;bottom:0;left:0;right:0;height:58px;background:#fff;border-top:1px solid #f1f5f9;display:flex;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.04)}
+.nav .item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;cursor:pointer;gap:2px}
 .nav .item .icon{font-size:20px}
 .nav .item.active{color:#8b5cf6;font-weight:700}
 .page{display:none;padding:16px;padding-top:12px;max-width:600px;margin:0 auto}
 .page.active{display:block}
-.section-title{font-size:16px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.card{background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid rgba(0,0,0,.04)}
+.section-title{font-size:16px;font-weight:800;margin-bottom:12px}
+.card{background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:12px;border:1px solid rgba(0,0,0,.04)}
 .empty{text-align:center;color:#94a3b8;padding:30px 0;font-size:13px}
-.submit-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .2s;color:#fff}
-.submit-btn:active{transform:scale(.96)}
-.submit-btn.pink{background:linear-gradient(135deg,#ff8fab,#ff6b8a);box-shadow:0 4px 15px rgba(255,143,171,.4)}
-.submit-btn.green{background:linear-gradient(135deg,#06d6a0,#04c392);box-shadow:0 4px 15px rgba(6,214,160,.4)}
-
-/* 首页欢迎 */
-.welcome-card{background:linear-gradient(135deg,#667eea 15%,#764ba2 85%);color:#fff;border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;position:relative;overflow:hidden}
-.welcome-card::after{content:'✨⭐🌟';position:absolute;font-size:60px;right:-10px;bottom:-5px;opacity:.15}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;color:#fff}
+.submit-btn.pink{background:linear-gradient(135deg,#ff8fab,#ff6b8a)}
+.submit-btn.green{background:linear-gradient(135deg,#06d6a0,#04c392)}
+.welcome-card{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:20px;padding:20px 22px;margin-bottom:16px}
 .welcome-card .greeting{font-size:18px;font-weight:800}
 .welcome-card .sub{font-size:13px;opacity:.8;margin-top:4px}
-.welcome-card .study-streak{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:30px;padding:6px 14px;margin-top:10px;font-size:12px}
-
-/* 成绩趋势 */
 .trend-grid{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
-.trend-card{min-width:100px;background:var(--card-bg);border-radius:14px;padding:12px;border:1px solid #f1f5f9;flex-shrink:0}
+.trend-card{min-width:100px;background:#fff;border-radius:14px;padding:12px;border:1px solid #f1f5f9}
 .trend-card .subject{font-size:11px;color:#64748b;font-weight:700;margin-bottom:2px}
 .trend-card .score{font-size:20px;font-weight:800}
-.trend-card .change{font-size:10px;margin-top:2px}
 .trend-card .up{color:#10b981}.trend-card .down{color:#ef4444}
-
-/* 错题 */
-.mistake-item{border-left:4px solid #ff8fab;margin-bottom:10px;cursor:pointer;transition:all .2s}
-.mistake-item:hover{transform:translateX(4px)}
-.mistake-item .mi-top{display:flex;justify-content:space-between;align-items:start}
+.mistake-item{border-left:4px solid #ff8fab;margin-bottom:10px;cursor:pointer}
 .mistake-item .mi-subject{font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:8px;display:inline-block}
 .mi-subject.math{background:#4cc9f0}.mi-subject.chinese{background:#ff8fab}.mi-subject.english{background:#06d6a0}
-.mistake-item .mi-question{font-size:14px;font-weight:600;margin:6px 0 3px}
 .mistake-item .badge{font-size:10px;padding:2px 8px;border-radius:10px}
 .badge.review{background:#fef3c7;color:#92400e}.badge.done{background:#d1fae5;color:#065f46}
-
-/* 复习弹窗 */
-.review-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:200;align-items:center;justify-content:center;padding:24px}
-.review-overlay.show{display:flex}
-.review-box{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:400px}
-.review-box h3{font-size:18px;margin-bottom:12px}
-.review-box .question{font-size:20px;font-weight:700;text-align:center;padding:20px;background:#f9fafb;border-radius:14px;margin-bottom:16px}
-.review-box input{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;text-align:center;margin-bottom:12px;outline:none}
-.review-box input:focus{border-color:#8b5cf6}
-.review-box .rb-btns{display:flex;gap:8px}
-.review-box .rb-btns button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
-.review-box .correct{background:#d1fae5;color:#065f46}.review-box .wrong{background:#fee2e2;color:#991b1b}
-
-/* 考试记录 */
 .exam-item{border-left:4px solid #06d6a0;margin-bottom:10px}
 .exam-item .ei-top{display:flex;justify-content:space-between}
 .exam-item .ei-score{font-size:20px;font-weight:800}
 .exam-item .ei-type{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
 .ei-type.quiz{background:#dbeafe;color:#1e40af}.ei-type.midterm{background:#fef3c7;color:#92400e}
-.ei-type.final{background:#fee2e2;color:#991b1b}.ei-type.mock{background:#f3e8ff;color:#6d28d9}
-
-/* 录入 */
+.ei-type.final{background:#fee2e2;color:#991b1b}
 .form-group{margin-bottom:14px}
 .form-group label{font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;outline:none;background:#fafafa}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#8b5cf6;background:#fff}
-.form-group textarea{resize:vertical;min-height:80px}
-.photo-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:2px dashed #d1d5db;border-radius:12px;cursor:pointer;font-size:13px;color:#64748b;background:#fafafa}
-.photo-btn:active{background:#f0f0ff;border-color:#8b5cf6}
-#photoPreview img{max-height:120px;border-radius:10px;margin-top:6px}
-
-/* 注册弹窗 */
+.form-group input,.form-group select{width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;outline:none;background:#fafafa}
+.form-group input:focus,.form-group select:focus{border-color:#8b5cf6;background:#fff}
+.filter-row{display:flex;gap:8px;margin-bottom:12px}
+.filter-row select{flex:1;padding:8px 10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}
 .modal-box{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px}
@@ -102,31 +63,19 @@ input,select,textarea,button{font-family:inherit}
 .modal-box input{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;margin-bottom:10px;outline:none}
 .modal-box input:focus{border-color:#8b5cf6}
 .modal-box .mb-btns{display:flex;gap:8px;margin-top:12px}
-.modal-box .mb-btns button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.modal-box button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
 .modal-box .cancel{background:#f1f5f9;color:#64748b}.modal-box .confirm{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
-
-/* 报告 */
-.r-card{margin-bottom:10px}
-.r-card .r-title{font-size:12px;color:#64748b;font-weight:600;margin-bottom:4px}
-.r-card .r-body{font-size:14px;color:#1e293b}
 .r-card .r-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:4px}
-.r-card .r-bar .fill{height:100%;border-radius:4px;transition:width .5s}
-.action-btn{position:fixed;bottom:68px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4);z-index:50}
-.action-btn:active{transform:scale(.9)}
-
-/* 过滤行 */
-.filter-row{display:flex;gap:8px;margin-bottom:12px}
-.filter-row select{flex:1;padding:8px 10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none}
+.r-card .r-bar .fill{height:100%;border-radius:4px}
 </style>
 </head>
 <body>
 
-<!-- 登录页 -->
 <div class="login-wrap" id="loginPage">
   <div class="login-box">
     <div class="logo">🌟</div>
     <h1>学习小星球</h1>
-    <div class="sub">每个小朋友的专属错题本 ✨</div>
+    <div class="sub">每个小朋友的专属学习记录 ✨</div>
     <form onsubmit="return doLogin(event)">
       <label>👤 用户名</label>
       <input type="text" id="loginUser" placeholder="输入名字" autocomplete="username">
@@ -139,7 +88,6 @@ input,select,textarea,button{font-family:inherit}
   </div>
 </div>
 
-<!-- 注册弹窗 -->
 <div class="modal" id="registerModal">
   <div class="modal-box">
     <h2>🌟 注册新用户</h2>
@@ -154,9 +102,7 @@ input,select,textarea,button{font-family:inherit}
   </div>
 </div>
 
-<!-- 主界面 -->
 <div id="mainApp" style="display:none">
-  <!-- 底部导航 -->
   <div class="nav">
     <div class="item active" data-page="home" onclick="switchPage('home')"><span class="icon">🏠</span><span>首页</span></div>
     <div class="item" data-page="mistakes" onclick="switchPage('mistakes')"><span class="icon">📝</span><span>错题</span></div>
@@ -165,9 +111,8 @@ input,select,textarea,button{font-family:inherit}
     <div class="item" data-page="settings" onclick="switchPage('settings')"><span class="icon">👤</span><span>我的</span></div>
   </div>
 
-  <!-- 首页 -->
   <div class="page active" id="pageHome">
-    <div class="welcome-card" id="welcomeCard">
+    <div class="welcome-card">
       <div class="greeting" id="greetingText">🌟 你好！</div>
       <div class="sub">今天也要加油哦！</div>
     </div>
@@ -177,427 +122,96 @@ input,select,textarea,button{font-family:inherit}
     <div id="homeReviewList"></div>
   </div>
 
-  <!-- 错题页 -->
   <div class="page" id="pageMistakes">
     <div class="section-title">📝 错题本</div>
     <div id="mistakeList"></div>
   </div>
 
-  <!-- 成绩页 -->
   <div class="page" id="pageExams">
     <div class="section-title">🏆 考试成绩</div>
     <div class="filter-row">
-      <select id="examSubjectFilter">
-        <option value="all">全部科目</option>
-        <option value="语文">语文</option>
-        <option value="数学">数学</option>
-        <option value="英语">英语</option>
-      </select>
-      <select id="examTypeFilter">
-        <option value="all">全部类型</option>
-        <option value="随堂测验">随堂测验</option>
-        <option value="模拟考试">模拟考试</option>
-        <option value="期中考试">期中考试</option>
-        <option value="期末考试">期末考试</option>
-      </select>
+      <select id="examSubjectFilter"><option value="all">全部科目</option><option value="语文">语文</option><option value="数学">数学</option><option value="英语">英语</option></select>
+      <select id="examTypeFilter"><option value="all">全部类型</option><option value="随堂测验">随堂测验</option><option value="模拟考试">模拟考试</option><option value="期中考试">期中考试</option><option value="期末考试">期末考试</option></select>
     </div>
     <div id="examList"></div>
   </div>
 
-  <!-- 报告页 -->
   <div class="page" id="pageReport">
     <div class="section-title">📊 学习报告</div>
     <div id="reportContent"></div>
   </div>
 
-  <!-- 设置页 -->
   <div class="page" id="pageSettings">
     <div class="section-title">👤 我的</div>
     <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
       <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px" id="avatarLetter">🌟</div>
-      <div>
-        <div style="font-weight:700;font-size:16px" id="settingName">用户</div>
-        <div style="font-size:11px;color:#64748b">学习小星球</div>
-      </div>
+      <div><div style="font-weight:700;font-size:16px" id="settingName">用户</div><div style="font-size:11px;color:#64748b">学习小星球</div></div>
     </div>
-    <div class="card" style="cursor:pointer" onclick="switchPage('addMistake')">
-      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">📸</span><div><div style="font-weight:600;font-size:14px">录入错题</div><div style="font-size:11px;color:#64748b">拍照或打字记录错题</div></div></div>
-    </div>
-    <div class="card" style="cursor:pointer" onclick="switchPage('addExam')">
-      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🏆</span><div><div style="font-weight:600;font-size:14px">记录考试成绩</div><div style="font-size:11px;color:#64748b">录入期中/期末/模拟考分数</div></div></div>
-    </div>
-    <div class="card" style="cursor:pointer;margin-top:12px" onclick="doLogout()">
-      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🚪</span><div><div style="font-weight:600;font-size:14px;color:#ef4444">退出登录</div></div></div>
-    </div>
+    <div class="card" style="cursor:pointer" onclick="switchPage('addMistake')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">📸</span><div><div style="font-weight:600;font-size:14px">录入错题</div><div style="font-size:11px;color:#64748b">拍照或打字记录错题</div></div></div></div>
+    <div class="card" style="cursor:pointer" onclick="switchPage('addExam')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🏆</span><div><div style="font-weight:600;font-size:14px">记录考试成绩</div><div style="font-size:11px;color:#64748b">录入期中/期末/模拟考分数</div></div></div></div>
+    <div class="card" style="cursor:pointer;margin-top:12px" onclick="doLogout()"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🚪</span><div><div style="font-weight:600;font-size:14px;color:#ef4444">退出登录</div></div></div></div>
   </div>
 
-  <!-- 录入错题 -->
   <div class="page" id="pageAddMistake">
     <div class="section-title" style="cursor:pointer;font-size:14px" onclick="switchPage('settings')">← 返回</div>
     <div class="card" style="border-top:4px solid #ff8fab">
-      <div class="form-group">
-        <label>📚 科目</label>
-        <select id="amSubject"><option>数学</option><option>语文</option><option>英语</option></select>
-      </div>
-      <div class="form-group">
-        <label>📸 拍照（可选）</label>
-        <div class="photo-btn" onclick="document.getElementById('amPhoto').click()">📷 点击拍照或上传图片</div>
-        <input type="file" accept="image/*" capture="environment" id="amPhoto" style="display:none" onchange="previewPhoto(event)">
-        <div id="photoPreview"></div>
-      </div>
-      <div class="form-group">
-        <label>📝 题目</label>
-        <input type="text" id="amQuestion" placeholder="抄写或描述题目">
-      </div>
-      <div class="form-group">
-        <label>✅ 正确答案</label>
-        <input type="text" id="amAnswer" placeholder="正确答案">
-      </div>
-      <div class="form-group">
-        <label>❌ 错误原因</label>
-        <select id="amReason"><option>粗心大意</option><option>计算错误</option><option>概念不清</option><option>看错题目</option><option>不会做</option><option>审题不细</option><option>其他</option></select>
-      </div>
+      <div class="form-group"><label>📚 科目</label><select id="amSubject"><option>数学</option><option>语文</option><option>英语</option></select></div>
+      <div class="form-group"><label>📝 题目</label><input type="text" id="amQuestion" placeholder="抄写或描述题目"></div>
+      <div class="form-group"><label>✅ 正确答案</label><input type="text" id="amAnswer" placeholder="正确答案"></div>
+      <div class="form-group"><label>❌ 错误原因</label><select id="amReason"><option>粗心大意</option><option>计算错误</option><option>概念不清</option><option>看错题目</option><option>不会做</option><option>其他</option></select></div>
       <button class="submit-btn pink" onclick="addMistake()">🌟 保存错题</button>
     </div>
   </div>
 
-  <!-- 录入成绩 -->
   <div class="page" id="pageAddExam">
     <div class="section-title" style="cursor:pointer;font-size:14px" onclick="switchPage('settings')">← 返回</div>
     <div class="card" style="border-top:4px solid #06d6a0">
-      <div class="form-group">
-        <label>📚 科目</label>
-        <select id="aeSubject"><option>语文</option><option>数学</option><option>英语</option></select>
-      </div>
-      <div class="form-group">
-        <label>📋 考试类型</label>
-        <select id="aeType"><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select>
-      </div>
-      <div class="form-group">
-        <label>🏆 分数</label>
-        <input type="number" id="aeScore" placeholder="输入分数" min="0" max="100">
-      </div>
-      <div class="form-group">
-        <label>📅 日期</label>
-        <input type="date" id="aeDate">
-      </div>
-      <div class="form-group">
-        <label>📝 备注（可选）</label>
-        <input type="text" id="aeNote" placeholder="如：数学第3单元">
-      </div>
+      <div class="form-group"><label>📚 科目</label><select id="aeSubject"><option>语文</option><option>数学</option><option>英语</option></select></div>
+      <div class="form-group"><label>📋 考试类型</label><select id="aeType"><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select></div>
+      <div class="form-group"><label>🏆 分数</label><input type="number" id="aeScore" placeholder="输入分数" min="0" max="100"></div>
+      <div class="form-group"><label>📅 日期</label><input type="date" id="aeDate"></div>
+      <div class="form-group"><label>📝 备注</label><input type="text" id="aeNote" placeholder="如：数学第3单元"></div>
       <button class="submit-btn green" onclick="addExam()">🏆 保存成绩</button>
     </div>
   </div>
 </div>
 
-<!-- 复习弹窗 -->
-<div class="review-overlay" id="reviewOverlay">
-  <div class="review-box">
-    <h3>📝 复习时间！</h3>
-    <div class="question" id="reviewQuestion">题目</div>
-    <input type="text" id="reviewInput" placeholder="输入你的答案" onkeydown="if(event.key==='Enter')reviewCorrect()">
-    <div id="reviewResult" style="text-align:center;font-size:14px;margin-bottom:10px;display:none"></div>
-    <div class="rb-btns">
-      <button class="wrong" onclick="reviewWrong()">❌ 不会</button>
-      <button class="correct" onclick="reviewCorrect()">✅ 对了</button>
+<script>
+var DB={users:{},mistakes:{},exams:{}},CURRENT_USER=null,REVIEW_IDX=-1;
+function load(){try{var d=localStorage.getItem('studybook');if(d)DB=JSON.parse(d)}catch(e){}if(!DB.users)DB.users={};if(!DB.mistakes)DB.mistakes={};if(!DB.exams)DB.exams={}}
+function save(){localStorage.setItem('studybook',JSON.stringify(DB))}
+load();
+
+function doLogin(e){e.preventDefault();var u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value.trim(),err=document.getElementById('loginError');if(!u||!p){err.textContent='请输入用户名和密码';err.style.display='block';return false}if(!DB.users[u]){err.textContent='用户不存在哦~';err.style.display='block';return false}if(DB.users[u].pass!==p){err.textContent='密码不对哦~';err.style.display='block';return false}CURRENT_USER=u;document.getElementById('loginPage').style.display='none';document.getElementById('mainApp').style.display='block';initApp();return false}
+function showRegister(){document.getElementById('registerModal').classList.add('show');document.getElementById('regError').style.display='none'}
+function hideRegister(){document.getElementById('registerModal').classList.remove('show')}
+function doRegister(){var u=document.getElementById('regUser').value.trim(),p=document.getElementById('regPass').value.trim(),p2=document.getElementById('regPass2').value.trim(),err=document.getElementById('regError');if(!u||!p){err.textContent='用户名和密码不能空哦~';err.style.display='block';return}if(p!==p2){err.textContent='两次密码不一致哦~';err.style.display='block';return}if(p.length<4){err.textContent='密码至少4位哦~';err.style.display='block';return}if(DB.users[u]){err.textContent='用户名已经被用啦~';err.style.display='block';return}DB.users[u]={pass:p,created:Date.now()};save();hideRegister();alert('🎉 注册成功！用新账号登录吧~')}
+function doLogout(){if(!confirm('确定退出吗？'))return;CURRENT_USER=null;document.getElementById('mainApp').style.display='none';document.getElementById('loginPage').style.display='flex'}
+function initApp(){var u=CURRENT_USER;if(!DB.mistakes[u])DB.mistakes[u]=[];if(!DB.exams[u])DB.exams[u]=[];save();document.getElementById('greetingText').textContent='🌟 '+(new Date().getHours()<12?'早上好哦':'下午好哦')+'，'+u+'！';document.getElementById('settingName').textContent=u;document.getElementById('avatarLetter').textContent=u.charAt(0)||'🌟';switchPage('home')}
+function switchPage(id){['home','mistakes','exams','report','settings','addMistake','addExam'].forEach(function(p){var e=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));if(e)e.classList.remove('active')});var t=document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));if(t)t.classList.add('active');document.querySelectorAll('.nav .item').forEach(function(e){e.classList.remove('active')});var n=document.querySelector('.nav .item[data-page="'+id+'"]');if(n)n.classList.add('active');if(id==='home')renderHome();if(id==='mistakes')renderMistakes();if(id==='exams')renderExams();if(id==='report')renderReport()}
+function renderHome(){var u=CURRENT_USER,ms=DB.mistakes[u]||[],ex=DB.exams[u]||[],grid=document.getElementById('trendGrid');grid.innerHTML='';['语文','数学','英语'].forEach(function(s){var myEx=ex.filter(function(e){return e.subject===s}).sort(function(a,b){return a.date>b.date?-1:1});if(myEx.length===0)return;var last=myEx[0],prev=myEx[1],chg='<span class="change">刚起步</span>';if(prev)chg=last.score>prev.score?'<span class="up">↑'+(last.score-prev.score)+'</span>':'<span class="down">↓'+(prev.score-last.score)+'</span>';grid.innerHTML+='<div class="trend-card"><div class="subject">'+s+'</div><div class="score">'+last.score+'</div>'+chg+'</div>'});if(grid.innerHTML==='')grid.innerHTML='<div class="empty">还没有成绩，去"我的"录入吧~</div>';var t=ms.filter(function(m){return !m.mastered});document.getElementById('reviewCount').textContent='（还有 '+t.length+' 题）';var list=document.getElementById('homeReviewList');if(t.length===0){list.innerHTML='<div class="card" style="text-align:center;color:#94a3b8">🎉 全部掌握啦！</div>';return}list.innerHTML='';t.slice(0,5).forEach(function(m){var i=ms.indexOf(m),sc=m.subject==='数学'?'math':m.subject==='语文'?'chinese':'english';list.innerHTML+='<div class="card mistake-item" onclick="openReview('+i+')"><div class="mi-top"><span class="mi-subject '+sc+'">'+m.subject+'</span><span class="badge review">待复习</span></div><div class="mi-question">'+(m.question||'📷 图片题')+'</div></div>'})}
+function renderMistakes(){var ms=DB.mistakes[CURRENT_USER]||[],list=document.getElementById('mistakeList');if(ms.length===0){list.innerHTML='<div class="empty">还没有错题哦，录入一道吧~</div>';return}list.innerHTML='';ms.forEach(function(m,i){var sc=m.subject==='数学'?'math':m.subject==='语文'?'chinese':'english';list.innerHTML+='<div class="card mistake-item" onclick="openReview('+i+')"><div class="mi-top"><span class="mi-subject '+sc+'">'+m.subject+'</span><span class="badge '+(m.mastered?'done':'review')+'">'+(m.mastered?'已掌握':'待复习')+'</span></div><div class="mi-question">'+(m.question||'📷 图片题')+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">❌ '+m.reason+' | '+m.date+'</div></div>'})}
+function renderExams(){var ex=DB.exams[CURRENT_USER]||[],sub=document.getElementById('examSubjectFilter').value,typ=document.getElementById('examTypeFilter').value,list=document.getElementById('examList'),f=ex.filter(function(e){return(sub==='all'||e.subject===sub)&&(typ==='all'||e.type===typ)}).sort(function(a,b){return a.date>b.date?-1:1});if(f.length===0){list.innerHTML='<div class="empty">没有符合条件的成绩记录</div>';return}list.innerHTML='';f.forEach(function(e){var tc='quiz';if(e.type==='模拟考试')tc='mock';if(e.type==='期中考试')tc='midterm';if(e.type==='期末考试')tc='final';list.innerHTML+='<div class="card exam-item"><div class="ei-top"><div><div style="font-weight:600;font-size:14px">'+e.subject+'</div><span class="ei-type '+tc+'">'+e.type+'</span></div><div class="ei-score" style="color:'+(e.score>=90?'#10b981':e.score>=80?'#f59e0b':'#ef4444')+'">'+e.score+'</div></div><div style="font-size:11px;color:#94a3b8;margin-top:4px">📅 '+e.date+(e.note?' | '+e.note:'')+'</div></div>'})}
+function renderReport(){var ex=DB.exams[CURRENT_USER]||[],ms=DB.mistakes[CURRENT_USER]||[],el=document.getElementById('reportContent'),html='<div class="section-title" style="font-size:14px">📊 各科平均分</div>';['语文','数学','英语'].forEach(function(s){var fex=ex.filter(function(e){return e.subject===s});if(fex.length===0){html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">'+s+'</div><div style="color:#94a3b8;font-size:13px">暂无数据</div></div>';return}var avg=Math.round(fex.reduce(function(a,b){return a+b.score},0)/fex.length),c={语文:'#ff8fab',数学:'#4cc9f0',英语:'#06d6a0'};html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">'+s+'（共'+fex.length+'次）</div><div style="font-size:16px;font-weight:700;margin:4px 0">'+avg+'分</div><div class="r-bar"><div class="fill" style="width:'+avg+'%;background:'+c[s]+'"></div></div></div>'});var mastered=ms.filter(function(m){return m.mastered}).length;html+='<div class="section-title" style="font-size:14px;margin-top:16px">❌ 错题分析</div><div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">掌握进度</div><div style="font-size:14px;margin:4px 0">已掌握 '+mastered+'/'+ms.length+' 题（'+Math.round(mastered/ms.length*100||0)+'%）</div><div class="r-bar"><div class="fill" style="width:'+(mastered/ms.length*100||0)+'%;background:#10b981"></div></div></div>';var reasons={};ms.forEach(function(m){if(!reasons[m.reason])reasons[m.reason]=0;reasons[m.reason]++});if(Object.keys(reasons).length>0){html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">高频错误原因</div>';Object.keys(reasons).sort(function(a,b){return reasons[b]-reasons[a]}).slice(0,3).forEach(function(r){html+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #f1f5f9"><span>❌ '+r+'</span><span style="font-weight:700">'+reasons[r]+'次</span></div>'});html+='</div>'}if(ex.length===0)html='<div class="empty">录入一些成绩，报告就会自动生成啦~</div>';el.innerHTML=html}
+function addMistake(){var q=document.getElementById('amQuestion').value.trim(),a=document.getElementById('amAnswer').value.trim(),sub=document.getElementById('amSubject').value,reason=document.getElementById('amReason').value;if(!q&&!a){alert('至少填题目或答案哦~');return}var ms=DB.mistakes[CURRENT_USER]||[];ms.unshift({subject:sub,question:q,answer:a,reason:reason,date:new Date().toLocaleDateString('zh-CN'),mastered:false});DB.mistakes[CURRENT_USER]=ms;save();document.getElementById('amQuestion').value='';document.getElementById('amAnswer').value='';switchPage('mistakes')}
+function addExam(){var score=parseInt(document.getElementById('aeScore').value);if(isNaN(score)||score<0||score>100){alert('请输入0-100之间的分数哦~');return}var sub=document.getElementById('aeSubject').value,typ=document.getElementById('aeType').value,date=document.getElementById('aeDate').value||new Date().toISOString().slice(0,10),note=document.getElementById('aeNote').value.trim(),ex=DB.exams[CURRENT_USER]||[];ex.push({subject:sub,type:typ,score:score,date:date,note:note});DB.exams[CURRENT_USER]=ex;save();document.getElementById('aeScore').value='';document.getElementById('aeNote').value='';switchPage('exams')}
+function openReview(idx){REVIEW_IDX=idx;var m=DB.mistakes[CURRENT_USER][idx];document.getElementById('reviewQuestion').textContent=m.question||'📷 图片题';document.getElementById('reviewInput').value='';document.getElementById('reviewResult').style.display='none';document.getElementById('reviewOverlay').classList.add('show');setTimeout(function(){document.getElementById('reviewInput').focus()},200)}
+function markReview(done){var ms=DB.mistakes[CURRENT_USER];if(REVIEW_IDX>=0&&REVIEW_IDX<ms.length){if(done)ms[REVIEW_IDX].mastered=true;if(!ms[REVIEW_IDX].reviewCount)ms[REVIEW_IDX].reviewCount=0;ms[REVIEW_IDX].reviewCount++;ms[REVIEW_IDX].lastReview=Date.now();save()}document.getElementById('reviewOverlay').classList.remove('show');renderHome();renderMistakes();REVIEW_IDX=-1}
+function reviewCorrect(){markReview(true)}
+function reviewWrong(){markReview(false)}
+</script>
+
+<div class="review-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:24px" id="reviewOverlay">
+  <div style="background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:400px">
+    <h3 style="margin-bottom:12px;font-size:18px">📝 复习时间！</h3>
+    <div style="font-size:20px;font-weight:700;text-align:center;padding:20px;background:#f9fafb;border-radius:14px;margin-bottom:16px" id="reviewQuestion">题目</div>
+    <input type="text" id="reviewInput" placeholder="输入你的答案" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;text-align:center;margin-bottom:12px;outline:none" onkeydown="if(event.key==='Enter')reviewCorrect()">
+    <div style="display:flex;gap:8px">
+      <button class="wrong" style="flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:#fee2e2;color:#991b1b" onclick="reviewWrong()">❌ 不会</button>
+      <button class="correct" style="flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:#d1fae5;color:#065f46" onclick="reviewCorrect()">✅ 对了</button>
     </div>
   </div>
 </div>
 
-<!-- 浮动按钮 -->
-<button class="action-btn" id="fabBtn" onclick="showQuickAdd()">＋</button>
-
-<script>
-<script>
-// 学习小星球 - 主逻辑
-var DB = {users:{}, mistakes:{}, exams:{}};
-var CURRENT_USER = null;
-var REVIEW_IDX = -1;
-
-function load(){
-  try{var d=localStorage.getItem('studybook');if(d)DB=JSON.parse(d);}catch(e){}
-  if(!DB.users) DB.users={};
-  if(!DB.mistakes) DB.mistakes={};
-  if(!DB.exams) DB.exams={};
-}
-function save(){localStorage.setItem('studybook',JSON.stringify(DB));}
-load();
-
-// ===== 登录 =====
-function doLogin(e){
-  e.preventDefault();
-  var u=document.getElementById('loginUser').value.trim();
-  var p=document.getElementById('loginPass').value.trim();
-  var err=document.getElementById('loginError');
-  if(!u||!p){err.textContent='请输入用户名和密码';err.style.display='block';return false;}
-  if(!DB.users[u]){err.textContent='用户不存在哦~';err.style.display='block';return false;}
-  if(DB.users[u].pass!==p){err.textContent='密码不对哦~';err.style.display='block';return false;}
-  CURRENT_USER=u;
-  document.getElementById('loginPage').style.display='none';
-  document.getElementById('mainApp').style.display='block';
-  initApp();
-  return false;
-}
-
-function showRegister(){document.getElementById('registerModal').classList.add('show');document.getElementById('regError').style.display='none';}
-function hideRegister(){document.getElementById('registerModal').classList.remove('show');}
-
-function doRegister(){
-  var u=document.getElementById('regUser').value.trim();
-  var p=document.getElementById('regPass').value.trim();
-  var p2=document.getElementById('regPass2').value.trim();
-  var err=document.getElementById('regError');
-  if(!u||!p){err.textContent='用户名和密码不能空哦~';err.style.display='block';return;}
-  if(p!==p2){err.textContent='两次密码不一致哦~';err.style.display='block';return;}
-  if(p.length<4){err.textContent='密码至少4位哦~';err.style.display='block';return;}
-  if(DB.users[u]){err.textContent='用户名已经被用啦~';err.style.display='block';return;}
-  DB.users[u]={pass:p,created:Date.now()};
-  save();
-  hideRegister();
-  alert('🎉 注册成功！用新账号登录吧~');
-}
-
-function doLogout(){
-  if(!confirm('确定退出吗？'))return;
-  CURRENT_USER=null;
-  document.getElementById('mainApp').style.display='none';
-  document.getElementById('loginPage').style.display='flex';
-}
-
-function initApp(){
-  var u=CURRENT_USER;
-  if(!DB.mistakes[u]) DB.mistakes[u]=[];
-  if(!DB.exams[u]) DB.exams[u]=[];
-  save();
-  var h=new Date().getHours();
-  document.getElementById('greetingText').textContent='🌟 '+(h<12?'早上好哦':'下午好哦')+'，'+u+'！';
-  document.getElementById('settingName').textContent=u;
-  document.getElementById('avatarLetter').textContent=u.charAt(0)||'🌟';
-  switchPage('home');
-}
-
-// ===== 页面切换 =====
-function switchPage(id){
-  ['home','mistakes','exams','report','settings','addMistake','addExam'].forEach(function(p){
-    var el=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));
-    if(el) el.classList.remove('active');
-  });
-  var target=document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));
-  if(target) target.classList.add('active');
-  document.querySelectorAll('.nav .item').forEach(function(el){el.classList.remove('active');});
-  var navItem=document.querySelector('.nav .item[data-page="'+id+'"]');
-  if(navItem) navItem.classList.add('active');
-  document.getElementById('fabBtn').style.display=(['home','mistakes','exams','report','settings'].indexOf(id)>=0)?'block':'none';
-  if(id==='home') renderHome();
-  if(id==='mistakes') renderMistakes();
-  if(id==='exams') renderExams();
-  if(id==='report') renderReport();
-}
-
-function showQuickAdd(){
-  if(confirm('要添加什么？\n确定→错题  取消→考试成绩')) switchPage('addMistake');
-  else switchPage('addExam');
-}
-
-// ===== 首页 =====
-function renderHome(){
-  var u=CURRENT_USER, ms=DB.mistakes[u]||[], ex=DB.exams[u]||[];
-  var grid=document.getElementById('trendGrid');
-  grid.innerHTML='';
-  ['语文','数学','英语'].forEach(function(s){
-    var myEx=ex.filter(function(e){return e.subject===s;}).sort(function(a,b){return a.date>b.date?-1:1;});
-    if(myEx.length===0) return;
-    var last=myEx[0], prev=myEx[1];
-    var chg='<span class="change">刚起步</span>';
-    if(prev) chg=last.score>prev.score?'<span class="change up">↑'+(last.score-prev.score)+'</span>':'<span class="change down">↓'+(prev.score-last.score)+'</span>';
-    grid.innerHTML+='<div class="trend-card"><div class="subject">'+s+'</div><div class="score">'+last.score+'</div>'+chg+'</div>';
-  });
-  if(grid.innerHTML==='') grid.innerHTML='<div class="empty">还没有成绩，去"我的"录入吧~</div>';
-
-  var toReview=ms.filter(function(m){return !m.mastered;});
-  document.getElementById('reviewCount').textContent='（还有 '+toReview.length+' 题）';
-  var list=document.getElementById('homeReviewList');
-  if(toReview.length===0){list.innerHTML='<div class="card" style="text-align:center;color:#94a3b8">🎉 全部掌握啦！</div>';return;}
-  list.innerHTML='';
-  toReview.slice(0,5).forEach(function(m){
-    var idx=ms.indexOf(m);
-    var sc=m.subject==='数学'?'math':m.subject==='语文'?'chinese':'english';
-    list.innerHTML+='<div class="card mistake-item" onclick="openReview('+idx+')">'+
-      '<div class="mi-top"><span class="mi-subject '+sc+'">'+m.subject+'</span><span class="badge review">待复习</span></div>'+
-      '<div class="mi-question">'+(m.question||'📷 图片题')+'</div></div>';
-  });
-}
-
-// ===== 错题列表 =====
-function renderMistakes(){
-  var ms=DB.mistakes[CURRENT_USER]||[];
-  var list=document.getElementById('mistakeList');
-  if(ms.length===0){list.innerHTML='<div class="empty">还没有错题哦，录入一道吧~</div>';return;}
-  list.innerHTML='';
-  ms.forEach(function(m,i){
-    var sc=m.subject==='数学'?'math':m.subject==='语文'?'chinese':'english';
-    list.innerHTML+='<div class="card mistake-item" onclick="openReview('+i+')">'+
-      '<div class="mi-top"><span class="mi-subject '+sc+'">'+m.subject+'</span><span class="badge '+(m.mastered?'done':'review')+'">'+(m.mastered?'已掌握':'待复习')+'</span></div>'+
-      '<div class="mi-question">'+(m.question||'📷 图片题')+'</div>'+
-      '<div style="font-size:11px;color:#94a3b8;margin-top:4px">❌ '+m.reason+' | '+m.date+'</div></div>';
-  });
-}
-
-// ===== 考试列表 =====
-function renderExams(){
-  var ex=DB.exams[CURRENT_USER]||[];
-  var sub=document.getElementById('examSubjectFilter').value;
-  var typ=document.getElementById('examTypeFilter').value;
-  var list=document.getElementById('examList');
-  var filtered=ex.filter(function(e){return (sub==='all'||e.subject===sub)&&(typ==='all'||e.type===typ);})
-    .sort(function(a,b){return a.date>b.date?-1:1;});
-  if(filtered.length===0){list.innerHTML='<div class="empty">没有符合条件的成绩记录</div>';return;}
-  list.innerHTML='';
-  filtered.forEach(function(e){
-    var tc='qiuz';if(e.type==='模拟考试') tc='mock';if(e.type==='期中考试') tc='midterm';if(e.type==='期末考试') tc='final';
-    list.innerHTML+='<div class="card exam-item"><div class="ei-top"><div><div style="font-weight:600;font-size:14px">'+e.subject+'</div><span class="ei-type '+tc+'">'+e.type+'</span></div><div class="ei-score" style="color:'+(e.score>=90?'#10b981':e.score>=80?'#f59e0b':'#ef4444')+'">'+e.score+'</div></div>'+
-      '<div style="font-size:11px;color:#94a3b8;margin-top:4px">📅 '+e.date+(e.note?' | '+e.note:'')+'</div></div>';
-  });
-}
-
-// ===== 报告 =====
-function renderReport(){
-  var ex=DB.exams[CURRENT_USER]||[];
-  var ms=DB.mistakes[CURRENT_USER]||[];
-  var el=document.getElementById('reportContent');
-  
-  // 各科平均分
-  var subs=['语文','数学','英语'];
-  var html='<div class="section-title" style="font-size:14px">📊 各科平均分</div>';
-  subs.forEach(function(s){
-    var fex=ex.filter(function(e){return e.subject===s;});
-    if(fex.length===0){html+='<div class="card r-card"><div class="r-title">'+s+'</div><div class="r-body" style="color:#94a3b8">暂无数据</div></div>';return;}
-    var avg=Math.round(fex.reduce(function(a,b){return a+b.score;},0)/fex.length);
-    var colors={语文:'#ff8fab',数学:'#4cc9f0',英语:'#06d6a0'};
-    html+='<div class="card r-card"><div class="r-title">'+s+'（共'+fex.length+'次）</div><div class="r-body"><b>'+avg+'分</b></div><div class="r-bar"><div class="fill" style="width:'+avg+'%;background:'+colors[s]+'"></div></div></div>';
-  });
-
-  // 错题统计
-  html+='<div class="section-title" style="font-size:14px;margin-top:16px">❌ 错题分析</div>';
-  var mastered=ms.filter(function(m){return m.mastered;}).length;
-  var total=ms.length;
-  html+='<div class="card r-card"><div class="r-title">掌握进度</div><div class="r-body">已掌握 '+mastered+'/'+total+' 题（'+Math.round(mastered/total*100||0)+'%）</div><div class="r-bar"><div class="fill" style="width:'+(mastered/total*100||0)+'%;background:#10b981"></div></div></div>';
-
-  var reasons={};
-  ms.forEach(function(m){if(!reasons[m.reason]) reasons[m.reason]=0;reasons[m.reason]++;});
-  if(Object.keys(reasons).length>0){
-    html+='<div class="card r-card"><div class="r-title">高频错误原因</div>';
-    Object.keys(reasons).sort(function(a,b){return reasons[b]-reasons[a];}).slice(0,3).forEach(function(r){
-      html+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #f1f5f9"><span>❌ '+r+'</span><span style="font-weight:700">'+reasons[r]+'次</span></div>';
-    });
-    html+='</div>';
-  }
-
-  // 进步/退步
-  html+='<div class="section-title" style="font-size:14px;margin-top:16px">📈 进步榜</div>';
-  subs.forEach(function(s){
-    var fex=ex.filter(function(e){return e.subject===s;}).sort(function(a,b){return a.date>b.date?-1:1;});
-    if(fex.length<2) return;
-    var best=fex.reduce(function(a,b){return a.score>b.score?a:b;});
-    var worst=fex.reduce(function(a,b){return a.score<b.score?a:b;});
-    var last2=fex.slice(0,2);
-    html+='<div class="card r-card"><div class="r-title">'+s+'</div><div class="r-body">最高 '+best.score+'分 · 最低 '+worst.score+'分 · '+
-      (last2.length===2?(last2[0].score>last2[1].score?'📈 最近在进步':'📉 最近要加把劲'):'刚起步')+'</div></div>';
-  });
-  
-  if(ex.length===0) html='<div class="empty">录入一些成绩和错题，报告就会自动生成啦~</div>';
-  el.innerHTML=html;
-}
-
-// ===== 录入错题 =====
-function previewPhoto(e){
-  var file=e.target.files[0];
-  if(!file) return;
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    var p=document.getElementById('photoPreview');
-    p.innerHTML='<img src="'+ev.target.result+'" style="max-height:120px;border-radius:10px;margin-top:6px">';
-  };
-  reader.readAsDataURL(file);
-}
-
-function addMistake(){
-  var q=document.getElementById('amQuestion').value.trim();
-  var a=document.getElementById('amAnswer').value.trim();
-  var sub=document.getElementById('amSubject').value;
-  var reason=document.getElementById('amReason').value;
-  var photo='';
-  var img=document.querySelector('#photoPreview img');
-  if(img) photo=img.src;
-  
-  if(!q&&!photo&&!a){alert('至少要填题目或拍照哦~');return;}
-  var ms=DB.mistakes[CURRENT_USER]||[];
-  ms.unshift({
-    subject:sub, question:q||'📷', answer:a, reason:reason,
-    photo:photo, date:new Date().toLocaleDateString('zh-CN'),
-    mastered:false, reviewCount:0, lastReview:null
-  });
-  DB.mistakes[CURRENT_USER]=ms;
-  save();
-  document.getElementById('amQuestion').value='';
-  document.getElementById('amAnswer').value='';
-  document.getElementById('amPhoto').value='';
-  document.getElementById('photoPreview').innerHTML='';
-  switchPage('mistakes');
-}
-
-// ===== 录入成绩 =====
-function addExam(){
-  var score=parseInt(document.getElementById('aeScore').value);
-  if(isNaN(score)||score<0||score>100){alert('请输入0-100之间的分数哦~');return;}
-  var sub=document.getElementById('aeSubject').value;
-  var typ=document.getElementById('aeType').value;
-  var date=document.getElementById('aeDate').value||new Date().toISOString().slice(0,10);
-  var note=document.getElementById('aeNote').value.trim();
-  var ex=DB.exams[CURRENT_USER]||[];
-  ex.push({subject:sub, type:typ, score:score, date:date, note:note});
-  DB.exams[CURRENT_USER]=ex;
-  save();
-  document.getElementById('aeScore').value='';
-  document.getElementById('aeNote').value='';
-  switchPage('exams');
-}
-
-// ===== 复习弹窗 =====
-function openReview(idx){
-  REVIEW_IDX=idx;
-  var ms=DB.mistakes[CURRENT_USER];
-  var m=ms[idx];
-  document.getElementById('reviewQuestion').textContent=m.question||'📷 图片题';
-  document.getElementById('reviewInput').value='';
-  document.getElementById('reviewResult').style.display='none';
-  document.getElementById('reviewOverlay').classList.add('show');
-  setTimeout(function(){document.getElementById('reviewInput').focus();},200);
-}
-
-function markReview(done){
-  var ms=DB.mistakes[CURRENT_USER];
-  if(REVIEW_IDX>=0&&REVIEW_IDX<ms.length){
-    if(done) ms[REVIEW_IDX].mastered=true;
-    if(!ms[REVIEW_IDX].reviewCount) ms[REVIEW_IDX].reviewCount=0;
-    ms[REVIEW_IDX].reviewCount++;
-    ms[REVIEW_IDX].lastReview=Date.now();
-    save();
-  }
-  document.getElementById('reviewOverlay').classList.remove('show');
-  renderHome(); renderMistakes();
-  REVIEW_IDX=-1;
-}
-function reviewCorrect(){markReview(true);}
-function reviewWrong(){markReview(false);}
-
-// 考试过滤变更
-document.addEventListener('DOMContentLoaded',function(){
-  ['examSubjectFilter','examTypeFilter'].forEach(function(id){
-    document.getElementById(id).addEventListener('change',renderExams);
-  });
-});
-
-</script>
 </body>
 </html>
