@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌟 学习数据看板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1e293b;min-height:100vh}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+.header{background:linear-gradient(135deg,#667eea 15%,#764ba2 85%);color:#fff;border-radius:16px;padding:24px 28px;margin-bottom:16px;position:relative;overflow:hidden}
+.header::after{content:'✨⭐🌟';position:absolute;font-size:80px;right:10px;top:-5px;opacity:.12}
+.header .h1{font-size:24px;font-weight:800}.header .sub{font-size:13px;opacity:.7;margin-top:4px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpi-card .kl{font-size:11px;color:#64748b;margin-bottom:3px}
+.kpi-card .kv{font-size:24px;font-weight:700}
+.kpi-card .ks{font-size:11px;color:#94a3b8;margin-top:2px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}}
+.chart-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chart-card .ct{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px}
+.chart-card canvas{max-height:280px}
+.full{grid-column:1/-1}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 8px;background:#f8fafc;color:#475569;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
+tr:hover{background:#f8fafc}
+.badge{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:600}
+.badge.purple{background:#ede9fe;color:#6d28d9}.badge.pink{background:#fce7f3;color:#be185d}.badge.green{background:#d1fae5;color:#065f46}
+.badge.blue{background:#dbeafe;color:#1e40af}.badge.yellow{background:#fef3c7;color:#92400e}
+.text-right{text-align:right}
+.footer{text-align:center;color:#94a3b8;font-size:11px;padding:20px 0}
+.r-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:4px}
+.r-bar .fill{height:100%;border-radius:4px;transition:width .8s}
+.subject-color{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+.fab{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4);z-index:50}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.mi-card{border-left:3px solid #ff8fab;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.mi-card .mq{font-size:13px;font-weight:600;margin:4px 0 2px}
+.mi-card .mi-info{font-size:10px;color:#94a3b8}
+.mi-card .ms{font-size:10px;color:#fff;padding:1px 8px;border-radius:6px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <div class="h1">🌟 学习数据看板</div>
+  <div class="sub">考试成绩 · 错题分析 · 学习进度 · 一屏掌握</div>
+</div>
+
+<div class="kpi-row id="kpiRow"></div>
+
+<div class="chart-row">
+  <div class="chart-card full"><div class="ct">📈 考试成绩趋势</div><canvas id="trendChart"></canvas></div>
+</div>
+
+<div class="chart-row">
+  <div class="chart-card><div class="ct">📊 各科平均分对比</div><canvas id="avgChart"></canvas></div>
+  <div class="chart-card><div class="ct">🏆 考试类型分布</div><canvas id="typeChart"></canvas></div>
+</div>
+
+<div class="chart-card full><div class="ct">📋 成绩明细表</div><div class="tbl-wrap"><table><thead><tr><th>日期</th><th>年级</th><th>学科</th><th>类型</th><th>分数</th></tr></thead><tbody id="scoreTable"></tbody></table></div></div>
+
+<div class="chart-row">
+  <div class="chart-card full"><div class="ct">❌ 错题本</div><div id="mistakeGrid" class="grid-3"></div></div>
+</div>
+
+</div>
+<div class="footer">🌟 学习小星球 · 数据存在本地浏览器</div>
+<button class="fab" onclick="addData()">＋</button>
+
+<script>
+var D={mistakes:{},exams:{}},U='default';
+function ld(){try{var d=localStorage.getItem('sz');if(d)D=JSON.parse(d)}catch(e){}if(!D.mistakes)D.mistakes={};if(!D.exams)D.exams={}}
+function sv(){localStorage.setItem('sz',JSON.stringify(D))}
+ld();
+if(!D.mistakes[U]||D.mistakes[U].length===0){
+  D.mistakes[U]=[
+    {s:'数学',q:'36+47=?',a:'83',r:'进位忘记加1',d:'2026/4/20',m:false},
+    {s:'语文',q:'\"已\"字怎么写？',a:'半开口的已',r:'和\"己\"搞混',d:'2026/4/22',m:false},
+    {s:'英语',q:'apple怎么拼？',a:'a-p-p-l-e',r:'少写一个p',d:'2026/4/25',m:true}
+  ];
+  D.exams[U]=[
+    {s:'语文',t:'期中考试',c:92,d:'2026-04-15',n:'第三单元'},
+    {s:'数学',t:'期中考试',c:88,d:'2026-04-15',n:'第三单元'},
+    {s:'英语',t:'随堂测验',c:95,d:'2026-04-22',n:'Unit5'},
+    {s:'数学',t:'随堂测验',c:85,d:'2026-04-10',n:'计算专项'}
+  ];
+  sv();
+}
+
+var charts={};
+
+function render(){
+  var ex=D.exams[U]||[],ms=D.mistakes[U]||[];
+  var avg=ex.length?Math.round(ex.reduce(function(a,b){return a+b.c},0)/ex.length):0;
+  var mk=ms.filter(function(m){return m.m}).length;
+  document.getElementById('kpiRow').innerHTML=
+    '<div class="kpi-card"><div class="kl">🏆 考试次数</div><div class="kv" style="color:#4361ee">'+ex.length+'</div><div class="ks">次</div></div>'+
+    '<div class="kpi-card"><div class="kl">📊 总平均分</div><div class="kv" style="color:#06d6a0">'+avg+'</div><div class="ks">分</div></div>'+
+    '<div class="kpi-card"><div class="kl">🥇 最高分</div><div class="kv" style="color:#10b981">'+(ex.length?ex.reduce(function(a,b){return a.c>b.c?a:b}).c:'-')+'</div><div class="ks">分</div></div>'+
+    '<div class="kpi-card"><div class="kl">❌ 错题掌握</div><div class="kv" style="color:#f59e0b">'+(ms.length?Math.round(mk/ms.length*100):0)+'%</div><div class="ks">'+mk+'/'+ms.length+'题</div></div>';
+  
+  // 成绩表格
+  var ex2=ex.concat().sort(function(a,b){return a.d>b.d?-1:1});
+  var tb=document.getElementById('scoreTable');tb.innerHTML='';
+  ex2.forEach(function(e){
+    var c=e.c>=90?'#10b981':e.c>=80?'#f59e0b':'#ef4444';
+    var tc='badge blue';if(e.t==='期中考试')tc='badge yellow';if(e.t==='期末考试')tc='badge pink';if(e.t==='模拟考试')tc='badge purple';
+    tb.innerHTML+='<tr><td>'+e.d+'</td><td>三年级</td><td><span class="subject-color" style="background:'+(e.s==='语文'?'#ff8fab':e.s==='数学'?'#4cc9f0':'#06d6a0')+'"></span>'+e.s+'</td><td><span class="'+tc+'">'+e.t+'</span></td><td class="text-right" style="font-weight:700;color:'+c+'">'+e.c+'</td></tr>';
+  });
+  
+  // 错题
+  var mg=document.getElementById('mistakeGrid');mg.innerHTML='';
+  ms.forEach(function(m){
+    var cls=m.s==='数学'?'background:#4cc9f0':m.s==='语文'?'background:#ff8fab':'background:#06d6a0';
+    mg.innerHTML+='<div class="mi-card"><div><span class="ms" style="'+cls+'">'+m.s+'</span> <span style="font-size:10px;color:'+(m.m?'#10b981':'#f59e0b')+'">'+(m.m?'✅已掌握':'⏳待复习')+'</span></div><div class="mq">'+(m.q||'📷')+'</div><div class="mi-info">❌ '+m.r+' · '+m.d+'</div></div>';
+  });
+  
+  drawCharts(ex, ms);
+}
+
+function drawCharts(ex, ms){
+  // 趋势图
+  var ex2=ex.concat().sort(function(a,b){return a.d>b.d?1:-1});
+  if(ex2.length>0){
+    destroyChart('trendChart');
+    var labels=ex2.map(function(e){return e.d.substring(5)});
+    var data=ex2.map(function(e){return e.c});
+    var colors=ex2.map(function(e){return e.s==='语文'?'#ff8fab':e.s==='数学'?'#4cc9f0':'#06d6a0'});
+    var borderColors=ex2.map(function(e){return e.s==='语文'?'#f06292':e.s==='数学'?'#26c6da':'#4db6ac'});
+    charts.trendChart=new Chart(document.getElementById('trendChart'),{
+      type:'line',
+      data:{labels:labels,datasets:[{label:'分数',data:data,borderColor:'#4361ee',backgroundColor:'rgba(67,97,238,.08)',fill:true,tension:.3,pointBackgroundColor:colors,pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,borderWidth:2.5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.raw+'分'}}}},
+      scales:{y:{min:50,max:105,ticks:{stepSize:10,font:{size:10}},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false},ticks:{font:{size:9}}}}}
+    });
+  }
+  
+  // 各科平均图
+  destroyChart('avgChart');
+  var subs=['语文','数学','英语'];
+  var avgs=subs.map(function(s){var fex=ex.filter(function(e){return e.s===s});return fex.length?Math.round(fex.reduce(function(x,y){return x+y.c},0)/fex.length):0});
+  var sc=['#ff8fab','#4cc9f0','#06d6a0'];
+  charts.avgChart=new Chart(document.getElementById('avgChart'),{
+    type:'bar',
+    data:{labels:subs,datasets:[{label:'平均分',data:avgs,backgroundColor:sc,borderRadius:6,barPercentage:.5}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{beginAtZero:true,max:100,ticks:{stepSize:20,font:{size:10}},grid:{color:'rgba(0,0,0,.04)'}},y:{grid:{display:false},ticks:{font:{size:11,weight:'bold'}}}}}
+  });
+  
+  // 类型分布
+  destroyChart('typeChart');
+  var types={};ex.forEach(function(e){if(!types[e.t])types[e.t]=0;types[e.t]++});
+  var tl=Object.keys(types);
+  var td=tl.map(function(t){return types[t]});
+  var tc=['#4361ee','#ff9f1c','#06d6a0','#8338ec'];
+  charts.typeChart=new Chart(document.getElementById('typeChart'),{
+    type:'doughnut',
+    data:{labels:tl,datasets:[{data:td,backgroundColor:tc.slice(0,tl.length)}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:6}}}}
+  });
+}
+
+function destroyChart(id){
+  if(charts[id]){charts[id].destroy();delete charts[id]}
+}
+
+function addData(){
+  var what=prompt('添加什么？\n1=错题  2=成绩  其他=取消');
+  if(what==='1'){
+    var q=prompt('题目：');if(!q)return;
+    var a=prompt('答案：');if(!a)return;
+    var s=prompt('科目（语文/数学/英语）：')||'数学';
+    var r=prompt('错因：')||'粗心大意';
+    var ms=D.mistakes[U]||[];
+    ms.unshift({s:s,q:q,a:a,r:r,d:new Date().toLocaleDateString('zh-CN'),m:false});
+    D.mistakes[U]=ms;sv();render();
+  }else if(what==='2'){
+    var s=prompt('科目（语文/数学/英语）：')||'语文';
+    var t=prompt('类型（随堂测验/期中考试/期末考试）：')||'随堂测验';
+    var c=parseInt(prompt('分数：'));if(isNaN(c))return;
+    var ex=D.exams[U]||[];
+    ex.push({s:s,t:t,c:c,d:new Date().toISOString().slice(0,10)});
+    D.exams[U]=ex;sv();render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
