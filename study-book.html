@@ -5,265 +5,336 @@
 <title>🌟 学习小星球</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#fef9ef;color:#2d3436;min-height:100vh;padding-bottom:80px;overflow-x:hidden}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#fef9ef;color:#2d3436;min-height:100vh;padding-bottom:72px;overflow-x:hidden}
 input,select,textarea,button{font-family:inherit}
-.nav{position:fixed;bottom:0;left:0;right:0;height:58px;background:#fff;border-top:1px solid #f1f5f9;display:flex;z-index:100}
-.nav .item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;cursor:pointer;gap:2px}
+.nav{position:fixed;bottom:0;left:0;right:0;height:58px;background:#fff;border-top:1px solid #f1f5f9;display:flex;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.04)}
+.nav .item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;cursor:pointer;gap:2px;transition:color .2s}
 .nav .item .icon{font-size:20px}
 .nav .item.active{color:#8b5cf6;font-weight:700}
 .page{display:none;padding:16px;padding-top:12px;max-width:600px;margin:0 auto}
 .page.active{display:block}
-.section-title{font-size:16px;font-weight:800;margin-bottom:12px}
+.sec-title{font-size:16px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .card{background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:12px;border:1px solid rgba(0,0,0,.04)}
 .empty{text-align:center;color:#94a3b8;padding:30px 0;font-size:13px}
-.submit-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;color:#fff}
-.submit-btn.pink{background:linear-gradient(135deg,#ff8fab,#ff6b8a)}
-.submit-btn.green{background:linear-gradient(135deg,#06d6a0,#04c392)}
-.welcome-card{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:20px;padding:20px 22px;margin-bottom:16px}
-.welcome-card .greeting{font-size:18px;font-weight:800}
-.welcome-card .sub{font-size:13px;opacity:.8;margin-top:4px}
-.trend-grid{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
-.trend-card{min-width:100px;background:#fff;border-radius:14px;padding:12px;border:1px solid #f1f5f9}
-.trend-card .subject{font-size:11px;color:#64748b;font-weight:700;margin-bottom:2px}
-.trend-card .score{font-size:20px;font-weight:800}
-.trend-card .up{color:#10b981}.trend-card .down{color:#ef4444}
-.mistake-item{border-left:4px solid #ff8fab;margin-bottom:10px;cursor:pointer}
-.mistake-item .mi-subject{font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:8px;display:inline-block}
-.mi-subject.math{background:#4cc9f0}.mi-subject.chinese{background:#ff8fab}.mi-subject.english{background:#06d6a0}
-.mistake-item .badge{font-size:10px;padding:2px 8px;border-radius:10px}
-.badge.review{background:#fef3c7;color:#92400e}.badge.done{background:#d1fae5;color:#065f46}
-.exam-item{border-left:4px solid #06d6a0;margin-bottom:10px}
-.exam-item .ei-top{display:flex;justify-content:space-between}
-.exam-item .ei-score{font-size:20px;font-weight:800}
-.exam-item .ei-type{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
-.ei-type.quiz{background:#dbeafe;color:#1e40af}.ei-type.midterm{background:#fef3c7;color:#92400e}.ei-type.final{background:#fee2e2;color:#991b1b}
-.form-group{margin-bottom:14px}
-.form-group label{font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
-.form-group input,.form-group select{width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;outline:none;background:#fafafa}
-.form-group input:focus,.form-group select:focus{border-color:#8b5cf6;background:#fff}
-.filter-row{display:flex;gap:8px;margin-bottom:12px}
-.filter-row select{flex:1;padding:8px 10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;color:#fff;transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn-pink{background:linear-gradient(135deg,#ff8fab,#ff6b8a)}
+.btn-green{background:linear-gradient(135deg,#06d6a0,#04c392)}
+.btn-purple{background:linear-gradient(135deg,#667eea,#764ba2)}
+.welcome{background:linear-gradient(135deg,#667eea 15%,#764ba2 85%);color:#fff;border-radius:20px;padding:20px 24px;margin-bottom:16px;position:relative;overflow:hidden}
+.welcome::after{content:'✨⭐🌟';position:absolute;font-size:60px;right:-10px;bottom:-10px;opacity:.15}
+.welcome .g{font-size:18px;font-weight:800}
+.welcome .s{font-size:13px;opacity:.8;margin-top:4px}
+.grid-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.grid-card{min-width:100px;background:#fff;border-radius:14px;padding:12px;border:1px solid #f1f5f9;flex-shrink:0}
+.grid-card .subj{font-size:11px;color:#64748b;font-weight:700;margin-bottom:2px}
+.grid-card .scr{font-size:20px;font-weight:800}
+.grid-card .chg{font-size:10px;margin-top:2px}
+.grid-card .up{color:#10b981}.grid-card .down{color:#ef4444}.grid-card .first{color:#94a3b8}
+.mi{border-left:4px solid #ff8fab;margin-bottom:10px;cursor:pointer;transition:transform .15s}
+.mi:active{transform:translateX(4px)}
+.mi .mt{display:flex;justify-content:space-between;align-items:start}
+.mi .ms{font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:8px;display:inline-block}
+.mi .mq{font-size:14px;font-weight:600;margin:6px 0 3px}
+.ms-math{background:#4cc9f0}.ms-chinese{background:#ff8fab}.ms-english{background:#06d6a0}
+.bg{font-size:10px;padding:2px 8px;border-radius:10px}
+.bg-review{background:#fef3c7;color:#92400e}.bg-done{background:#d1fae5;color:#065f46}.bg-photo{background:#e0e7ff;color:#3730a3}
+.ei{border-left:4px solid #06d6a0;margin-bottom:10px}
+.ei .et{display:flex;justify-content:space-between}
+.ei .es{font-size:20px;font-weight:800}
+.ei .etp{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
+.etp-quiz{background:#dbeafe;color:#1e40af}.etp-mid{background:#fef3c7;color:#92400e}.etp-final{background:#fee2e2;color:#991b1b}.etp-mock{background:#f3e8ff;color:#6d28d9}
+.fg{margin-bottom:14px}
+.fg label{font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
+.fg input,.fg select{width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;outline:none;background:#fafafa}
+.fg input:focus,.fg select:focus{border-color:#8b5cf6;background:#fff}
+.fl{display:flex;gap:8px;margin-bottom:12px}
+.fl select{flex:1;padding:8px 10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none}
+.photo-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:2px dashed #d1d5db;border-radius:12px;cursor:pointer;font-size:13px;color:#64748b;background:#fafafa;transition:all .2s}
+.photo-btn:active{background:#f0f0ff;border-color:#8b5cf6}
+#photoPreview img{max-height:150px;border-radius:12px;margin-top:6px;width:100%;object-fit:cover}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:24px}
+.overlay.show{display:flex}
+.obox{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:400px}
+.obox h3{font-size:18px;margin-bottom:12px}
+.obox .q{font-size:20px;font-weight:700;text-align:center;padding:20px;background:#f9fafb;border-radius:14px;margin-bottom:16px}
+.obox input[type=text]{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;text-align:center;margin-bottom:12px;outline:none}
+.obox input:focus{border-color:#8b5cf6}
+.obox .rb{display:flex;gap:8px}
+.obox .rb button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.rb-correct{background:#d1fae5;color:#065f46}.rb-wrong{background:#fee2e2;color:#991b1b}
+.r-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:4px}
+.r-bar .fill{height:100%;border-radius:4px}
+.act-btn{position:fixed;bottom:68px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4);z-index:50;transition:transform .2s}
+.act-btn:active{transform:scale(.9)}
+.dn{display:none}
 </style>
 </head>
 <body>
 
-<div style="background:#ff8fab;color:#fff;text-align:center;padding:10px;font-size:13px;font-weight:700">
-  🌟 学习小星球 - 小朋友的错题本和成绩记录
+<div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:10px;font-size:13px;font-weight:700;letter-spacing:1px">
+  🌟 学习小星球
 </div>
 
 <div class="nav">
-  <div class="item active" data-page="home" onclick="switchPage('home')"><span class="icon">🏠</span><span>首页</span></div>
-  <div class="item" data-page="mistakes" onclick="switchPage('mistakes')"><span class="icon">📝</span><span>错题</span></div>
-  <div class="item" data-page="exams" onclick="switchPage('exams')"><span class="icon">🏆</span><span>成绩</span></div>
-  <div class="item" data-page="report" onclick="switchPage('report')"><span class="icon">📊</span><span>报告</span></div>
-  <div class="item" data-page="add" onclick="switchPage('add')"><span class="icon">➕</span><span>新记录</span></div>
+  <div class="item active" onclick="go('home')"><span class="icon">🏠</span><span>首页</span></div>
+  <div class="item" onclick="go('mistakes')"><span class="icon">📝</span><span>错题</span></div>
+  <div class="item" onclick="go('exams')"><span class="icon">🏆</span><span>成绩</span></div>
+  <div class="item" onclick="go('report')"><span class="icon">📊</span><span>报告</span></div>
+  <div class="item" onclick="go('add')"><span class="icon">➕</span><span>记录</span></div>
 </div>
 
-<div class="page active" id="pageHome">
-  <div class="welcome-card">
-    <div class="greeting" id="greetingText">🌟 欢迎来到学习小星球！</div>
-    <div class="sub">记录错题和成绩，每天进步一点点 ✨</div>
+<div id="pageHome" class="page active">
+  <div class="welcome">
+    <div class="g" id="greeting">🌟 欢迎来到学习小星球！</div>
+    <div class="s">记录错题和成绩，每天进步一点点 ✨</div>
   </div>
-  <div class="section-title">📈 最近成绩</div>
-  <div class="trend-grid" id="trendGrid"></div>
-  <div class="section-title" style="margin-top:16px">📋 待复习错题 <span style="font-size:12px;color:#94a3b8;font-weight:400" id="reviewCount"></span></div>
-  <div id="homeReviewList"></div>
+  <div class="sec-title">📈 最近成绩</div>
+  <div class="grid-scroll" id="trendGrid"></div>
+  <div class="sec-title" style="margin-top:16px">📋 待复习错题 <span style="font-size:12px;color:#94a3b8;font-weight:400" id="rcnt"></span></div>
+  <div id="homeList"></div>
 </div>
 
-<div class="page" id="pageMistakes">
-  <div class="section-title">📝 错题本</div>
+<div id="pageMistakes" class="page">
+  <div class="sec-title">📝 错题本</div>
   <div id="mistakeList"></div>
 </div>
 
-<div class="page" id="pageExams">
-  <div class="section-title">🏆 考试成绩</div>
-  <div class="filter-row">
-    <select id="examSubjectFilter"><option value="all">全部科目</option><option value="语文">语文</option><option value="数学">数学</option><option value="英语">英语</option></select>
-    <select id="examTypeFilter"><option value="all">全部类型</option><option value="随堂测验">随堂测验</option><option value="模拟考试">模拟考试</option><option value="期中考试">期中考试</option><option value="期末考试">期末考试</option></select>
+<div id="pageExams" class="page">
+  <div class="sec-title">🏆 考试成绩</div>
+  <div class="fl">
+    <select id="exSub"><option value="all">全部科目</option><option>语文</option><option>数学</option><option>英语</option></select>
+    <select id="exTyp"><option value="all">全部类型</option><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select>
   </div>
   <div id="examList"></div>
 </div>
 
-<div class="page" id="pageReport">
-  <div class="section-title">📊 学习报告</div>
+<div id="pageReport" class="page">
+  <div class="sec-title">📊 学习报告</div>
   <div id="reportContent"></div>
+  <div class="card" style="margin-top:12px;padding:12px;text-align:center">
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">💾 数据备份</div>
+    <button class="btn btn-purple" style="padding:8px;font-size:12px" onclick="backupData()">📤 导出备份</button>
+    <button class="btn btn-green" style="padding:8px;font-size:12px;margin-top:6px" onclick="document.getElementById('restoreInput').click()">📥 导入备份</button>
+    <input type="file" accept=".json" id="restoreInput" class="dn" onchange="restoreData(event)">
+  </div>
 </div>
 
-<div class="page" id="pageAdd">
-  <div class="section-title">➕ 新记录</div>
+<div id="pageAdd" class="page">
+  <div class="sec-title">➕ 新记录</div>
   <div style="display:flex;gap:10px;margin-bottom:16px">
-    <button class="submit-btn pink" onclick="switchPage('addMistake')" style="flex:1">📸 添加错题</button>
-    <button class="submit-btn green" onclick="switchPage('addExam')" style="flex:1">🏆 添加成绩</button>
-  </div>
-  <div id="addMistakeForm" style="display:none">
-    <div class="card" style="border-top:4px solid #ff8fab">
-      <div class="form-group"><label>📚 科目</label><select id="amSubject"><option>数学</option><option>语文</option><option>英语</option></select></div>
-      <div class="form-group"><label>📝 题目</label><input type="text" id="amQuestion" placeholder="抄写或描述题目"></div>
-      <div class="form-group"><label>✅ 正确答案</label><input type="text" id="amAnswer" placeholder="正确答案"></div>
-      <div class="form-group"><label>❌ 错误原因</label><select id="amReason"><option>粗心大意</option><option>计算错误</option><option>概念不清</option><option>看错题目</option><option>不会做</option><option>其他</option></select></div>
-      <button class="submit-btn pink" onclick="addMistake()">🌟 保存错题</button>
-    </div>
-  </div>
-  <div id="addExamForm" style="display:none">
-    <div class="card" style="border-top:4px solid #06d6a0">
-      <div class="form-group"><label>📚 科目</label><select id="aeSubject"><option>语文</option><option>数学</option><option>英语</option></select></div>
-      <div class="form-group"><label>📋 考试类型</label><select id="aeType"><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select></div>
-      <div class="form-group"><label>🏆 分数</label><input type="number" id="aeScore" placeholder="输入分数" min="0" max="100"></div>
-      <div class="form-group"><label>📅 日期</label><input type="date" id="aeDate"></div>
-      <div class="form-group"><label>📝 备注</label><input type="text" id="aeNote" placeholder="如：数学第3单元"></div>
-      <button class="submit-btn green" onclick="addExam()">🏆 保存成绩</button>
-    </div>
+    <button class="btn btn-pink" onclick="go('addMistake')" style="flex:1">📸 添加错题</button>
+    <button class="btn btn-green" onclick="go('addExam')" style="flex:1">🏆 添加成绩</button>
   </div>
 </div>
 
-<div class="page" id="pageAddMistake">
-  <div class="section-title" style="cursor:pointer;font-size:14px" onclick="switchPage('add')">← 返回</div>
+<div id="pageAddMistake" class="page">
+  <div class="sec-title" style="cursor:pointer;font-size:14px" onclick="go('add')" id="amBack">← 返回</div>
   <div class="card" style="border-top:4px solid #ff8fab">
-    <div class="form-group"><label>📚 科目</label><select id="amSubject2"><option>数学</option><option>语文</option><option>英语</option></select></div>
-    <div class="form-group"><label>📝 题目</label><input type="text" id="amQuestion2" placeholder="抄写或描述题目"></div>
-    <div class="form-group"><label>✅ 正确答案</label><input type="text" id="amAnswer2" placeholder="正确答案"></div>
-    <div class="form-group"><label>❌ 错误原因</label><select id="amReason2"><option>粗心大意</option><option>计算错误</option><option>概念不清</option><option>看错题目</option><option>不会做</option><option>其他</option></select></div>
-    <button class="submit-btn pink" onclick="addMistake2()">🌟 保存错题</button>
+    <div class="fg"><label>📚 科目</label><select id="amSub"><option>数学</option><option>语文</option><option>英语</option></select></div>
+    <div class="fg">
+      <label>📸 拍照上传（可选）</label>
+      <div class="photo-btn" onclick="document.getElementById('amFile').click()">📷 拍照或选图</div>
+      <input type="file" accept="image/*" capture="environment" id="amFile" class="dn" onchange="preview(event)">
+      <div id="photoPreview"></div>
+    </div>
+    <div class="fg"><label>📝 题目</label><input type="text" id="amQ" placeholder="输入题目"></div>
+    <div class="fg"><label>✅ 答案</label><input type="text" id="amA" placeholder="正确答案"></div>
+    <div class="fg"><label>❌ 错因</label><select id="amR"><option>粗心大意</option><option>计算错误</option><option>概念不清</option><option>看错题目</option><option>不会做</option><option>其他</option></select></div>
+    <button class="btn btn-pink" onclick="addMistake()">🌟 保存</button>
   </div>
 </div>
 
-<div class="page" id="pageAddExam">
-  <div class="section-title" style="cursor:pointer;font-size:14px" onclick="switchPage('add')">← 返回</div>
+<div id="pageAddExam" class="page">
+  <div class="sec-title" style="cursor:pointer;font-size:14px" onclick="go('add')">← 返回</div>
   <div class="card" style="border-top:4px solid #06d6a0">
-    <div class="form-group"><label>📚 科目</label><select id="aeSubject2"><option>语文</option><option>数学</option><option>英语</option></select></div>
-    <div class="form-group"><label>📋 考试类型</label><select id="aeType2"><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select></div>
-    <div class="form-group"><label>🏆 分数</label><input type="number" id="aeScore2" placeholder="输入分数" min="0" max="100"></div>
-    <div class="form-group"><label>📅 日期</label><input type="date" id="aeDate2"></div>
-    <div class="form-group"><label>📝 备注</label><input type="text" id="aeNote2" placeholder="如：数学第3单元"></div>
-    <button class="submit-btn green" onclick="addExam2()">🏆 保存成绩</button>
+    <div class="fg"><label>📚 科目</label><select id="aeSub"><option>语文</option><option>数学</option><option>英语</option></select></div>
+    <div class="fg"><label>📋 类型</label><select id="aeTyp"><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select></div>
+    <div class="fg"><label>🏆 分数</label><input type="number" id="aeSc" placeholder="0-100" min="0" max="100"></div>
+    <div class="fg"><label>📅 日期</label><input type="date" id="aeDt"></div>
+    <div class="fg"><label>📝 备注</label><input type="text" id="aeNt" placeholder="如：第3单元"></div>
+    <button class="btn btn-green" onclick="addExam()">🏆 保存</button>
   </div>
 </div>
 
-<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:24px" id="reviewOverlay">
-  <div style="background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:400px">
-    <h3 style="margin-bottom:12px;font-size:18px">📝 复习时间！</h3>
-    <div style="font-size:20px;font-weight:700;text-align:center;padding:20px;background:#f9fafb;border-radius:14px;margin-bottom:16px" id="reviewQuestion">题目</div>
-    <input type="text" id="reviewInput" placeholder="输入你的答案" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;text-align:center;margin-bottom:12px;outline:none" onkeydown="if(event.key==='Enter')reviewCorrect()">
-    <div style="display:flex;gap:8px">
-      <button style="flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:#fee2e2;color:#991b1b" onclick="reviewWrong()">❌ 不会</button>
-      <button style="flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:#d1fae5;color:#065f46" onclick="reviewCorrect()">✅ 对了</button>
+<div class="overlay" id="reviewBox">
+  <div class="obox">
+    <h3>📝 复习时间！</h3>
+    <div class="q" id="rvQ">题目</div>
+    <input type="text" id="rvI" placeholder="输入你的答案" onkeydown="if(event.key==='Enter')rvY()">
+    <div class="rb">
+      <button class="rb-wrong" onclick="rvN()">❌ 不会</button>
+      <button class="rb-correct" onclick="rvY()">✅ 对了</button>
     </div>
   </div>
 </div>
+
+<button class="act-btn" onclick="showAddMenu()">＋</button>
 
 <script>
-var DB={mistakes:{},exams:{}},REVIEW_IDX=-1;
-function load(){try{var d=localStorage.getItem('studybook');if(d)DB=JSON.parse(d)}catch(e){}if(!DB.mistakes)DB.mistakes={};if(!DB.exams)DB.exams={}}
-function save(){localStorage.setItem('studybook',JSON.stringify(DB))}
-load();
+var D={mistakes:{},exams:{}},R=-1,U='default';
+function ld(){try{var d=localStorage.getItem('sz');if(d)D=JSON.parse(d)}catch(e){}if(!D.mistakes)D.mistakes={};if(!D.exams)D.exams={}}
+function sv(){localStorage.setItem('sz',JSON.stringify(D))}
+ld();
 
-// 默认用户
-var U='default';
-if(!DB.mistakes[U]||DB.mistakes[U].length===0){
-  DB.mistakes[U]=[
-    {subject:'数学',question:'36 + 47 = ?',answer:'83',reason:'进位忘记加1',date:'2026/4/20',mastered:false},
-    {subject:'语文',question:'"己"和"已"是不一样的',answer:'己(全开口)已(半开口)',reason:'和"己"搞混',date:'2026/4/22',mastered:false},
-    {subject:'英语',question:'apple 怎么拼？',answer:'a-p-p-l-e',reason:'少写了一个p',date:'2026/4/25',mastered:true}
+// 演示数据
+if(!D.mistakes[U]||D.mistakes[U].length===0){
+  D.mistakes[U]=[
+    {s:'数学',q:'36+47=?',a:'83',r:'进位忘记加1',d:'2026/4/20',m:false},
+    {s:'语文',q:'"已"字怎么写？',a:'半开口的已',r:'和"己"搞混',d:'2026/4/22',m:false},
+    {s:'英语',q:'apple怎么拼？',a:'a-p-p-l-e',r:'少写一个p',d:'2026/4/25',m:true}
   ];
-  DB.exams[U]=[
-    {subject:'语文',type:'期中考试',score:92,date:'2026-04-15',note:'第三单元'},
-    {subject:'数学',type:'期中考试',score:88,date:'2026-04-15',note:'第三单元'},
-    {subject:'英语',type:'随堂测验',score:95,date:'2026-04-22',note:'Unit 5'},
-    {subject:'数学',type:'随堂测验',score:85,date:'2026-04-10',note:'计算专项'}
+  D.exams[U]=[
+    {s:'语文',t:'期中考试',c:92,d:'2026-04-15',n:'第三单元'},
+    {s:'数学',t:'期中考试',c:88,d:'2026-04-15',n:'第三单元'},
+    {s:'英语',t:'随堂测验',c:95,d:'2026-04-22',n:'Unit5'},
+    {s:'数学',t:'随堂测验',c:85,d:'2026-04-10',n:'计算专项'}
   ];
-  save();
+  sv();
 }
 
-function switchPage(id){
-  ['home','mistakes','exams','report','add','addMistake','addExam'].forEach(function(p){
-    var e=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));
+function go(p){
+  ['home','mistakes','exams','report','add','addMistake','addExam'].forEach(function(x){
+    var e=document.getElementById('page'+x.charAt(0).toUpperCase()+x.slice(1));
     if(e)e.classList.remove('active');
   });
-  var t=document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));
+  var t=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));
   if(t)t.classList.add('active');
   document.querySelectorAll('.nav .item').forEach(function(e){e.classList.remove('active')});
-  var n=document.querySelector('.nav .item[data-page="'+id+'"]');
-  if(n)n.classList.add('active');
-  if(id==='home')renderHome();
-  if(id==='mistakes')renderMistakes();
-  if(id==='exams')renderExams();
-  if(id==='report')renderReport();
+  var map={home:0,mistakes:1,exams:2,report:3,add:4};
+  var items=document.querySelectorAll('.nav .item');
+  if(map[p]!==undefined)items[map[p]].classList.add('active');
+  if(p==='home')rHome();
+  if(p==='mistakes')rMis();
+  if(p==='exams')rEx();
+  if(p==='report')rRep();
 }
 
-function renderHome(){
-  var ms=DB.mistakes[U]||[],ex=DB.exams[U]||[];
-  var grid=document.getElementById('trendGrid');
-  grid.innerHTML='';
+function rHome(){
+  var ms=D.mistakes[U]||[],ex=D.exams[U]||[];
+  var g=document.getElementById('trendGrid');g.innerHTML='';
   ['语文','数学','英语'].forEach(function(s){
-    var myEx=ex.filter(function(e){return e.subject===s}).sort(function(a,b){return a.date>b.date?-1:1});
-    if(myEx.length===0)return;
-    var last=myEx[0],prev=myEx[1],chg='<span class="change">刚起步</span>';
-    if(prev)chg=last.score>prev.score?'<span class="up">↑'+(last.score-prev.score)+'</span>':'<span class="down">↓'+(prev.score-last.score)+'</span>';
-    grid.innerHTML+='<div class="trend-card"><div class="subject">'+s+'</div><div class="score">'+last.score+'</div>'+chg+'</div>';
+    var my=ex.filter(function(e){return e.s===s}).sort(function(a,b){return a.d>b.d?-1:1});
+    if(my.length===0)return;
+    var l=my[0],p=my[1],c=p?l.c>p.c?'<span class="up">↑'+(l.c-p.c)+'</span>':'<span class="down">↓'+(p.c-l.c)+'</span>':'<span class="first">刚起步</span>';
+    g.innerHTML+='<div class="grid-card"><div class="subj">'+s+'</div><div class="scr">'+l.c+'</div><div class="chg">'+c+'</div></div>';
   });
-  if(grid.innerHTML==='')grid.innerHTML='<div class="empty">还没有成绩哦，录一条吧~</div>';
-  var t=ms.filter(function(m){return !m.mastered});
-  document.getElementById('reviewCount').textContent='（还有 '+t.length+' 题）';
-  var list=document.getElementById('homeReviewList');
-  if(t.length===0){list.innerHTML='<div class="card" style="text-align:center;color:#94a3b8">🎉 全都掌握了，好棒！</div>';return}
-  list.innerHTML='';
+  if(g.innerHTML==='')g.innerHTML='<div class="empty">暂无成绩</div>';
+  var t=ms.filter(function(m){return !m.m});
+  document.getElementById('rcnt').textContent='（'+t.length+'题）';
+  var l=document.getElementById('homeList');
+  if(t.length===0){l.innerHTML='<div class="card" style="text-align:center;color:#94a3b8">🎉 全部掌握啦！</div>';return}
+  l.innerHTML='';
   t.slice(0,5).forEach(function(m){
-    var i=ms.indexOf(m),sc=m.subject==='数学'?'math':m.subject==='语文'?'chinese':'english';
-    list.innerHTML+='<div class="card mistake-item" onclick="openReview('+i+')"><div class="mi-top"><span class="mi-subject '+sc+'">'+m.subject+'</span><span class="badge review">待复习</span></div><div class="mi-question">'+(m.question||'📷 图片题')+'</div></div>';
+    var i=ms.indexOf(m),cls=m.s==='数学'?'ms-math':m.s==='语文'?'ms-chinese':'ms-english';
+    var hasPhoto=m.p&&m.p.length>100;
+    l.innerHTML+='<div class="card mi" onclick="openR('+i+')"><div class="mt"><span class="ms '+cls+'">'+m.s+(hasPhoto?'📷':'')+'</span><span class="bg bg-review">待复习</span></div><div class="mq">'+(m.q||'📷 图片题')+'</div></div>';
   });
 }
 
-function renderMistakes(){
-  var ms=DB.mistakes[U]||[],list=document.getElementById('mistakeList');
-  if(ms.length===0){list.innerHTML='<div class="empty">还没有错题哦~</div>';return}
-  list.innerHTML='';
+function rMis(){
+  var ms=D.mistakes[U]||[],l=document.getElementById('mistakeList');
+  if(ms.length===0){l.innerHTML='<div class="empty">还没有错题哦~</div>';return}
+  l.innerHTML='';
   ms.forEach(function(m,i){
-    var sc=m.subject==='数学'?'math':m.subject==='语文'?'chinese':'english';
-    list.innerHTML+='<div class="card mistake-item" onclick="openReview('+i+')"><div class="mi-top"><span class="mi-subject '+sc+'">'+m.subject+'</span><span class="badge '+(m.mastered?'done':'review')+'">'+(m.mastered?'已掌握':'待复习')+'</span></div><div class="mi-question">'+(m.question||'📷 图片题')+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">❌ '+m.reason+' | '+m.date+'</div></div>';
+    var cls=m.s==='数学'?'ms-math':m.s==='语文'?'ms-chinese':'ms-english';
+    var hasPhoto=m.p&&m.p.length>100;
+    l.innerHTML+='<div class="card mi" onclick="openR('+i+')"><div class="mt"><span class="ms '+cls+'">'+m.s+(hasPhoto?' 📷':'')+'</span><span class="bg '+(m.m?'bg-done':'bg-review')+'">'+(m.m?'已掌握':'待复习')+'</span></div><div class="mq">'+(m.q||'📷 图片题')+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">❌ '+m.r+' | '+m.d+'</div></div>';
   });
 }
 
-function renderExams(){
-  var ex=DB.exams[U]||[],sub=document.getElementById('examSubjectFilter').value,typ=document.getElementById('examTypeFilter').value,list=document.getElementById('examList'),f=ex.filter(function(e){return(sub==='all'||e.subject===sub)&&(typ==='all'||e.type===typ)}).sort(function(a,b){return a.date>b.date?-1:1});
-  if(f.length===0){list.innerHTML='<div class="empty">没有符合条件的成绩</div>';return}
-  list.innerHTML='';
-  f.forEach(function(e){
-    var tc='quiz';if(e.type==='模拟考试')tc='mock';if(e.type==='期中考试')tc='midterm';if(e.type==='期末考试')tc='final';
-    list.innerHTML+='<div class="card exam-item"><div class="ei-top"><div><div style="font-weight:600;font-size:14px">'+e.subject+'</div><span class="ei-type '+tc+'">'+e.type+'</span></div><div class="ei-score" style="color:'+(e.score>=90?'#10b981':e.score>=80?'#f59e0b':'#ef4444')+'">'+e.score+'</div></div><div style="font-size:11px;color:#94a3b8;margin-top:4px">📅 '+e.date+(e.note?' | '+e.note:'')+'</div></div>';
+function rEx(){
+  var ex=D.exams[U]||[],s=document.getElementById('exSub').value,t=document.getElementById('exTyp').value,l=document.getElementById('examList');
+  var f=ex.filter(function(e){return(s==='all'||e.s===s)&&(t==='all'||e.t===t)}).sort(function(a,b){return a.d>b.d?-1:1});
+  if(f.length===0){l.innerHTML='<div class="empty">暂无</div>';return}
+  l.innerHTML='';
+  f.forEach(function(e){var c='etp-quiz';if(e.t==='模拟考试')c='etp-mock';if(e.t==='期中考试')c='etp-mid';if(e.t==='期末考试')c='etp-final';
+    l.innerHTML+='<div class="card ei"><div class="et"><div><div style="font-weight:600;font-size:14px">'+e.s+'</div><span class="etp '+c+'">'+e.t+'</span></div><div class="es" style="color:'+(e.c>=90?'#10b981':e.c>=80?'#f59e0b':'#ef4444')+'">'+e.c+'</div></div><div style="font-size:11px;color:#94a3b8;margin-top:4px">📅 '+e.d+(e.n?' | '+e.n:'')+'</div></div>';
   });
 }
 
-function renderReport(){
-  var ex=DB.exams[U]||[],ms=DB.mistakes[U]||[],el=document.getElementById('reportContent'),html='<div class="section-title" style="font-size:14px">📊 各科平均分</div>';
+function rRep(){
+  var ex=D.exams[U]||[],ms=D.mistakes[U]||[],el=document.getElementById('reportContent'),html='<div class="sec-title" style="font-size:14px">📊 各科平均分</div>';
   ['语文','数学','英语'].forEach(function(s){
-    var fex=ex.filter(function(e){return e.subject===s});
-    if(fex.length===0){html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">'+s+'</div><div style="color:#94a3b8;font-size:13px">暂无数据</div></div>';return}
-    var avg=Math.round(fex.reduce(function(a,b){return a+b.score},0)/fex.length);
-    var c={语文:'#ff8fab',数学:'#4cc9f0',英语:'#06d6a0'};
-    html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">'+s+'（共'+fex.length+'次）</div><div style="font-size:16px;font-weight:700;margin:4px 0">'+avg+'分</div><div class="r-bar" style="height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden"><div class="fill" style="height:100%;border-radius:4px;width:'+avg+'%;background:'+c[s]+'"></div></div></div>';
+    var fex=ex.filter(function(e){return e.s===s});
+    if(fex.length===0){html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">'+s+'</div><div style="color:#94a3b8;font-size:13px">暂无</div></div>';return}
+    var avg=Math.round(fex.reduce(function(a,b){return a+b.c},0)/fex.length);
+    var mc={语文:'#ff8fab',数学:'#4cc9f0',英语:'#06d6a0'};
+    html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">'+s+'（'+fex.length+'次）</div><div style="font-size:16px;font-weight:700;margin:4px 0">'+avg+'分</div><div class="r-bar"><div class="fill" style="width:'+avg+'%;background:'+mc[s]+'"></div></div></div>';
   });
-  var mastered=ms.filter(function(m){return m.mastered}).length;
-  html+='<div class="section-title" style="font-size:14px;margin-top:16px">❌ 错题分析</div><div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">掌握进度</div><div style="font-size:14px;margin:4px 0">已掌握 '+mastered+'/'+ms.length+' 题（'+Math.round(mastered/ms.length*100||0)+'%）</div><div class="r-bar" style="height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden"><div class="fill" style="height:100%;border-radius:4px;width:'+(mastered/ms.length*100||0)+'%;background:#10b981"></div></div></div>';
-  var reasons={};ms.forEach(function(m){if(!reasons[m.reason])reasons[m.reason]=0;reasons[m.reason]++});
-  if(Object.keys(reasons).length>0){html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">高频错误原因</div>';Object.keys(reasons).sort(function(a,b){return reasons[b]-reasons[a]}).slice(0,3).forEach(function(r){html+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #f1f5f9"><span>❌ '+r+'</span><span style="font-weight:700">'+reasons[r]+'次</span></div>'});html+='</div>'}
+  var mk=ms.filter(function(m){return m.m}).length;
+  html+='<div class="sec-title" style="font-size:14px;margin-top:16px">❌ 错题分析</div><div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">掌握进度</div><div style="font-size:14px;margin:4px 0">已掌握 '+mk+'/'+ms.length+' 题（'+Math.round(mk/ms.length*100||0)+'%）</div><div class="r-bar"><div class="fill" style="width:'+(mk/ms.length*100||0)+'%;background:#10b981"></div></div></div>';
+  var rr={};ms.forEach(function(m){if(!rr[m.r])rr[m.r]=0;rr[m.r]++});
+  if(Object.keys(rr).length>0){html+='<div class="card" style="padding:12px;margin-bottom:8px"><div style="font-size:12px;color:#64748b;font-weight:600">高频错误</div>';Object.keys(rr).sort(function(a,b){return rr[b]-rr[a]}).slice(0,3).forEach(function(r){html+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #f1f5f9"><span>❌ '+r+'</span><span style="font-weight:700">'+rr[r]+'次</span></div>'});html+='</div>'}
   if(ex.length===0)html='<div class="empty">录入一些成绩，报告自动生成~</div>';el.innerHTML=html;
 }
 
-function addMistake(){var q=document.getElementById('amQuestion2').value.trim(),a=document.getElementById('amAnswer2').value.trim(),sub=document.getElementById('amSubject2').value,reason=document.getElementById('amReason2').value;if(!q&&!a){alert('至少填题目或答案哦~');return}var ms=DB.mistakes[U]||[];ms.unshift({subject:sub,question:q,answer:a,reason:reason,date:new Date().toLocaleDateString('zh-CN'),mastered:false});DB.mistakes[U]=ms;save();document.getElementById('amQuestion2').value='';document.getElementById('amAnswer2').value='';switchPage('mistakes')}
-function addExam(){var score=parseInt(document.getElementById('aeScore2').value);if(isNaN(score)||score<0||score>100){alert('请输入0-100之间的分数哦~');return}var sub=document.getElementById('aeSubject2').value,typ=document.getElementById('aeType2').value,date=document.getElementById('aeDate2').value||new Date().toISOString().slice(0,10),note=document.getElementById('aeNote2').value.trim(),ex=DB.exams[U]||[];ex.push({subject:sub,type:typ,score:score,date:date,note:note});DB.exams[U]=ex;save();document.getElementById('aeScore2').value='';document.getElementById('aeNote2').value='';switchPage('exams')}
-function addMistake2(){return addMistake()}
-function addExam2(){return addExam()}
+function showAddMenu(){
+  if(confirm('添加什么？\n确定→错题  取消→成绩'))go('addMistake');else go('addExam');
+}
 
-function openReview(idx){REVIEW_IDX=idx;var m=DB.mistakes[U][idx];document.getElementById('reviewQuestion').textContent=m.question||'📷 图片题';document.getElementById('reviewInput').value='';document.getElementById('reviewOverlay').style.display='flex';setTimeout(function(){document.getElementById('reviewInput').focus()},200)}
-function markReview(done){var ms=DB.mistakes[U];if(REVIEW_IDX>=0&&REVIEW_IDX<ms.length){if(done)ms[REVIEW_IDX].mastered=true;ms[REVIEW_IDX].reviewCount=(ms[REVIEW_IDX].reviewCount||0)+1;ms[REVIEW_IDX].lastReview=Date.now();save()}document.getElementById('reviewOverlay').style.display='none';renderHome();renderMistakes();REVIEW_IDX=-1}
-function reviewCorrect(){markReview(true)}
-function reviewWrong(){markReview(false)}
+var photoData='';
+function preview(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){photoData=ev.target.result;document.getElementById('photoPreview').innerHTML='<img src="'+photoData+'">'};
+  r.readAsDataURL(f);
+}
+
+function addMistake(){
+  var q=document.getElementById('amQ').value.trim(),a=document.getElementById('amA').value.trim();
+  var sub=document.getElementById('amSub').value,reason=document.getElementById('amR').value;
+  if(!q&&!a&&!photoData){alert('至少填题目或拍照哦~');return}
+  var ms=D.mistakes[U]||[];
+  ms.unshift({s:sub,q:q||'[拍照题]',a:a,r:reason,d:new Date().toLocaleDateString('zh-CN'),m:false,p:photoData||''});
+  D.mistakes[U]=ms;sv();
+  document.getElementById('amQ').value='';document.getElementById('amA').value='';document.getElementById('amFile').value='';document.getElementById('photoPreview').innerHTML='';photoData='';
+  go('mistakes');
+}
+
+function addExam(){
+  var sc=parseInt(document.getElementById('aeSc').value);
+  if(isNaN(sc)||sc<0||sc>100){alert('请输入0-100的分数~');return}
+  var sub=document.getElementById('aeSub').value,typ=document.getElementById('aeTyp').value;
+  var dt=document.getElementById('aeDt').value||new Date().toISOString().slice(0,10);
+  var nt=document.getElementById('aeNt').value.trim();
+  var ex=D.exams[U]||[];ex.push({s:sub,t:typ,c:sc,d:dt,n:nt});D.exams[U]=ex;sv();
+  document.getElementById('aeSc').value='';document.getElementById('aeNt').value='';
+  go('exams');
+}
+
+function openR(idx){
+  R=idx;var m=D.mistakes[U][idx];
+  document.getElementById('rvQ').textContent=m.q||'📷 图片题';
+  if(m.p&&m.p.length>100)document.getElementById('rvQ').innerHTML=m.q||'<img src="'+m.p+'" style="max-height:150px;border-radius:8px">';
+  document.getElementById('rvI').value='';
+  document.getElementById('reviewBox').classList.add('show');
+  setTimeout(function(){document.getElementById('rvI').focus()},200);
+}
+
+function rvDone(v){
+  var ms=D.mistakes[U];if(R>=0&&R<ms.length){if(v)ms[R].m=true;ms[R].rc=(ms[R].rc||0)+1;ms[R].lr=Date.now();sv()}
+  document.getElementById('reviewBox').classList.remove('show');rHome();rMis();R=-1;
+}
+function rvY(){rvDone(true)}
+function rvN(){rvDone(false)}
+
+function backupData(){
+  var json=JSON.stringify(D,null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='学习小星球备份_'+(new Date().toISOString().slice(0,10))+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+}
+function restoreData(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d.mistakes&&d.exams){D=d;sv();alert('✅ 导入成功！');rHome();rMis();rEx();rRep()}else alert('文件格式不对~')}catch(e){alert('文件解析失败~')}};
+  r.readAsText(f);
+}
 
 document.addEventListener('DOMContentLoaded',function(){
-  ['examSubjectFilter','examTypeFilter'].forEach(function(id){
-    document.getElementById(id).addEventListener('change',renderExams);
-  });
-  renderHome();
+  ['exSub','exTyp'].forEach(function(i){document.getElementById(i).addEventListener('change',rEx)});
+  rHome();
 });
 </script>
 </body>
