@@ -162,9 +162,13 @@ input,select,textarea,button{font-family:inherit}
     <h3>📝 复习时间！</h3>
     <div class="q" id="rvQ">题目</div>
     <input type="text" id="rvI" placeholder="输入你的答案" onkeydown="if(event.key==='Enter')rvY()">
-    <div class="rb">
-      <button class="rb-wrong" onclick="rvN()">❌ 不会</button>
-      <button class="rb-correct" onclick="rvY()">✅ 对了</button>
+    <div id="rvRes" style="text-align:center;font-size:14px;margin-bottom:10px;display:none"></div>
+    <div class="rb" id="rvBtn1">
+      <button class="rb-wrong" onclick="rvN()">❌ 跳过</button>
+      <button class="rb-correct" onclick="rvY()">✅ 检查答案</button>
+    </div>
+    <div class="rb" id="rvBtn2" style="display:none">
+      <button class="btn-purple" style="flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2)" onclick="rvClose()">继续 →</button>
     </div>
   </div>
 </div>
@@ -321,16 +325,46 @@ function openR(idx){
   document.getElementById('rvQ').textContent=m.q||'📷 图片题';
   if(m.p&&m.p.length>100)document.getElementById('rvQ').innerHTML=m.q||'<img src="'+m.p+'" style="max-height:150px;border-radius:8px">';
   document.getElementById('rvI').value='';
+  document.getElementById('rvRes').style.display='none';
   document.getElementById('reviewBox').classList.add('show');
-  setTimeout(function(){document.getElementById('rvI').focus()},200);
+  document.getElementById('rvI').focus();
 }
 
-function rvDone(v){
-  var ms=D.mistakes[U];if(R>=0&&R<ms.length){if(v)ms[R].m=true;ms[R].rc=(ms[R].rc||0)+1;ms[R].lr=Date.now();sv()}
-  document.getElementById('reviewBox').classList.remove('show');rHome();rMis();R=-1;
+function rvY(){
+  var m=D.mistakes[U][R];if(!m){rvClose();return}
+  var ans=document.getElementById('rvI').value.trim();
+  // 检查答案（答案可能是多个可能，模糊匹配）
+  var correct=m.a||'';
+  var ok=false;
+  if(ans&&correct){
+    // 去掉空格、标点后比较
+    var a1=ans.replace(/[\s，。、？\s]/g,'');
+    var a2=correct.replace(/[\s，。、？\s]/g,'');
+    ok=a1.indexOf(a2)>=0||a2.indexOf(a1)>=0||a1===a2;
+  }
+  var res=document.getElementById('rvRes');
+  if(ok){
+    res.innerHTML='🎉 答对了！好棒！';
+    res.style.color='#10b981';
+    m.m=true;
+  }else{
+    if(ans)res.innerHTML='❌ 不对哦，正确答案是：<b>'+correct+'</b>';
+    else res.innerHTML='💡 正确答案是：<b>'+correct+'</b>';
+    res.style.color='#ef4444';
+  }
+  m.rc=(m.rc||0)+1;m.lr=Date.now();sv();
+  res.style.display='block';
+  document.getElementById('rvBtn1').style.display='none';
+  document.getElementById('rvBtn2').style.display='block';
 }
-function rvY(){rvDone(true)}
-function rvN(){rvDone(false)}
+function rvN(){rvClose();}
+function rvNext(){rvClose();}
+function rvClose(){
+  document.getElementById('reviewBox').classList.remove('show');
+  document.getElementById('rvBtn1').style.display='flex';
+  document.getElementById('rvBtn2').style.display='none';
+  rHome();rMis();R=-1;
+}
 
 function backupData(){
   var json=JSON.stringify(D,null,2);
