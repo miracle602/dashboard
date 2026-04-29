@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌟 学习小星球</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--pink:#ff8fab;--orange:#ffb347;--yellow:#ffd166;--green:#06d6a0;--blue:#4cc9f0;--purple:#b388ff;--bg:#fef9ef;--card-bg:#fff;--shadow:0 4px 20px rgba(0,0,0,.08);--radius:20px;--nav-h:58px}
+body{font-family:'PingFang SC','Microsoft YaHei','Nunito',sans-serif;background:var(--bg);color:#2d3436;min-height:100vh;padding-bottom:80px;overflow-x:hidden}
+input,select,textarea,button{font-family:inherit}
+
+/* 登录 */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#667eea,#764ba2);position:relative;overflow:hidden}
+.login-box{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:32px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.15);position:relative;z-index:1}
+.login-box .logo{text-align:center;font-size:48px;margin-bottom:8px}
+.login-box h1{text-align:center;font-size:24px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.login-box .sub{text-align:center;font-size:13px;color:#64748b;margin-bottom:24px}
+.login-box label{font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
+.login-box input{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:14px;font-size:15px;margin-bottom:14px;outline:none;background:#f9fafb}
+.login-box input:focus{border-color:#8b5cf6;background:#fff}
+.login-box .btn-login{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4)}
+.login-box .btn-login:active{transform:scale(.96)}
+.login-box .error{font-size:12px;color:#ef4444;margin-bottom:8px;display:none}
+.login-box .register-link{text-align:center;margin-top:16px;font-size:13px;color:#64748b}
+.login-box .register-link span{color:#8b5cf6;font-weight:700;cursor:pointer}
+
+/* 主框架 */
+.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#fff;border-top:1px solid #f1f5f9;display:flex;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.04)}
+.nav .item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;cursor:pointer;transition:color .2s;gap:2px}
+.nav .item .icon{font-size:20px}
+.nav .item.active{color:#8b5cf6;font-weight:700}
+.page{display:none;padding:16px;padding-top:12px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+.section-title{font-size:16px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid rgba(0,0,0,.04)}
+.empty{text-align:center;color:#94a3b8;padding:30px 0;font-size:13px}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .2s;color:#fff}
+.submit-btn:active{transform:scale(.96)}
+.submit-btn.pink{background:linear-gradient(135deg,#ff8fab,#ff6b8a);box-shadow:0 4px 15px rgba(255,143,171,.4)}
+.submit-btn.green{background:linear-gradient(135deg,#06d6a0,#04c392);box-shadow:0 4px 15px rgba(6,214,160,.4)}
+
+/* 首页欢迎 */
+.welcome-card{background:linear-gradient(135deg,#667eea 15%,#764ba2 85%);color:#fff;border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;position:relative;overflow:hidden}
+.welcome-card::after{content:'✨⭐🌟';position:absolute;font-size:60px;right:-10px;bottom:-5px;opacity:.15}
+.welcome-card .greeting{font-size:18px;font-weight:800}
+.welcome-card .sub{font-size:13px;opacity:.8;margin-top:4px}
+.welcome-card .study-streak{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:30px;padding:6px 14px;margin-top:10px;font-size:12px}
+
+/* 成绩趋势 */
+.trend-grid{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.trend-card{min-width:100px;background:var(--card-bg);border-radius:14px;padding:12px;border:1px solid #f1f5f9;flex-shrink:0}
+.trend-card .subject{font-size:11px;color:#64748b;font-weight:700;margin-bottom:2px}
+.trend-card .score{font-size:20px;font-weight:800}
+.trend-card .change{font-size:10px;margin-top:2px}
+.trend-card .up{color:#10b981}.trend-card .down{color:#ef4444}
+
+/* 错题 */
+.mistake-item{border-left:4px solid #ff8fab;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.mistake-item:hover{transform:translateX(4px)}
+.mistake-item .mi-top{display:flex;justify-content:space-between;align-items:start}
+.mistake-item .mi-subject{font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:8px;display:inline-block}
+.mi-subject.math{background:#4cc9f0}.mi-subject.chinese{background:#ff8fab}.mi-subject.english{background:#06d6a0}
+.mistake-item .mi-question{font-size:14px;font-weight:600;margin:6px 0 3px}
+.mistake-item .badge{font-size:10px;padding:2px 8px;border-radius:10px}
+.badge.review{background:#fef3c7;color:#92400e}.badge.done{background:#d1fae5;color:#065f46}
+
+/* 复习弹窗 */
+.review-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:200;align-items:center;justify-content:center;padding:24px}
+.review-overlay.show{display:flex}
+.review-box{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:400px}
+.review-box h3{font-size:18px;margin-bottom:12px}
+.review-box .question{font-size:20px;font-weight:700;text-align:center;padding:20px;background:#f9fafb;border-radius:14px;margin-bottom:16px}
+.review-box input{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;text-align:center;margin-bottom:12px;outline:none}
+.review-box input:focus{border-color:#8b5cf6}
+.review-box .rb-btns{display:flex;gap:8px}
+.review-box .rb-btns button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.review-box .correct{background:#d1fae5;color:#065f46}.review-box .wrong{background:#fee2e2;color:#991b1b}
+
+/* 考试记录 */
+.exam-item{border-left:4px solid #06d6a0;margin-bottom:10px}
+.exam-item .ei-top{display:flex;justify-content:space-between}
+.exam-item .ei-score{font-size:20px;font-weight:800}
+.exam-item .ei-type{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block}
+.ei-type.quiz{background:#dbeafe;color:#1e40af}.ei-type.midterm{background:#fef3c7;color:#92400e}
+.ei-type.final{background:#fee2e2;color:#991b1b}.ei-type.mock{background:#f3e8ff;color:#6d28d9}
+
+/* 录入 */
+.form-group{margin-bottom:14px}
+.form-group label{font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;outline:none;background:#fafafa}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#8b5cf6;background:#fff}
+.form-group textarea{resize:vertical;min-height:80px}
+.photo-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:2px dashed #d1d5db;border-radius:12px;cursor:pointer;font-size:13px;color:#64748b;background:#fafafa}
+.photo-btn:active{background:#f0f0ff;border-color:#8b5cf6}
+#photoPreview img{max-height:120px;border-radius:10px;margin-top:6px}
+
+/* 注册弹窗 */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:24px}
+.modal.show{display:flex}
+.modal-box{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px}
+.modal-box h2{text-align:center;margin-bottom:16px;font-size:20px}
+.modal-box input{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;margin-bottom:10px;outline:none}
+.modal-box input:focus{border-color:#8b5cf6}
+.modal-box .mb-btns{display:flex;gap:8px;margin-top:12px}
+.modal-box .mb-btns button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.modal-box .cancel{background:#f1f5f9;color:#64748b}.modal-box .confirm{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+
+/* 报告 */
+.r-card{margin-bottom:10px}
+.r-card .r-title{font-size:12px;color:#64748b;font-weight:600;margin-bottom:4px}
+.r-card .r-body{font-size:14px;color:#1e293b}
+.r-card .r-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:4px}
+.r-card .r-bar .fill{height:100%;border-radius:4px;transition:width .5s}
+.action-btn{position:fixed;bottom:68px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4);z-index:50}
+.action-btn:active{transform:scale(.9)}
+
+/* 过滤行 */
+.filter-row{display:flex;gap:8px;margin-bottom:12px}
+.filter-row select{flex:1;padding:8px 10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div class="login-wrap" id="loginPage">
+  <div class="login-box">
+    <div class="logo">🌟</div>
+    <h1>学习小星球</h1>
+    <div class="sub">每个小朋友的专属错题本 ✨</div>
+    <form onsubmit="return doLogin(event)">
+      <label>👤 用户名</label>
+      <input type="text" id="loginUser" placeholder="输入名字" autocomplete="username">
+      <label>🔑 密码</label>
+      <input type="password" id="loginPass" placeholder="输入密码" autocomplete="current-password">
+      <div class="error" id="loginError">用户名或密码不对哦~</div>
+      <button class="btn-login" type="submit">🚀 进入学习小星球</button>
+    </form>
+    <div class="register-link">还没有账号？<span onclick="showRegister()">点这里注册 ✨</span></div>
+  </div>
+</div>
+
+<!-- 注册弹窗 -->
+<div class="modal" id="registerModal">
+  <div class="modal-box">
+    <h2>🌟 注册新用户</h2>
+    <input type="text" id="regUser" placeholder="取个名字（如：朵朵）">
+    <input type="password" id="regPass" placeholder="设置密码（4位以上）">
+    <input type="password" id="regPass2" placeholder="再输一次密码">
+    <div id="regError" style="font-size:12px;color:#ef4444;display:none;margin-bottom:4px"></div>
+    <div class="mb-btns">
+      <button class="cancel" onclick="hideRegister()">算了</button>
+      <button class="confirm" onclick="doRegister()">注册 ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="mainApp" style="display:none">
+  <!-- 底部导航 -->
+  <div class="nav">
+    <div class="item active" data-page="home" onclick="switchPage('home')"><span class="icon">🏠</span><span>首页</span></div>
+    <div class="item" data-page="mistakes" onclick="switchPage('mistakes')"><span class="icon">📝</span><span>错题</span></div>
+    <div class="item" data-page="exams" onclick="switchPage('exams')"><span class="icon">🏆</span><span>成绩</span></div>
+    <div class="item" data-page="report" onclick="switchPage('report')"><span class="icon">📊</span><span>报告</span></div>
+    <div class="item" data-page="settings" onclick="switchPage('settings')"><span class="icon">👤</span><span>我的</span></div>
+  </div>
+
+  <!-- 首页 -->
+  <div class="page active" id="pageHome">
+    <div class="welcome-card" id="welcomeCard">
+      <div class="greeting" id="greetingText">🌟 你好！</div>
+      <div class="sub">今天也要加油哦！</div>
+    </div>
+    <div class="section-title">📈 最近成绩</div>
+    <div class="trend-grid" id="trendGrid"></div>
+    <div class="section-title" style="margin-top:16px">📋 待复习错题 <span style="font-size:12px;color:#94a3b8;font-weight:400" id="reviewCount"></span></div>
+    <div id="homeReviewList"></div>
+  </div>
+
+  <!-- 错题页 -->
+  <div class="page" id="pageMistakes">
+    <div class="section-title">📝 错题本</div>
+    <div id="mistakeList"></div>
+  </div>
+
+  <!-- 成绩页 -->
+  <div class="page" id="pageExams">
+    <div class="section-title">🏆 考试成绩</div>
+    <div class="filter-row">
+      <select id="examSubjectFilter">
+        <option value="all">全部科目</option>
+        <option value="语文">语文</option>
+        <option value="数学">数学</option>
+        <option value="英语">英语</option>
+      </select>
+      <select id="examTypeFilter">
+        <option value="all">全部类型</option>
+        <option value="随堂测验">随堂测验</option>
+        <option value="模拟考试">模拟考试</option>
+        <option value="期中考试">期中考试</option>
+        <option value="期末考试">期末考试</option>
+      </select>
+    </div>
+    <div id="examList"></div>
+  </div>
+
+  <!-- 报告页 -->
+  <div class="page" id="pageReport">
+    <div class="section-title">📊 学习报告</div>
+    <div id="reportContent"></div>
+  </div>
+
+  <!-- 设置页 -->
+  <div class="page" id="pageSettings">
+    <div class="section-title">👤 我的</div>
+    <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px" id="avatarLetter">🌟</div>
+      <div>
+        <div style="font-weight:700;font-size:16px" id="settingName">用户</div>
+        <div style="font-size:11px;color:#64748b">学习小星球</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="switchPage('addMistake')">
+      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">📸</span><div><div style="font-weight:600;font-size:14px">录入错题</div><div style="font-size:11px;color:#64748b">拍照或打字记录错题</div></div></div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="switchPage('addExam')">
+      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🏆</span><div><div style="font-weight:600;font-size:14px">记录考试成绩</div><div style="font-size:11px;color:#64748b">录入期中/期末/模拟考分数</div></div></div>
+    </div>
+    <div class="card" style="cursor:pointer;margin-top:12px" onclick="doLogout()">
+      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🚪</span><div><div style="font-weight:600;font-size:14px;color:#ef4444">退出登录</div></div></div>
+    </div>
+  </div>
+
+  <!-- 录入错题 -->
+  <div class="page" id="pageAddMistake">
+    <div class="section-title" style="cursor:pointer;font-size:14px" onclick="switchPage('settings')">← 返回</div>
+    <div class="card" style="border-top:4px solid #ff8fab">
+      <div class="form-group">
+        <label>📚 科目</label>
+        <select id="amSubject"><option>数学</option><option>语文</option><option>英语</option></select>
+      </div>
+      <div class="form-group">
+        <label>📸 拍照（可选）</label>
+        <div class="photo-btn" onclick="document.getElementById('amPhoto').click()">📷 点击拍照或上传图片</div>
+        <input type="file" accept="image/*" capture="environment" id="amPhoto" style="display:none" onchange="previewPhoto(event)">
+        <div id="photoPreview"></div>
+      </div>
+      <div class="form-group">
+        <label>📝 题目</label>
+        <input type="text" id="amQuestion" placeholder="抄写或描述题目">
+      </div>
+      <div class="form-group">
+        <label>✅ 正确答案</label>
+        <input type="text" id="amAnswer" placeholder="正确答案">
+      </div>
+      <div class="form-group">
+        <label>❌ 错误原因</label>
+        <select id="amReason"><option>粗心大意</option><option>计算错误</option><option>概念不清</option><option>看错题目</option><option>不会做</option><option>审题不细</option><option>其他</option></select>
+      </div>
+      <button class="submit-btn pink" onclick="addMistake()">🌟 保存错题</button>
+    </div>
+  </div>
+
+  <!-- 录入成绩 -->
+  <div class="page" id="pageAddExam">
+    <div class="section-title" style="cursor:pointer;font-size:14px" onclick="switchPage('settings')">← 返回</div>
+    <div class="card" style="border-top:4px solid #06d6a0">
+      <div class="form-group">
+        <label>📚 科目</label>
+        <select id="aeSubject"><option>语文</option><option>数学</option><option>英语</option></select>
+      </div>
+      <div class="form-group">
+        <label>📋 考试类型</label>
+        <select id="aeType"><option>随堂测验</option><option>模拟考试</option><option>期中考试</option><option>期末考试</option></select>
+      </div>
+      <div class="form-group">
+        <label>🏆 分数</label>
+        <input type="number" id="aeScore" placeholder="输入分数" min="0" max="100">
+      </div>
+      <div class="form-group">
+        <label>📅 日期</label>
+        <input type="date" id="aeDate">
+      </div>
+      <div class="form-group">
+        <label>📝 备注（可选）</label>
+        <input type="text" id="aeNote" placeholder="如：数学第3单元">
+      </div>
+      <button class="submit-btn green" onclick="addExam()">🏆 保存成绩</button>
+    </div>
+  </div>
+</div>
+
+<!-- 复习弹窗 -->
+<div class="review-overlay" id="reviewOverlay">
+  <div class="review-box">
+    <h3>📝 复习时间！</h3>
+    <div class="question" id="reviewQuestion">题目</div>
+    <input type="text" id="reviewInput" placeholder="输入你的答案" onkeydown="if(event.key==='Enter')reviewCorrect()">
+    <div id="reviewResult" style="text-align:center;font-size:14px;margin-bottom:10px;display:none"></div>
+    <div class="rb-btns">
+      <button class="wrong" onclick="reviewWrong()">❌ 不会</button>
+      <button class="correct" onclick="reviewCorrect()">✅ 对了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 浮动按钮 -->
+<button class="action-btn" id="fabBtn" onclick="showQuickAdd()">＋</button>
+
+<script>
+<script src="study-book.js"></script>
+</body>
+</html>
