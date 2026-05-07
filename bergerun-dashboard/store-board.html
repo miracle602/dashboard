@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>门店销售看板 | 云南伯俊</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:20px 24px}
+.header h1{font-size:20px;font-weight:600}
+.header .sub{font-size:13px;opacity:.8;margin-top:4px}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.kpi-card .label{font-size:12px;color:#888}
+.kpi-card .value{font-size:24px;font-weight:700;color:#1a237e;margin-top:4px}
+.kpi-card .small{font-size:12px;color:#999;margin-top:2px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.chart-box{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chart-box h3{font-size:14px;color:#555;margin-bottom:8px}
+.chart-box .chart{height:320px}
+.chart-box.full{grid-column:1/-1}
+.table-wrap{background:#fff;border-radius:10px;overflow:auto;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:#1a237e;color:#fff}
+th{padding:10px 12px;font-weight:500;text-align:center}
+td{padding:8px 12px;border-bottom:1px solid #eee;text-align:center}
+tr:hover{background:#f5f5ff}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.footer{text-align:center;padding:20px;font-size:12px;color:#999}
+.highlight{color:#1a237e;font-weight:600}
+.pct-high{color:#1b5e20}
+.pct-low{color:#c62828}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏬 门店销售看板 · 2026年</h1>
+  <div class="sub">各门店零售汇总 · 数据来源：伯俊ERP</div>
+</div>
+
+<div class="container">
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="label">有销售门店</div><div class="value" id="kpi0">-</div></div>
+    <div class="kpi-card"><div class="label">总订单数</div><div class="value" id="kpi1">-</div></div>
+    <div class="kpi-card"><div class="label">总销售件数</div><div class="value" id="kpi2">-</div></div>
+    <div class="kpi-card"><div class="label">总销售额</div><div class="value" id="kpi3">-</div></div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-box"><h3>各门店销售额占比</h3><div class="chart" id="chartPie"></div></div>
+    <div class="chart-box"><h3>各门店销售额对比</h3><div class="chart" id="chartBar"></div></div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-box full"><h3>各门店明细</h3></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>门店名称</th><th>编码</th><th>订单数</th><th>件数</th><th>销售额</th><th>牌价金额</th><th>折扣率</th></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">云南伯俊 · 品类售罄汇总分析 · 数据来源：伯俊ERP</div>
+
+<script>
+var storeData = [
+  ["小西门店","ZY020",1375,1407,447171,474145,94.3],
+  ["雷婷婷的店仓","170001",25,41,11455,32514,35.2],
+  ["南屏街1店","ZY010",2,4,1510,2547,59.3],
+  ["测试店仓","1001",2,2,1298,2797,46.4],
+  ["总部仓库","Z000",1,1,999,3282,30.4],
+  ["会泽1店","AT01",1,1,150,150,100]
+];
+
+function fmt(n){return n.toLocaleString()}
+function fmtMoney(n){return '¥'+n.toLocaleString()}
+function discClass(d){return d>=80?'pct-high':d>=50?'':'pct-low'}
+
+// KPI
+document.getElementById('kpi0').textContent = storeData.length;
+var totalOrders=0,totalQty=0,totalAmt=0;
+storeData.forEach(function(r){totalOrders+=r[2];totalQty+=r[3];totalAmt+=r[4]});
+document.getElementById('kpi1').textContent = fmt(totalOrders);
+document.getElementById('kpi2').textContent = fmt(totalQty);
+document.getElementById('kpi3').textContent = fmtMoney(totalAmt);
+
+// 表格
+var tbody = '';
+var seq=0;
+storeData.forEach(function(r){
+  seq++;
+  var main = r[0]==='小西门店' ? ' style="background:#f0f2ff;font-weight:600"' : '';
+  tbody += '<tr'+main+'>';
+  tbody += '<td>'+seq+'</td>';
+  tbody += '<td>'+r[0]+'</td>';
+  tbody += '<td>'+r[1]+'</td>';
+  tbody += '<td class="num">'+fmt(r[2])+'</td>';
+  tbody += '<td class="num">'+fmt(r[3])+'</td>';
+  tbody += '<td class="num highlight">'+fmtMoney(r[4])+'</td>';
+  tbody += '<td class="num">'+fmtMoney(r[5])+'</td>';
+  tbody += '<td class="num '+discClass(r[6])+'">'+r[6]+'%</td>';
+  tbody += '</tr>';
+});
+document.getElementById('tableBody').innerHTML = tbody;
+
+// Chart
+var names = storeData.map(function(r){return r[0]});
+var amounts = storeData.map(function(r){return Math.round(r[4]/100)/10}); // 万元
+
+// 饼图
+var pieChart = echarts.init(document.getElementById('chartPie'));
+var pieData = storeData.map(function(r){return {name:r[0], value:Math.round(r[4])}});
+pieChart.setOption({
+  tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
+  series:[{type:'pie',radius:['30%','60%'],data:pieData,label:{formatter:'{b}\n¥{c}',fontSize:11}}]
+});
+
+// 柱状图
+var barChart = echarts.init(document.getElementById('chartBar'));
+barChart.setOption({
+  tooltip:{trigger:'axis',formatter:function(p){return p[0].axisValue+'<br>¥'+p[0].value+'万'}},
+  grid:{left:60,right:20,bottom:50},
+  xAxis:{type:'category',data:names,axisLabel:{rotate:20,fontSize:11}},
+  yAxis:{type:'value',name:'万元'},
+  series:[{type:'bar',data:amounts,itemStyle:{color:function(p){return p.dataIndex===0?'#1a237e':'#7986cb'}},barMaxWidth:40,label:{show:true,position:'top',formatter:'¥{c}万',fontSize:11}}]
+});
+
+window.addEventListener('resize',function(){pieChart.resize();barChart.resize()});
+</script>
+</body>
+</html>
