@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零售库存母表 | 周售罄跟踪</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333;font-size:12px}
+.header{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:16px 20px;position:sticky;top:0;z-index:10}
+.header h1{font-size:18px;font-weight:600}
+.header .sub{font-size:12px;opacity:.8;margin-top:3px}
+.header .stats{font-size:11px;opacity:.6;margin-top:2px}
+.controls{background:#fff;padding:10px 20px;border-bottom:1px solid #e0e0e0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:72px;z-index:9}
+.controls select,.controls input{padding:4px 8px;border:1px solid #d0d5dd;border-radius:4px;font-size:12px}
+.controls .btn{padding:4px 14px;background:#1a237e;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px}
+.controls label{font-size:12px;color:#666}
+.table-wrap{overflow:auto;max-height:calc(100vh - 160px)}
+table{border-collapse:collapse;width:100%;min-width:2000px}
+thead{position:sticky;top:0;z-index:2}
+th{background:#1a237e;color:#fff;padding:6px 4px;font-weight:500;white-space:nowrap;font-size:11px;position:sticky;top:0;border-right:1px solid rgba(255,255,255,.15)}
+th:hover{background:rgba(255,255,255,.15)}
+td{padding:4px;border:1px solid #e8e8e8;white-space:nowrap;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+tr:nth-child(even){background:#f8f9ff}
+tr:hover{background:#e8eaf6}
+tr.has-sale td{background:#e8f5e9}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.col-store{min-width:140px}
+.col-product{min-width:80px}
+.col-name{min-width:120px}
+.col-cat{min-width:70px}
+.col-price{width:60px}
+.col-qty{width:55px}
+.col-amt{width:70px}
+.footer{text-align:center;padding:12px;font-size:11px;color:#999}
+#loading{text-align:center;padding:60px;font-size:16px;color:#888}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 零售库存母表 · 26Q2 周售罄跟踪</h1>
+  <div class="sub">严格按导出格式 · 19列完整展示</div>
+  <div class="stats" id="headerStats">加载中...</div>
+</div>
+
+<div class="controls">
+  <label>地区：</label><select id="filterArea"><option value="all">全部</option></select>
+  <label>城市：</label><select id="filterCity"><option value="all">全部</option></select>
+  <label>店仓：</label><select id="filterStore"><option value="all">全部</option></select>
+  <label>大类：</label><select id="filterCat"><option value="all">全部</option></select>
+  <label>属性：</label><select id="filterType"><option value="all">全部</option></select>
+  <label>搜索货号：</label><input id="searchInput" style="width:120px">
+  <label>有销售：</label><select id="saleFilter"><option value="all">全部</option><option value="yes">仅看有销售</option><option value="no">仅看无销售</option></select>
+  <button class="btn" onclick="applyFilter()">筛选</button>
+  <span id="countInfo" style="font-size:11px;color:#888"></span>
+</div>
+
+<div class="table-wrap" id="tableWrap">
+  <table><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+</div>
+
+<div class="footer">数据来源：伯俊ERP · 26Q2周售罄跟踪表</div>
+
+<script>
+var DATA = {headers:[],rows:[]};
+
+fetch('stock-master.json').then(r=>r.json()).then(d=>{DATA=d;init();}).catch(()=>{
+  document.getElementById('tableWrap').innerHTML='<div id="loading">加载数据失败，请刷新重试</div>';
+});
+
+function fmt(n){
+  if(n===null||n===undefined||n===''||n==='None'||n==='#N/A')return'-';
+  n=Number(n);if(isNaN(n))return String(n);
+  return n.toLocaleString();
+}
+
+function init(){
+  var rows=DATA.rows, h=DATA.headers;
+  
+  document.getElementById('headerStats').textContent=rows.length+' 条记录 · '+new Set(rows.map(r=>r[4])).size+' 个店仓 · '+
+    new Set(rows.map(r=>r[6])).size+' 个大类';
+  
+  // 填充筛选
+  var areas={},cities={},stores={},cats={},types={};
+  rows.forEach(function(r){
+    if(r[0]&&r[0]!=='#N/A')areas[r[0]]=true;
+    if(r[1]&&r[1]!=='#N/A')cities[r[1]]=true;
+    if(r[4])stores[r[4]]=true;
+    if(r[6])cats[r[6]]=true;
+    if(r[7])types[r[7]]=true;
+  });
+  
+  fillSel('filterArea',Object.keys(areas).sort());
+  fillSel('filterCity',Object.keys(cities).sort());
+  fillSel('filterStore',Object.keys(stores).sort());
+  fillSel('filterCat',Object.keys(cats).sort());
+  fillSel('filterType',Object.keys(types).sort());
+  
+  // 渲染表头
+  var hhtml='<tr>';
+  h.forEach(function(hh,i){
+    var cls='';
+    if(i===4)cls='col-store';if(i===5)cls='col-product';
+    if(i===8)cls='col-name';if(i===9||i===6)cls='col-cat';
+    if(i===11)cls='col-price';
+    if([12,14,17].indexOf(i)>=0)cls='col-qty';
+    if([13,15,16,18].indexOf(i)>=0)cls='col-amt';
+    hhtml+='<th class="'+cls+'">'+hh+'</th>';
+  });
+  hhtml+='</tr>';
+  document.getElementById('thead').innerHTML=hhtml;
+  
+  applyFilter();
+}
+
+function fillSel(id,items){
+  var sel=document.getElementById(id);
+  items.forEach(function(v){sel.innerHTML+='<option value="'+v+'">'+v+'</option>'});
+}
+
+function applyFilter(){
+  var area=document.getElementById('filterArea').value;
+  var city=document.getElementById('filterCity').value;
+  var store=document.getElementById('filterStore').value;
+  var cat=document.getElementById('filterCat').value;
+  var type=document.getElementById('filterType').value;
+  var search=document.getElementById('searchInput').value.trim().toLowerCase();
+  var sale=document.getElementById('saleFilter').value;
+  
+  var filtered=DATA.rows.filter(function(r){
+    if(area!=='all'&&r[0]!==area)return false;
+    if(city!=='all'&&r[1]!==city)return false;
+    if(store!=='all'&&r[4]!==store)return false;
+    if(cat!=='all'&&r[6]!==cat)return false;
+    if(type!=='all'&&r[7]!==type)return false;
+    if(search&&!(r[5]||'').toLowerCase().includes(search))return false;
+    if(sale==='yes'&&(!r[14]||r[14]===0))return false;
+    if(sale==='no'&&r[14]&&r[14]>0)return false;
+    return true;
+  });
+  
+  // 汇总
+  var totalStockQty=0,totalStockAmt=0,totalSaleQty=0,totalSaleAmt=0,totalOrders=0;
+  var stores=new Set();
+  filtered.forEach(function(r){
+    stores.add(r[4]);
+    totalStockQty+=r[12]||0;
+    totalStockAmt+=r[13]||0;
+    totalSaleQty+=r[14]||0;
+    totalSaleAmt+=r[16]||0;
+    if(r[14]&&r[14]>0)totalOrders++;
+  });
+  
+  document.getElementById('countInfo').textContent=filtered.length+' 行 · '+stores.size+' 店仓 · 库存'+fmt(totalStockQty)+'件 ¥'+fmt(totalStockAmt)+' · 销售'+fmt(totalSaleQty)+'件 ¥'+fmt(totalSaleAmt);
+  
+  // 渲染表格
+  var body='';
+  filtered.forEach(function(r){
+    var hasSale=r[14]&&r[14]>0;
+    body+='<tr'+(hasSale?' class="has-sale"':'')+'>';
+    for(var j=0;j<19;j++){
+      var v=r[j];
+      if(v===null||v===undefined||v===''||v==='None'||v==='#N/A'){
+        body+='<td>-</td>';
+      }else if(typeof v==='number'&&j>=12){
+        body+='<td class="num">'+fmt(v)+'</td>';
+      }else{
+        body+='<td>'+String(v)+'</td>';
+      }
+    }
+    body+='</tr>';
+  });
+  document.getElementById('tbody').innerHTML=body;
+}
+</script>
+</body>
+</html>
