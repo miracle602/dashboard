@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>品类售罄看板 · 交互版</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:18px 24px}
+.header h1{font-size:20px;font-weight:600}
+.header .sub{font-size:13px;opacity:.8;margin-top:4px}
+.container{max-width:1400px;margin:0 auto;padding:16px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi-card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.kpi-card .label{font-size:11px;color:#888}
+.kpi-card .value{font-size:20px;font-weight:700;color:#1a237e;margin-top:3px}
+.kpi-card .small{font-size:11px;color:#999;margin-top:2px}
+.controls{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.controls select,.controls button{padding:6px 12px;border:1px solid #d0d5dd;border-radius:6px;font-size:13px;background:#fff}
+.controls select:focus{outline:none;border-color:#1a237e}
+.controls label{font-size:13px;color:#666}
+.controls .btn{padding:6px 18px;background:#1a237e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px}
+.controls .btn:hover{background:#283593}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.chart-box{background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chart-box h3{font-size:14px;color:#555;margin-bottom:8px}
+.chart-box .chart{height:340px}
+.chart-box.full{grid-column:1/-1}
+.table-wrap{background:#fff;border-radius:8px;overflow:auto;box-shadow:0 1px 3px rgba(0,0,0,.08);max-height:600px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:#1a237e;color:#fff;position:sticky;top:0}
+th{padding:8px 6px;font-weight:500;white-space:nowrap;cursor:pointer}
+th:hover{background:rgba(255,255,255,.15)}
+td{padding:6px;border-bottom:1px solid #eee;white-space:nowrap}
+tr:hover{background:#f5f5ff}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.pct-high{color:#1b5e20;font-weight:600}
+.pct-mid{color:#e65100}
+.pct-low{color:#c62828}
+.footer{text-align:center;padding:16px;font-size:12px;color:#999}
+.badge-store{display:inline-block;padding:1px 6px;border-radius:8px;font-size:11px;background:#e8eaf6;color:#283593}
+.sort-indicator{font-size:10px;margin-left:3px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 品类售罄看板</h1>
+  <div class="sub">门店 · 大类 · 小类 · 多维交互分析</div>
+</div>
+
+<div class="container">
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="controls">
+    <label>门店：</label>
+    <select id="filterStore"><option value="all">全部门店</option></select>
+    <label>大类：</label>
+    <select id="filterBigCat"><option value="all">全部大类</option></select>
+    <label>排序：</label>
+    <select id="sortField">
+      <option value="amt">金额</option>
+      <option value="qty">数量</option>
+      <option value="orders">订单数</option>
+      <option value="disc">折扣率</option>
+    </select>
+    <select id="sortDir"><option value="desc">降序</option><option value="asc">升序</option></select>
+    <button class="btn" onclick="applyFilter()">筛选</button>
+    <span id="resultCount" style="font-size:13px;color:#888"></span>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-box"><h3 id="chartTitle1">各门店销售占比</h3><div class="chart" id="chartPie"></div></div>
+    <div class="chart-box"><h3 id="chartTitle2">品类销售TOP 15</h3><div class="chart" id="chartBar"></div></div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-box full"><h3>大类分布</h3><div class="chart" id="chartStack"></div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table><thead><tr id="tableHead"></tr></thead><tbody id="tableBody"></tbody></table>
+  </div>
+
+</div>
+
+<div class="footer">云南伯俊 · 数据来源：伯俊ERP REST API · 支持年份/门店/品类多维筛选</div>
+
+<script>
+var RAW = [];
+var dim4Names = {};
+
+// 加载预生成数据
+fetch('retail-data-bundle.json')
+  .then(r=>r.json())
+  .then(d=>{RAW=d; init();})
+  .catch(()=>{
+    // fallback - inline
+    RAW = [];
+  });
+
+function fmt(n){if(n===null||n===undefined)return'-';n=Number(n);if(isNaN(n))return'-';if(n>=10000)return(n/10000).toFixed(1)+'万';return n.toLocaleString()}
+function fmtM(n){if(n===null||n===undefined)return'-';n=Number(n);if(isNaN(n))return'-';if(n>=10000)return'¥'+(n/10000).toFixed(1)+'万';return'¥'+n.toFixed(2)}
+function discClass(d){d=Number(d);if(d>=90)return'pct-high';if(d>=70)return'pct-mid';return'pct-low'}
+
+function init(){
+  // 提取门店和品类列表
+  var stores=[], bcats=[];
+  RAW.forEach(function(r){
+    if(r.store_name&&stores.indexOf(r.store_name)<0)stores.push(r.store_name);
+    if(r.big_cat&&bcats.indexOf(r.big_cat)<0)bcats.push(r.big_cat);
+  });
+  stores.sort(); bcats.sort();
+  
+  var selStore=document.getElementById('filterStore');
+  stores.forEach(function(s){selStore.innerHTML+='<option value="'+s+'">'+s+'</option>'});
+  
+  var selCat=document.getElementById('filterBigCat');
+  bcats.forEach(function(c){selCat.innerHTML+='<option value="'+c+'">'+c+'</option>'});
+  
+  applyFilter();
+}
+
+function applyFilter(){
+  var store=document.getElementById('filterStore').value;
+  var bcat=document.getElementById('filterBigCat').value;
+  var sf=document.getElementById('sortField').value;
+  var sd=document.getElementById('sortDir').value;
+  
+  var filtered=RAW.filter(function(r){
+    if(store!=='all'&&r.store_name!==store)return false;
+    if(bcat!=='all'&&r.big_cat!==bcat)return false;
+    return true;
+  });
+  
+  var sfMap={amt:'amt',qty:'qty',orders:'orders',disc:'disc'};
+  var f=sfMap[sf]||'amt';
+  filtered.sort(function(a,b){
+    var va=a[f]||0,vb=b[f]||0;
+    return sd==='desc'?vb-va:va-vb;
+  });
+  
+  renderKPI(filtered);
+  renderTable(filtered);
+  renderCharts(filtered, store, bcat);
+  document.getElementById('resultCount').textContent='共 '+filtered.length+' 条数据';
+}
+
+function renderKPI(data){
+  var stores={}, totalOrders=0,totalQty=0,totalAmt=0,totalList=0;
+  data.forEach(function(r){
+    if(!stores[r.store_name])stores[r.store_name]=true;
+    totalOrders+=r.orders||0;
+    totalQty+=r.qty||0;
+    totalAmt+=r.amt||0;
+    totalList+=r.list_amt||0;
+  });
+  var storeCount=Object.keys(stores).length;
+  var disc=totalList>0?(totalAmt/totalList*100).toFixed(1):0;
+  
+  document.getElementById('kpiRow').innerHTML=`
+    <div class="kpi-card"><div class="label">门店数</div><div class="value">${storeCount}</div></div>
+    <div class="kpi-card"><div class="label">订单数</div><div class="value">${fmt(totalOrders)}</div></div>
+    <div class="kpi-card"><div class="label">总件数</div><div class="value">${fmt(totalQty)}</div></div>
+    <div class="kpi-card"><div class="label">总金额</div><div class="value">${fmtM(totalAmt)}</div></div>
+    <div class="kpi-card"><div class="label">牌价金额</div><div class="value">${fmtM(totalList)}</div></div>
+    <div class="kpi-card"><div class="label">平均折扣</div><div class="value ${discClass(disc)}">${disc}%</div></div>
+  `;
+}
+
+function renderTable(data){
+  var head='<th>#</th><th>门店</th><th>大类</th><th>小类</th><th>订单</th><th>件数</th><th>金额</th><th>牌价</th><th>折扣</th>';
+  document.getElementById('tableHead').innerHTML=head;
+  
+  var body='',seq=0;
+  data.forEach(function(r){
+    seq++;
+    body+='<tr>';
+    body+='<td>'+seq+'</td>';
+    body+='<td><span class="badge-store">'+ (r.store_name||'-') +'</span></td>';
+    body+='<td>'+ (r.big_cat||'-') +'</td>';
+    body+='<td><strong>'+ (r.small_cat||'-') +'</strong></td>';
+    body+='<td class="num">'+fmt(r.orders)+'</td>';
+    body+='<td class="num">'+fmt(r.qty)+'</td>';
+    body+='<td class="num" style="color:#1a237e;font-weight:600">'+fmtM(r.amt)+'</td>';
+    body+='<td class="num">'+fmtM(r.list_amt)+'</td>';
+    body+='<td class="num '+discClass(r.disc)+'">'+r.disc+'%</td>';
+    body+='</tr>';
+  });
+  document.getElementById('tableBody').innerHTML=body;
+}
+
+function renderCharts(data,store,bcat){
+  if(typeof echarts==='undefined'){setTimeout(function(){renderCharts(data,store,bcat);},500);return}
+  
+  // 饼图 - 按门店
+  var byStore={};
+  data.forEach(function(r){
+    var sn=r.store_name||'未知';
+    if(!byStore[sn])byStore[sn]=0;
+    byStore[sn]+=r.amt||0;
+  });
+  var pieData=Object.keys(byStore).sort(function(a,b){return byStore[b]-byStore[a]}).slice(0,10).map(function(k){return{name:k,value:Math.round(byStore[k])}});
+  
+  var pieChart=echarts.init(document.getElementById('chartPie'));
+  pieChart.setOption({
+    tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
+    series:[{type:'pie',radius:['28%','55%'],data:pieData,label:{formatter:'{b}\n¥{c}',fontSize:10}}]
+  });
+  
+  // 柱状图 - TOP15品类
+  var top15=data.slice(0,15);
+  var barNames=top15.map(function(r){return (r.small_cat||'').substring(0,6)+(r.store_name?'·'+r.store_name.substring(0,4):'')});
+  var barAmt=top15.map(function(r){return Math.round((r.amt||0)/10000*10)/10});
+  var barDisc=top15.map(function(r){return r.disc||0});
+  
+  var barChart=echarts.init(document.getElementById('chartBar'));
+  barChart.setOption({
+    tooltip:{trigger:'axis',formatter:function(p){
+      var h='<strong>'+p[0].axisValue+'</strong><br>';
+      p.forEach(function(pp){
+        h+=pp.marker+(pp.seriesName==='金额'?'金额: ¥'+pp.value+'万':'- 折扣: '+pp.value+'%')+'<br>';
+      });return h;
+    }},
+    legend:{data:['金额(万)','折扣率(%)'],top:0},
+    grid:{left:55,right:55,bottom:90},
+    xAxis:{type:'category',data:barNames,axisLabel:{rotate:30,fontSize:9}},
+    yAxis:[{type:'value',name:'万元'},{type:'value',name:'折扣率%',max:100}],
+    series:[
+      {name:'金额(万)',type:'bar',data:barAmt,itemStyle:{color:'#3949ab'},barMaxWidth:24},
+      {name:'折扣率(%)',type:'line',yAxisIndex:1,data:barDisc,lineStyle:{color:'#f44336'},itemStyle:{color:'#f44336'}}
+    ]
+  });
+  
+  // 堆叠柱状图 - 大类分布
+  var byBigCat={};
+  data.forEach(function(r){
+    var bc=r.big_cat||'未分类';
+    if(!byBigCat[bc])byBigCat[bc]=0;
+    byBigCat[bc]+=r.amt||0;
+  });
+  var bcSorted=Object.keys(byBigCat).sort(function(a,b){return byBigCat[b]-byBigCat[a]}).slice(0,12);
+  
+  var stackChart=echarts.init(document.getElementById('chartStack'));
+  stackChart.setOption({
+    tooltip:{trigger:'axis',formatter:function(p){
+      var h='<strong>'+p[0].axisValue+'</strong><br>';
+      p.forEach(function(pp){h+=pp.marker+pp.seriesName+': ¥'+(pp.value/10000).toFixed(1)+'万<br>'});
+      return h;
+    }},
+    legend:{type:'scroll',top:0},
+    grid:{left:55,right:20,bottom:50},
+    xAxis:{type:'category',data:bcSorted,axisLabel:{rotate:20,fontSize:10}},
+    yAxis:{type:'value',name:'万元'},
+    series:[{
+      type:'bar',data:bcSorted.map(function(c){return Math.round((byBigCat[c]||0)/10000*10)/10}),
+      itemStyle:{color:'#7986cb'},barMaxWidth:40,
+      label:{show:true,position:'top',formatter:'¥{c}万',fontSize:10}
+    }]
+  });
+  
+  window.addEventListener('resize',function(){pieChart.resize();barChart.resize();stackChart.resize()});
+}
+</script>
+</body>
+</html>
