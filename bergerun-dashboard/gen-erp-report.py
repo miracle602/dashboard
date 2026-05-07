@@ -44,11 +44,11 @@ def query_oracle(store_id, days_back):
     LEFT JOIN M_DIM d2 ON p.M_DIM2_ID=d2.ID
     LEFT JOIN M_DIM d3 ON p.M_DIM3_ID=d3.ID
     WHERE m.ID=ri.M_RETAIL_ID AND ri.M_PRODUCT_ID=p.ID
-      AND m.BILLDATE>=:start AND m.BILLDATE<=:end
+      AND m.BILLDATE>={s} AND m.BILLDATE<={e}
       AND m.STATUS=2
-      AND m.C_STORE_ID=:sid
+      AND m.C_STORE_ID={st}
     ORDER BY m.BILLDATE
-    """, start=start, end=end, sid=store_id)
+    """.format(s=start, e=end, st=store_id))
     
     rows = cur.fetchall()
     cur.close()
