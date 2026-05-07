@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>南亚N.E.W商场 · 五一上半月销售战报</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1e293b;padding:16px;max-width:1100px;margin:0 auto}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px;padding:22px;margin-bottom:14px}
+.header h1{font-size:20px;font-weight:700}
+.header .sub{font-size:12px;opacity:.7;margin-top:3px}
+.header .period{display:inline-block;background:rgba(255,255,255,.15);padding:2px 10px;border-radius:6px;font-size:11px;margin-top:6px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpi-card .kl{font-size:10px;color:#64748b}
+.kpi-card .kv{font-size:20px;font-weight:700;margin:3px 0}
+.kpi-card .ks{font-size:10px;color:#94a3b8}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px}
+.card .ct{font-size:13px;font-weight:600;margin-bottom:8px;padding-left:8px;border-left:3px solid #4361ee}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:7px 6px;background:#f8fafc;color:#475569;font-weight:600;font-size:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:6px;border-bottom:1px solid #f1f5f9}
+tr:hover{background:#f8fafc}
+.text-right{text-align:right}.text-center{text-align:center}
+.pct-badge{display:inline-block;padding:1px 6px;border-radius:5px;font-size:10px;font-weight:600}
+.pct-green{background:#d1fae5;color:#065f46}.pct-yellow{background:#fef3c7;color:#92400e}
+.pct-red{background:#fee2e2;color:#991b1b}.pct-blue{background:#dbeafe;color:#1e40af}
+.up{color:#10b981}.down{color:#ef4444}.flat{color:#94a3b8}
+.bar-cell{position:relative;min-width:100px}
+.bar-bg{height:14px;background:#e5e7eb;border-radius:7px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:7px;transition:width .5s}
+.bar-label{font-size:9px;color:#1e293b;margin-top:1px;text-align:right}
+.section-divider{height:2px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin:14px 0}
+.pct-box{display:inline-block;padding:6px 12px;border-radius:8px;font-weight:700;font-size:18px}
+footer{text-align:center;font-size:10px;color:#94a3b8;padding:20px 0}
+.total-row{background:#f8fafc!important;font-weight:600}
+.total-row td{border-top:2px solid #4361ee}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>&#127962; 南亚风情第壹城N.E.W商场</h1>
+  <div class="sub">2026年5月1日-5月15日·上半月销售战报</div>
+  <div class="period">&#128200; 总目标385,000元 实绩135,233.2元 达成率35.1%</div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card"><div class="kl">&#127919; 总目标</div><div class="kv" style="color:#4361ee">385,000</div><div class="ks">5月1日-15日</div></div>
+  <div class="kpi-card"><div class="kl">&#128176; 实绩</div><div class="kv" style="color:#06d6a0">135,233</div><div class="ks">已完成金额</div></div>
+  <div class="kpi-card"><div class="kl">&#128202; 达成率</div><div class="kv" style="color:#f59e0b">35.1%</div><div class="ks">差距249,767元</div></div>
+  <div class="kpi-card"><div class="kl">&#127982; 在营门店</div><div class="kv" style="color:#4361ee">7</div><div class="ks">含新店/工厂店</div></div>
+</div>
+
+<div class="card">
+  <div class="ct">&#128203; 各门店销售明细 · 两阶段对比</div>
+  <table>
+    <thead>
+      <tr><th rowspan="2">门店</th><th rowspan="2">品类</th><th colspan="3" class="text-center">5月1日-5日</th><th colspan="3" class="text-center">5月6日-15日</th><th colspan="2" class="text-center">合计</th></tr>
+      <tr><th class="text-right">目标</th><th class="text-right">实绩</th><th class="text-right">达成</th><th class="text-right">目标</th><th class="text-right">实绩</th><th class="text-right">达成</th><th class="text-right" style="width:70px">总实绩</th><th class="text-right" style="width:60px">总达成</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="font-weight:600">XX女装</td><td>女装</td><td class="text-right">25,000</td><td class="text-right" style="font-weight:600">24,392</td><td><span class="pct-badge pct-green">97.6%</span></td><td class="text-right">15,000</td><td class="text-right" style="font-weight:600">9,212</td><td><span class="pct-badge pct-yellow">61.4%</span></td><td class="text-right" style="font-weight:700;color:#059669">33,604</td><td><span class="pct-badge pct-green">84.0%</span></td></tr>
+      <tr><td style="font-weight:600">XX一体裤</td><td>裤装</td><td class="text-right">45,000</td><td class="text-right" style="font-weight:600">11,778</td><td><span class="pct-badge pct-red">26.2%</span></td><td class="text-right">—</td><td class="text-right" style="font-weight:600">—</td><td>—</td><td class="text-right" style="font-weight:700">11,778</td><td><span class="pct-badge pct-red">26.2%</span></td></tr>
+      <tr><td style="font-weight:600">XX时尚男装</td><td>男装</td><td class="text-right">30,000</td><td class="text-right" style="font-weight:600">7,552</td><td><span class="pct-badge pct-red">25.2%</span></td><td class="text-right">15,000</td><td class="text-right" style="font-weight:600">9,486</td><td><span class="pct-badge pct-yellow">63.2%</span></td><td class="text-right" style="font-weight:700">17,038</td><td><span class="pct-badge pct-red">37.9%</span></td></tr>
+      <tr><td style="font-weight:600">XX家居服</td><td>家居</td><td class="text-right">20,000</td><td class="text-right" style="font-weight:600">3,696.8</td><td><span class="pct-badge pct-red">18.5%</span></td><td class="text-right">15,000</td><td class="text-right" style="font-weight:600">3,666</td><td><span class="pct-badge pct-red">24.4%</span></td><td class="text-right" style="font-weight:700">7,362.8</td><td><span class="pct-badge pct-red">21.0%</span></td></tr>
+      <tr><td style="font-weight:600">XX潮牌女装</td><td>女装</td><td class="text-right">15,000</td><td class="text-right" style="font-weight:600">702</td><td><span class="pct-badge pct-red">4.7%</span></td><td class="text-right">—</td><td class="text-right" style="font-weight:600">—</td><td>—</td><td class="text-right" style="font-weight:700">702</td><td><span class="pct-badge pct-red">4.7%</span></td></tr>
+      <tr><td style="font-weight:600">XX童装</td><td>童装</td><td class="text-right">10,000</td><td class="text-right" style="font-weight:600">250</td><td><span class="pct-badge pct-red">2.5%</span></td><td class="text-right">10,000</td><td class="text-right" style="font-weight:600">2,532</td><td><span class="pct-badge pct-red">25.3%</span></td><td class="text-right" style="font-weight:700">2,782</td><td><span class="pct-badge pct-red">13.9%</span></td></tr>
+      <tr><td style="font-weight:600">XX工厂店</td><td>综合</td><td class="text-right">5,000</td><td class="text-right" style="font-weight:600">329.6</td><td><span class="pct-badge pct-red">6.6%</span></td><td class="text-right">—</td><td class="text-right" style="font-weight:600">—</td><td>—</td><td class="text-right" style="font-weight:700">329.6</td><td><span class="pct-badge pct-red">6.6%</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="ct">&#128230; 品类维度达成分析</div>
+  <table>
+    <thead><tr><th>品类</th><th>包含门店</th><th>总目标</th><th>总实绩</th><th>达成率</th><th>进度条</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:#ff8fab;margin-right:4px"></span>女装</td><td>XX女装(33,604) + 潮牌女装(702)</td><td class="text-right">55,000</td><td class="text-right" style="font-weight:700;color:#059669">34,306</td><td><span class="pct-badge pct-yellow">62.4%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:62.4%;background:linear-gradient(90deg,#ff8fab,#f06292)"></div></div><div class="bar-label">34,306/55,000</div></td></tr>
+      <tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:#4cc9f0;margin-right:4px"></span>男装/潮牌</td><td>XX时尚男装(17,038)</td><td class="text-right">45,000</td><td class="text-right" style="font-weight:700">17,038</td><td><span class="pct-badge pct-red">37.9%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:37.9%;background:linear-gradient(90deg,#4cc9f0,#2196f3)"></div></div><div class="bar-label">17,038/45,000</div></td></tr>
+      <tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:#06d6a0;margin-right:4px"></span>鞋子</td><td>—</td><td class="text-right">15,000</td><td class="text-right" style="font-weight:700;color:#059669">8,291</td><td><span class="pct-badge pct-yellow">55.3%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:55.3%;background:linear-gradient(90deg,#06d6a0,#4db6ac)"></div></div><div class="bar-label">8,291/15,000</div></td></tr>
+      <tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:#f59e0b;margin-right:4px"></span>裤装</td><td>XX一体裤(11,778)</td><td class="text-right">25,000</td><td class="text-right" style="font-weight:700">11,778</td><td><span class="pct-badge pct-red">47.1%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:47.1%;background:linear-gradient(90deg,#f59e0b,#ffa726)"></div></div><div class="bar-label">11,778/25,000</div></td></tr>
+      <tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:#8338ec;margin-right:4px"></span>家居服</td><td>XX家居服(7,362.8)</td><td class="text-right">35,000</td><td class="text-right" style="font-weight:700">7,362.8</td><td><span class="pct-badge pct-red">21.0%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:21%;background:linear-gradient(90deg,#8338ec,#9c27b0)"></div></div><div class="bar-label">7,362.8/35,000</div></td></tr>
+      <tr><td style="font-weight:600"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:#64748b;margin-right:4px"></span>童装</td><td>XX童装(2,782)</td><td class="text-right">20,000</td><td class="text-right" style="font-weight:700">2,782</td><td><span class="pct-badge pct-red">13.9%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:13.9%;background:linear-gradient(90deg,#64748b,#94a3b8)"></div></div><div class="bar-label">2,782/20,000</div></td></tr>
+      <tr class="total-row"><td style="font-weight:700">合计</td><td>7家门店</td><td class="text-right" style="font-weight:700">195,000</td><td class="text-right" style="font-weight:700;color:#4361ee;font-size:13px">81,558</td><td><span class="pct-badge pct-yellow">41.8%</span></td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:41.8%;background:linear-gradient(90deg,#4361ee,#667eea)"></div></div><div class="bar-label">81,558/195,000</div></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="chart-row">
+  <div class="card"><div class="ct">&#127919; 各门店达成率对比</div><canvas id="storeChart" style="height:200px"></canvas></div>
+  <div class="card"><div class="ct">&#127942; 品类销售占比</div><canvas id="catChart" style="height:200px"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="ct">&#128204; 分析结论与建议</div>
+  <div style="font-size:12px;line-height:1.9">
+    <div>&#128994; <b>XX女装</b>表现最佳（合计84.0%），5月上旬几乎完成目标，是主力门店</div>
+    <div>&#128993; <b>时尚男装</b>后半段明显回升（从25.2%→63.2%），趋势向好</div>
+    <div>&#128993; <b>鞋子品类</b>达成率55.3%，相对其他品类表现不错</div>
+    <div>&#128308; <b>XX家居服</b>两阶段均未突破25%，整体低迷</div>
+    <div>&#128308; <b>XX童装</b>合计仅13.9%（2,782/20,000），差距最大</div>
+    <div>&#128308; <b>潮牌女装</b>仅702元，达成率4.7%，几乎无销售</div>
+    <div>&#128202; <b>建议</b>：下半月聚焦女装+鞋类主推，XX童装做清仓促销，家居服需调整陈列或活动策略</div>
+  </div>
+</div>
+
+<footer>数据来源：伯俊ERP · 生成于2026-05-07</footer>
+
+<script>
+var c1=new Chart(document.getElementById('storeChart'),{
+  type:'bar',data:{
+    labels:['XX女装','XX一体裤','时尚男装','家居服','潮牌女装','童装','工厂店'],
+    datasets:[{label:'总达成率',data:[84,26.2,37.9,21,4.7,13.9,6.6],backgroundColor:['#10b981','#ef4444','#f59e0b','#ef4444','#ef4444','#ef4444','#ef4444'],borderRadius:4,barPercentage:.6}]
+  },options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:function(v){return v+'%'},font:{size:9}},grid:{color:'rgba(0,0,0,.04)'}},x:{ticks:{font:{size:8,weight:'bold'}}}}}
+});
+var c2=new Chart(document.getElementById('catChart'),{
+  type:'doughnut',data:{
+    labels:['女装','男装/潮牌','鞋子','裤装','家居服','童装'],
+    datasets:[{data:[34.3,17,8.3,11.8,7.4,2.8],backgroundColor:['#ff8fab','#4cc9f0','#06d6a0','#f59e0b','#8338ec','#64748b']}]
+  },options:{plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:5}}}}
+});
+</script>
+</body>
+</html>
