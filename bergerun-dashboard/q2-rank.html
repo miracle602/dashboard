@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<title>Q2销售排名 - 26Q2</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+body{font-family:sans-serif;margin:0;padding:20px;background:#f5f5f5}
+h2{color:#333}.summary{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+.kpi-card{background:#fff;padding:15px 25px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);flex:1;min-width:150px;text-align:center}
+.kpi-card .num{font-size:28px;font-weight:700;color:#2c3e50}.kpi-card .label{font-size:13px;color:#999}
+.filter-bar{margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{padding:8px;border:1px solid #ddd;border-radius:5px}
+.chart-row{display:flex;gap:15px;margin-bottom:20px}.chart-box{flex:1;background:#fff;border-radius:8px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,.1);height:300px}
+.table-wrap{background:#fff;border-radius:8px;padding:15px;box-shadow:0 2px 8px rgba(0,0,0,.1);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:5px 8px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
+th{background:#f8f9fa;position:sticky;top:0}tr:hover{background:#f0f7ff}
+</style></head><body>
+<h2>26Q2 商品销售排名</h2>
+<div class="summary" id="summary"></div>
+<div class="filter-bar">
+<select id="catFilter" onchange="filter()"><option value="">全部大类</option></select>
+<select id="genFilter" onchange="filter()"><option value="">全部性别</option></select>
+</div>
+<div class="chart-row"><div class="chart-box" id="chart1"></div><div class="chart-box" id="chart2"></div></div>
+<div class="table-wrap"><table><thead><tr><th>货号</th><th>大类</th><th>性别</th><th>品类</th><th>上下装</th><th>标准价</th><th>销售价</th><th>销售数量</th><th>销售吊牌</th><th>销售金额</th><th>平均折扣</th><th>预计库存</th><th>商品售罄</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<script>
+const DATA = [["WX1DDT2101", "\u5957\u88c5", "", "\u5957\u88c5", "", 216.0, 216.0, 180, 38880, 38880, 1.0, 2, 98.9], ["WX1MYLE273", "\u8fde\u8863\u88d9", "", "\u8fde\u8863\u88d9", "\u4e0b\u88c5", 476.0, 476.0, 108, 51408, 51408, 1.0, 0, 100.0], ["WQ1MKK2139", "\u88e4\u5b50", "", "\u88e4\u5b50", "\u4e0b\u88c5", 349.0, 349.0, 72, 25128, 25128, 1.0, 21, 77.42], ["888888", "\u88e4\u5b50", "", "\u88e4\u5b50", "\u4e0b\u88c5", 398.0, 357.0, 4, 1592, 1428, 0.897, 0, 100.0], ["GQ0LYK5834", "\u88e4\u5b50", "", "\u88e4\u5b50", "\u4e0b\u88c5", 4162.0, 99.95, 2, 8324, 199.9, 0.024, 133, 1.48], ["WQ1LYK5921", "\u88e4\u5b50", "", "\u88e4\u5b50", "\u4e0b\u88c5", 410.0, 367.05, 2, 820, 734.1, 0.8952, 46, 4.17], ["\u5976\u7c891", "", "", "\u5176\u4ed6", "", 600.0, 540.0, 1, 600, 540, 0.9, 495, 0.2]];
+function init(){
+    const cats=[...new Set(DATA.map(r=>r[1]))].filter(Boolean).sort();
+    const gens=[...new Set(DATA.map(r=>r[2]))].filter(Boolean).sort();
+    cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.text=c;document.getElementById('catFilter').appendChild(o)});
+    gens.forEach(c=>{const o=document.createElement('option');o.value=c;o.text=c;document.getElementById('genFilter').appendChild(o)});
+    const sums=[0,0,0,0,0,0,0,0,0,0,0,0,0];DATA.forEach(r=>r.forEach((v,i)=>{if(typeof v==='number')sums[i]+=v}));
+    document.getElementById('summary').innerHTML=
+        '<div class="kpi-card"><div class="num">'+DATA.length+'</div><div class="label">商品数</div></div>'+
+        '<div class="kpi-card"><div class="num">'+sums[7].toLocaleString()+'</div><div class="label">总销量</div></div>'+
+        '<div class="kpi-card"><div class="num">¥'+sums[8].toLocaleString()+'</div><div class="label">吊牌额</div></div>'+
+        '<div class="kpi-card"><div class="num">¥'+sums[9].toLocaleString()+'</div><div class="label">销售额</div></div>';
+    filter();
+}
+function filter(){
+    const cat=document.getElementById('catFilter').value;
+    const gen=document.getElementById('genFilter').value;
+    render(cat||gen?DATA.filter(r=>(!cat||r[1]===cat)&&(!gen||r[2]===gen)):DATA);
+}
+function render(data){
+    document.getElementById('tbody').innerHTML=data.map((r,i)=>{
+        let row='<tr><td style="color:#999">'+(i+1)+'</td>';
+        row+=r.map((v,j)=>{
+            if(j===10) return '<td style="color:'+(v>=0.85?'#27ae60':v>=0.7?'#f39c12':'#e74c3c')+'">'+(v*100).toFixed(0)+'%</td>';
+            if(j===12) return '<td style="color:'+(v>20?'#27ae60':v>5?'#f39c12':'#e74c3c')+'">'+v+'%</td>';
+            return typeof v==='number'&&j>=7?'<td>¥'+v.toLocaleString()+'</td>':typeof v==='number'?'<td>'+v.toLocaleString()+'</td>':'<td>'+(v||'')+'</td>';
+        }).join('');
+        row+='</tr>';return row;
+    }).join('');
+    updateCharts(data);
+}
+function updateCharts(data){
+    const top=data.slice(0,10);
+    ech1({id:'chart1',title:'TOP10销售金额',x:top.map(r=>r[0]),y:top.map(r=>r[9]),color:'#2c3e50'});
+    const c={};data.forEach(r=>{c[r[1]]=(c[r[1]]||0)+r[9]});
+    const pie=Object.entries(c).filter(([k,v])=>v>0).map(([k,v])=>({name:k,value:v}));
+    ech2({id:'chart2',title:'大类销售金额占比',data:pie});
+}
+function ech1(o){var c=echarts.init(document.getElementById(o.id));c.setOption({title:{text:o.title,left:'center',textStyle:{fontSize:13}},tooltip:{trigger:'axis'},xAxis:{data:o.x,axisLabel:{rotate:30}},yAxis:{},series:[{type:'bar',data:o.y,itemStyle:{color:o.color}}]});}
+function ech2(o){var c=echarts.init(document.getElementById(o.id));c.setOption({title:{text:o.title,left:'center',textStyle:{fontSize:13}},tooltip:{},series:[{type:'pie',data:o.data,radius:['20%','60%'],center:['50%','55%'],label:{formatter:'{b}:{d}%'}}]});}
+window.addEventListener('DOMContentLoaded',init);
+</script></body></html>
