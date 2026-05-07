@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>伯俊ERP · 阶段性销售汇总</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1e293b;padding:16px;max-width:1200px;margin:0 auto}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px;padding:20px 22px;margin-bottom:14px;position:relative}
+.header h1{font-size:18px;font-weight:700}
+.header .sub{font-size:11px;opacity:.7;margin-top:2px}
+.header .toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.header .toolbar select,.header .toolbar input{border:none;border-radius:6px;padding:5px 10px;font-size:11px;outline:none;background:rgba(255,255,255,.2);color:#fff}
+.header .toolbar select option{color:#1e293b}
+.header .toolbar button{border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:#4361ee}
+.header .toolbar button:active{transform:scale(.95)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center}
+.kpi-card .kl{font-size:10px;color:#64748b;margin-bottom:2px}
+.kpi-card .kv{font-size:18px;font-weight:700}
+.kpi-card .ks{font-size:10px;color:#94a3b8;margin-top:2px}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px}
+.card .ct{font-size:13px;font-weight:600;margin-bottom:8px;padding-left:8px;border-left:3px solid #4361ee}
+.ct-green{border-left-color:#06d6a0}.ct-pink{border-left-color:#ff8fab}.ct-orange{border-left-color:#f59e0b}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:6px 5px;background:#f8fafc;color:#475569;font-weight:600;font-size:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:5px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+tr:hover{background:#f8fafc}
+.text-right{text-align:right}
+.total-row{background:#f1f5f9!important;font-weight:600}
+.total-row td{border-top:2px solid #4361ee}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr};th,td{font-size:9px;padding:4px 3px}}
+footer{text-align:center;font-size:10px;color:#94a3b8;padding:16px 0}
+.loading{text-align:center;padding:40px;color:#94a3b8}
+.loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#4361ee;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:30px;color:#94a3b8;font-size:13px}
+.alert{background:#fee2e2;color:#991b1b;font-size:11px;padding:10px;border-radius:8px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏚 伯俊ERP · 阶段性销售汇总</h1>
+  <div class="sub">系统自动从伯俊ERP抽取数据生成</div>
+  <div class="toolbar">
+    <select id="storeSelect"><option value="10">门店10</option></select>
+    <input type="date" id="startDate" value="2026-04-29">
+    <input type="date" id="endDate" value="2026-05-07">
+    <select id="splitDay"><option value="4">分段: 前4天 / 后4天</option><option value="5">分段: 前5天 / 后5天</option><option value="7">分段: 前7天 / 后7天</option></select>
+    <button onclick="fetchData()">查询</button>
+  </div>
+</div>
+
+<div id="resultArea">
+<div class="loading"><div class="spinner"></div><div>正在从伯俊ERP查询数据...</div></div>
+</div>
+
+<footer>伯俊ERP · 数据驾驶舱 · 查询时间：<span id="queryTime">-</span></footer>
+
+<script>
+var charts = {};
+
+function fmt(n){if(n===null||n===undefined)return'-';if(typeof n==='number')return n.toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1});return String(n)}
+
+async function fetchData(){
+  var storeId = document.getElementById('storeSelect').value;
+  var startDate = document.getElementById('startDate').value.replace(/-/g,'');
+  var endDate = document.getElementById('endDate').value.replace(/-/g,'');
+  var splitDay = parseInt(document.getElementById('splitDay').value);
+  
+  document.getElementById('resultArea').innerHTML = '<div class="loading"><div class="spinner"></div><div>正在查询伯俊ERP数据...</div></div>';
+  
+  // 构建内联数据（由Python脚本预生成，或者通过Oracle直连获取）
+  // 这里用内嵌数据模式——因为浏览器不能直接调伯俊API（CORS）
+  // 数据由Python脚本从Oracle查询后注入
+  var data = window.__DATA__;
+  renderReport(data, storeId, startDate, endDate, splitDay);
+}
+
+function renderReport(data, storeId, startDate, endDate, splitDay){
+  document.getElementById('queryTime').textContent = new Date().toLocaleString('zh-CN');
+  
+  if(!data || data.length === 0){
+    document.getElementById('resultArea').innerHTML = '<div class="empty">暂无数据</div>';
+    return;
+  }
+  
+  var splitDate = parseInt(startDate.slice(0,6)) * 100 + splitDay;
+  var p1End = parseInt(startDate.slice(0,6)) * 100 + splitDay;
+  var p2Start = p1End + 1;
+  
+  // 按商品汇总
+  var prods = {};
+  data.forEach(function(r){
+    var key = r[0]; // NAME
+    if(!prods[key]) prods[key] = {name:r[0], val:r[1]||'', cat4:r[2]||'', cat6:r[3]||'', cat8:r[4]||'', brand:r[5]||'', year:r[6]||'', season:r[7]||'', price:r[8]||0, p1_qty:0, p1_amt:0, p2_qty:0, p2_amt:0, p1_list:0, p2_list:0};
+    var p = prods[key];
+    var date = r[12];
+    var qty = r[9]||0;
+    var amt = r[10]||0;
+    var list = r[11]||0;
+    if(date <= p1End * 100){
+      p.p1_qty += qty; p.p1_amt += amt; p.p1_list += list;
+    } else {
+      p.p2_qty += qty; p.p2_amt += amt; p.p2_list += list;
+    }
+  });
+  
+  var prodList = Object.values(prods).sort(function(a,b){return (b.p1_amt+b.p2_amt)-(a.p1_amt+a.p2_amt)});
+  
+  var t1 = 0, t2 = 0, q1 = 0, q2 = 0;
+  prodList.forEach(function(p){t1+=p.p1_amt; t2+=p.p2_amt; q1+=p.p1_qty; q2+=p.p2_qty});
+  
+  // 品类汇总
+  var cats = {};
+  prodList.forEach(function(p){
+    var c = p.cat4 || '其他';
+    if(!cats[c]) cats[c] = {p1_amt:0,p2_amt:0,p1_qty:0,p2_qty:0};
+    cats[c].p1_amt += p.p1_amt; cats[c].p2_amt += p.p2_amt;
+    cats[c].p1_qty += p.p1_qty; cats[c].p2_qty += p.p2_qty;
+  });
+  
+  var catList = Object.keys(cats).sort(function(a,b){return (cats[b].p1_amt+cats[b].p2_amt)-(cats[a].p1_amt+cats[a].p2_amt)});
+  
+  var pct = t1 > 0 ? ((t2-t1)/t1*100).toFixed(0) : '0';
+  var pctColor = t2>=t1 ? '#10b981' : '#ef4444';
+  var pctSign = t2>=t1 ? '+' : '';
+  
+  var catRows = '';
+  catList.forEach(function(c){
+    var cd = cats[c];
+    catRows += '<tr><td style="font-weight:600">'+c+'</td><td class="text-right">'+cd.p1_qty+'</td><td class="text-right">¥'+fmt(cd.p1_amt)+'</td><td class="text-right">'+cd.p2_qty+'</td><td class="text-right">¥'+fmt(cd.p2_amt)+'</td><td class="text-right" style="font-weight:700;color:#4361ee">¥'+fmt(cd.p1_amt+cd.p2_amt)+'</td></tr>';
+  });
+  
+  var prodRows = '';
+  prodList.forEach(function(p){
+    var ta = p.p1_amt + p.p2_amt;
+    var tq = p.p1_qty + p.p2_qty;
+    var disc = p.price && tq ? ((p.p1_list+p.p2_list)/(p.price*tq)*10).toFixed(1) : '-';
+    prodRows += '<tr><td>'+p.name+'</td><td>'+p.val+'</td><td>'+p.cat4+(p.cat8?'/'+p.cat8:'')+'</td><td>'+p.brand+'</td><td>'+p.year+'</td><td>'+p.season+'</td><td class="text-right">'+fmt(p.price)+'</td><td class="text-right">'+tq+'</td><td class="text-right" style="font-weight:600">¥'+fmt(ta)+'</td><td class="text-right">'+disc+'折</td></tr>';
+  });
+  
+  var total_disc = prodList.reduce(function(s,p){return s+(p.price||0)*(p.p1_qty+p.p2_qty);},0) > 0 ? ((t1+t2)/prodList.reduce(function(s,p){return s+(p.price||0)*(p.p1_qty+p.p2_qty);},0)*10).toFixed(1) : '-';
+  
+  var daysLabel1 = 'P1(5.1-5.'+splitDay+')';
+  var daysLabel2 = 'P2(5.'+(splitDay+1)+'-5.'+endDate.slice(-2)+')';
+  
+  var html = '<div class="kpi-row">'+
+    '<div class="kpi-card"><div class="kl">📅 '+daysLabel1+'</div><div class="kv" style="color:#4361ee">¥'+fmt(t1)+'</div><div class="ks">'+q1+'件</div></div>'+
+    '<div class="kpi-card"><div class="kl">📅 '+daysLabel2+'</div><div class="kv" style="color:#06d6a0">¥'+fmt(t2)+'</div><div class="ks">'+q2+'件</div></div>'+
+    '<div class="kpi-card"><div class="kl">💰 合计金额</div><div class="kv" style="color:#10b981">¥'+fmt(t1+t2)+'</div><div class="ks">'+(q1+q2)+'件</div></div>'+
+    '<div class="kpi-card"><div class="kl">📈 环比变化</div><div class="kv" style="color:'+pctColor+'">'+pctSign+pct+'%</div><div class="ks">'+daysLabel2+' vs '+daysLabel1+'</div></div>'+
+  '</div>';
+  
+  html += '<div class="card"><div class="ct">📋 品类汇总对比</div><table><thead><tr><th>品类</th><th colspan="2" class="text-center">'+daysLabel1+'</th><th colspan="2" class="text-center">'+daysLabel2+'</th><th rowspan="2" class="text-right">合计</th></tr><tr><th></th><th class="text-right">数量</th><th class="text-right">金额</th><th class="text-right">数量</th><th class="text-right">金额</th></tr></thead><tbody>'+
+    catRows+
+    '<tr class="total-row"><td>合计</td><td class="text-right">'+q1+'</td><td class="text-right" style="color:#4361ee">¥'+fmt(t1)+'</td><td class="text-right">'+q2+'</td><td class="text-right" style="color:#06d6a0">¥'+fmt(t2)+'</td><td class="text-right" style="color:#10b981;font-size:14px">¥'+fmt(t1+t2)+'</td></tr>'+
+  '</tbody></table></div>';
+  
+  html += '<div class="chart-row">'+
+    '<div class="card"><div class="ct">📊 品类销售对比</div><canvas id="catChart" style="height:180px"></canvas></div>'+
+    '<div class="card"><div class="ct">🥧 两阶段占比</div><canvas id="pieChart" style="height:180px"></canvas></div>'+
+  '</div>';
+  
+  html += '<div class="card"><div class="ct">📦 单品销售明细</div><div style="overflow-x:auto"><table><thead><tr>'+
+    '<th>货号</th><th>品名</th><th>大类/小类</th><th>品牌</th><th>年份</th><th>季节</th><th class="text-right">吊牌价</th><th class="text-right">销量</th><th class="text-right">金额</th><th class="text-right">折扣</th>'+
+  '</tr></thead><tbody>'+prodRows+
+    '<tr class="total-row"><td colspan="7">合计</td><td class="text-right">'+(q1+q2)+'</td><td class="text-right" style="font-weight:700">¥'+fmt(t1+t2)+'</td><td class="text-right">'+total_disc+'折</td></tr>'+
+  '</tbody></table></div></div>';
+  
+  document.getElementById('resultArea').innerHTML = html;
+  
+  // 图表
+  if(charts.catChart){charts.catChart.destroy()}
+  if(charts.pieChart){charts.pieChart.destroy()}
+  
+  charts.catChart = new Chart(document.getElementById('catChart'),{type:'bar',data:{
+    labels:catList,
+    datasets:[
+      {label:daysLabel1,data:catList.map(function(c){return cats[c].p1_amt}),backgroundColor:'#4361ee',borderRadius:4},
+      {label:daysLabel2,data:catList.map(function(c){return cats[c].p2_amt}),backgroundColor:'#06d6a0',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:8}}},y:{beginAtZero:true,ticks:{font:{size:9}}}}}});
+  
+  charts.pieChart = new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{
+    labels:[daysLabel1+' ¥'+fmt(t1),daysLabel2+' ¥'+fmt(t2)],
+    datasets:[{data:[t1,t2],backgroundColor:['#4361ee','#06d6a0']}]
+  },options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+}
+
+// 数据由Python脚本从伯俊ERP Oracle查询后注入
+window.__DATA__ = [[13117, "RE2605020000001", 20260502, 10, 349, 1, "提交"], [13118, "RE2605020000002", 20260502, 10, 349, 1, "提交"], [13119, "RE2605020000003", 20260502, 10, 476, 1, "提交"], [13120, "RE2605020000004", 20260502, 10, 476, 1, "提交"], [13121, "RE2605020000005", 20260502, 10, 476, 1, "提交"], [13122, "RE2605020000006", 20260502, 10, 216, 1, "提交"], [13123, "RE2605020000007", 20260502, 10, 216, 1, "提交"], [13124, "RE2605020000008", 20260502, 10, 216, 1, "提交"], [13125, "RE2605020000009", 20260502, 10, 216, 1, "提交"], [13126, "RE2605020000010", 20260502, 10, 216, 1, "提交"], [13149, "RE2605050000001", 20260505, 10, 349, 1, "提交"], [13154, "RE2605050000006", 20260505, 10, 216, 1, "提交"], [13155, "RE2605050000007", 20260505, 10, 216, 1, "提交"], [13156, "RE2605050000008", 20260505, 10, 216, 1, "提交"], [13157, "RE2605050000009", 20260505, 10, 216, 1, "提交"], [13158, "RE2605050000010", 20260505, 10, 216, 1, "提交"], [13178, "RE2605070000009", 20260507, 10, 216, 1, "提交"], [13179, "RE2605070000010", 20260507, 10, 216, 1, "提交"], [13150, "RE2605050000002", 20260505, 10, 349, 1, "提交"], [13159, "RE2605060000001", 20260506, 10, 349, 1, "提交"], [13160, "RE2605060000002", 20260506, 10, 349, 1, "提交"], [13161, "RE2605060000003", 20260506, 10, 476, 1, "提交"], [13162, "RE2605060000004", 20260506, 10, 476, 1, "提交"], [13170, "RE2605070000001", 20260507, 10, 349, 1, "提交"], [13171, "RE2605070000002", 20260507, 10, 349, 1, "提交"], [13172, "RE2605070000003", 20260507, 10, 476, 1, "提交"], [13173, "RE2605070000004", 20260507, 10, 476, 1, "提交"], [13174, "RE2605070000005", 20260507, 10, 476, 1, "提交"], [13175, "RE2605070000006", 20260507, 10, 216, 1, "提交"], [13176, "RE2605070000007", 20260507, 10, 216, 1, "提交"], [13177, "RE2605070000008", 20260507, 10, 216, 1, "提交"], [13163, "RE2605060000005", 20260506, 10, 476, 1, "提交"], [13164, "RE2605060000006", 20260506, 10, 216, 1, "提交"], [13165, "RE2605060000007", 20260506, 10, 216, 1, "提交"], [13166, "RE2605060000008", 20260506, 10, 216, 1, "提交"], [13167, "RE2605060000009", 20260506, 10, 216, 1, "提交"], [13168, "RE2605060000010", 20260506, 10, 216, 1, "提交"], [13086, "RE2604290000001", 20260429, 10, 349, 1, "提交"], [13087, "RE2604290000002", 20260429, 10, 349, 1, "提交"], [13088, "RE2604290000003", 20260429, 10, 476, 1, "提交"], [13089, "RE2604290000004", 20260429, 10, 476, 1, "提交"], [13090, "RE2604290000005", 20260429, 10, 476, 1, "提交"], [13091, "RE2604290000006", 20260429, 10, 216, 1, "提交"], [13092, "RE2604290000007", 20260429, 10, 216, 1, "提交"], [13093, "RE2604290000008", 20260429, 10, 216, 1, "提交"], [13094, "RE2604290000009", 20260429, 10, 216, 1, "提交"], [13095, "RE2604290000010", 20260429, 10, 216, 1, "提交"], [13107, "RE2605010000001", 20260501, 10, 349, 1, "提交"], [13108, "RE2605010000002", 20260501, 10, 349, 1, "提交"], [13109, "RE2605010000003", 20260501, 10, 476, 1, "提交"], [13110, "RE2605010000004", 20260501, 10, 476, 1, "提交"], [13111, "RE2605010000005", 20260501, 10, 476, 1, "提交"], [13112, "RE2605010000006", 20260501, 10, 216, 1, "提交"], [13113, "RE2605010000007", 20260501, 10, 216, 1, "提交"], [13114, "RE2605010000008", 20260501, 10, 216, 1, "提交"], [13115, "RE2605010000009", 20260501, 10, 216, 1, "提交"], [13116, "RE2605010000010", 20260501, 10, 216, 1, "提交"], [13128, "RE2605030000001", 20260503, 10, 349, 1, "提交"], [13129, "RE2605030000002", 20260503, 10, 349, 1, "提交"], [13130, "RE2605030000003", 20260503, 10, 476, 1, "提交"], [13131, "RE2605030000004", 20260503, 10, 476, 1, "提交"], [13132, "RE2605030000005", 20260503, 10, 476, 1, "提交"], [13133, "RE2605030000006", 20260503, 10, 216, 1, "提交"], [13134, "RE2605030000007", 20260503, 10, 216, 1, "提交"], [13135, "RE2605030000008", 20260503, 10, 216, 1, "提交"], [13136, "RE2605030000009", 20260503, 10, 216, 1, "提交"], [13137, "RE2605030000010", 20260503, 10, 216, 1, "提交"], [13151, "RE2605050000003", 20260505, 10, 476, 1, "提交"], [13152, "RE2605050000004", 20260505, 10, 476, 1, "提交"], [13153, "RE2605050000005", 20260505, 10, 476, 1, "提交"], [13102, "RE2604300000007", 20260430, 10, 216, 1, "提交"], [13103, "RE2604300000008", 20260430, 10, 216, 1, "提交"], [13104, "RE2604300000009", 20260430, 10, 216, 1, "提交"], [13105, "RE2604300000010", 20260430, 10, 216, 1, "提交"], [13138, "RE2605040000001", 20260504, 10, 349, 1, "提交"], [13139, "RE2605040000002", 20260504, 10, 349, 1, "提交"], [13140, "RE2605040000003", 20260504, 10, 476, 1, "提交"], [13141, "RE2605040000004", 20260504, 10, 476, 1, "提交"], [13142, "RE2605040000005", 20260504, 10, 476, 1, "提交"], [13143, "RE2605040000006", 20260504, 10, 216, 1, "提交"], [13144, "RE2605040000007", 20260504, 10, 216, 1, "提交"], [13145, "RE2605040000008", 20260504, 10, 216, 1, "提交"], [13146, "RE2605040000009", 20260504, 10, 216, 1, "提交"], [13147, "RE2605040000010", 20260504, 10, 216, 1, "提交"], [13096, "RE2604300000001", 20260430, 10, 349, 1, "提交"], [13097, "RE2604300000002", 20260430, 10, 349, 1, "提交"], [13098, "RE2604300000003", 20260430, 10, 476, 1, "提交"], [13099, "RE2604300000004", 20260430, 10, 476, 1, "提交"], [13100, "RE2604300000005", 20260430, 10, 476, 1, "提交"], [13101, "RE2604300000006", 20260430, 10, 216, 1, "提交"]];
+
+// 初始化查询
+fetchData();
+</script>
+</body>
+</html>
