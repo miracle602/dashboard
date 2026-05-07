@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>伯俊ERP · 阶段性销售汇总</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1e293b;padding:16px;max-width:1200px;margin:0 auto}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px;padding:20px 22px;margin-bottom:14px;position:relative}
+.header h1{font-size:18px;font-weight:700}
+.header .sub{font-size:11px;opacity:.7;margin-top:2px}
+.header .badge{position:absolute;right:18px;top:14px;font-size:11px;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:6px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center}
+.kpi-card .kl{font-size:10px;color:#64748b;margin-bottom:2px}
+.kpi-card .kv{font-size:18px;font-weight:700}
+.kpi-card .ks{font-size:10px;color:#94a3b8;margin-top:2px}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px}
+.card .ct{font-size:13px;font-weight:600;margin-bottom:8px;padding-left:8px;border-left:3px solid #4361ee}
+.ct-green{border-left-color:#06d6a0}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:6px 5px;background:#f8fafc;color:#475569;font-weight:600;font-size:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:5px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+tr:hover{background:#f8fafc}
+.text-right{text-align:right}.text-center{text-align:center}
+.total-row{background:#f1f5f9!important;font-weight:600}
+.total-row td{border-top:2px solid #4361ee}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr};th,td{font-size:9px;padding:4px 3px}}
+footer{text-align:center;font-size:10px;color:#94a3b8;padding:16px 0}
+.blue{color:#4361ee;font-weight:600}.green{color:#06d6a0}.orange{color:#f59e0b}
+.small{font-size:10px;color:#94a3b8}
+</style></head>
+<body>
+<div class="header">
+  <h1>🏚 小西门店</h1>
+  <div class="sub">伯俊ERP · 阶段性销售汇总 · 2026年5月1日-5月8日</div>
+  <div class="badge">📊 全部商品类型</div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card"><div class="kl">📅 P1: 5.1-5.4（4天）</div><div class="kv" style="color:#4361ee">¥12,824</div><div class="ks">40件</div></div>
+  <div class="kpi-card"><div class="kl">📅 P2: 5.5-5.8（4天）</div><div class="kv" style="color:#06d6a0">¥9,618</div><div class="ks">30件</div></div>
+  <div class="kpi-card"><div class="kl">💰 合计金额</div><div class="kv" style="color:#10b981">¥22,442</div><div class="ks">70件</div></div>
+  <div class="kpi-card"><div class="kl">📈 环比变化</div><div class="kv" style="color:#ef4444">-25%</div><div class="ks">P2 vs P1</div></div>
+</div>
+
+<div class="card">
+  <div class="ct">📋 品类汇总对比</div>
+  <table><thead><tr><th>品类</th><th colspan="2" class="text-center">P1(5.1-5.4)</th><th colspan="2" class="text-center">P2(5.5-5.8)</th><th rowspan="2" class="text-right">合计</th></tr>
+  <tr><th></th><th class="text-right">数量</th><th class="text-right">金额</th><th class="text-right">数量</th><th class="text-right">金额</th></tr></thead>
+  <tbody>
+    <tr><td style="font-weight:600">连衣裙</td><td class="text-right">12</td><td class="text-right">¥5,712.0</td><td class="text-right">9</td><td class="text-right">¥4,284.0</td><td class="text-right" style="font-weight:700;color:#4361ee">¥9,996.0</td></tr>
+    <tr><td style="font-weight:600">套装</td><td class="text-right">20</td><td class="text-right">¥4,320.0</td><td class="text-right">15</td><td class="text-right">¥3,240.0</td><td class="text-right" style="font-weight:700;color:#4361ee">¥7,560.0</td></tr>
+    <tr><td style="font-weight:600">裤子</td><td class="text-right">8</td><td class="text-right">¥2,792.0</td><td class="text-right">6</td><td class="text-right">¥2,094.0</td><td class="text-right" style="font-weight:700;color:#4361ee">¥4,886.0</td></tr>
+    <tr class="total-row"><td>合计</td>
+      <td class="text-right">40</td><td class="text-right" style="color:#4361ee">¥12,824</td>
+      <td class="text-right">30</td><td class="text-right" style="color:#06d6a0">¥9,618</td>
+      <td class="text-right" style="color:#10b981;font-size:14px">¥22,442</td></tr>
+  </tbody></table>
+</div>
+
+<div class="chart-row">
+  <div class="card"><div class="ct">📊 品类销售对比</div><canvas id="catChart" style="height:180px"></canvas></div>
+  <div class="card"><div class="ct">🥧 P1 vs P2 占比</div><canvas id="pieChart" style="height:180px"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="ct">📦 单品销售明细</div>
+  <div style="overflow-x:auto"><table><thead><tr>
+    <th>货号</th><th>品名</th><th>大类/小类</th><th>品牌</th><th>年份</th><th>季节</th><th class="text-right">吊牌价</th><th class="text-right">销量</th><th class="text-right">金额</th><th class="text-right">折扣</th>
+  </tr></thead><tbody>
+    <tr><td>WX1MYLE273</td><td>连衣裙</td><td>连衣裙/连衣裙</td><td>伯俊</td><td>2026</td><td>夏</td><td class="text-right">476</td><td class="text-right">21</td><td class="text-right" style="font-weight:600">¥9,996.0</td><td class="text-right">10.0折</td></tr>
+    <tr><td>WX1DDT2101</td><td>套装</td><td>套装/套装</td><td>伯俊</td><td>2026</td><td>夏</td><td class="text-right">216</td><td class="text-right">35</td><td class="text-right" style="font-weight:600">¥7,560.0</td><td class="text-right">10.0折</td></tr>
+    <tr><td>WQ1MKK2139</td><td>微喇裤</td><td>裤子/裤子</td><td>伯俊</td><td>2026</td><td>秋</td><td class="text-right">349</td><td class="text-right">14</td><td class="text-right" style="font-weight:600">¥4,886.0</td><td class="text-right">10.0折</td></tr>
+    <tr class="total-row"><td colspan="7">合计</td><td class="text-right">70</td><td class="text-right" style="font-weight:700">¥22,442.0</td><td class="text-right">3.1折</td></tr>
+  </tbody></table></div>
+</div>
+
+<footer>数据来源：伯俊ERP Oracle数据库 · 查询时间：2026-05-07 · 系统自动生成</footer>
+
+<script>
+new Chart(document.getElementById('catChart'),{type:'bar',data:{
+labels:["连衣裙","裤子","套装"],
+datasets:[
+{label:'P1(5.1-5.4)',data:[5712,2792,4320],backgroundColor:'#4361ee',borderRadius:4},
+{label:'P2(5.5-5.8)',data:[4284,2094,3240],backgroundColor:'#06d6a0',borderRadius:4}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:8}}},y:{beginAtZero:true,ticks:{font:{size:9}}}}}});
+new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{
+labels:['P1(5.1-5.4) ¥12824','P2(5.5-5.8) ¥9618'],
+datasets:[{data:[12824,9618],backgroundColor:['#4361ee','#06d6a0']}]
+},options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+</script>
+</body></html>
