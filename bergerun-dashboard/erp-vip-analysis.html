@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>伯俊ERP · VIP销售分析</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1e293b;padding:16px;max-width:1200px;margin:0 auto}
+.header{background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;border-radius:14px;padding:20px 22px;margin-bottom:14px}
+.header h1{font-size:18px;font-weight:700}.header .sub{font-size:11px;opacity:.7;margin-top:2px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center}
+.kpi-card .kl{font-size:10px;color:#64748b;margin-bottom:2px}.kpi-card .kv{font-size:18px;font-weight:700}.kpi-card .ks{font-size:10px;color:#94a3b8;margin-top:2px}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:10px}
+.card .ct{font-size:13px;font-weight:600;margin-bottom:8px;padding-left:8px;border-left:3px solid #f5576c}
+.ct-blue{border-left-color:#4361ee}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;padding:6px 5px;background:#fdf2f8;color:#6b21a8;font-weight:600;font-size:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:5px;border-bottom:1px solid #f1f5f9;white-space:nowrap}tr:hover{background:#fdf2f8}
+.text-right{text-align:right}
+.total-row{background:#fdf2f8!important;font-weight:600}.total-row td{border-top:2px solid #f5576c}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}}
+footer{text-align:center;font-size:10px;color:#94a3b8;padding:16px 0}
+</style>
+</head>
+<body>
+
+<div class="header" id="pageHeader">
+  <h1>👑 <span id="storeName">小西门店</span> · VIP销售分析</h1>
+  <div class="sub">伯俊ERP · <span id="dateRange">2026年5月1日-5月8日</span></div>
+</div>
+
+<div class="kpi-row" id="kpiRow"></div>
+
+<div class="chart-row">
+  <div class="card"><div class="ct">🥇 VIP消费排行 TOP10</div><canvas id="vipChart" style="height:200px"></canvas></div>
+  <div class="card"><div class="ct">📊 每日销售趋势</div><canvas id="dailyChart" style="height:200px"></canvas></div>
+</div>
+
+<div class="card" id="vipRankCard">
+  <div class="ct">🏆 VIP消费排行</div>
+  <table><thead><tr><th>VIP会员</th><th class="text-right">次数</th><th class="text-right">件数</th><th class="text-right">金额</th></tr></thead><tbody id="vipRankBody"></tbody></table>
+</div>
+
+<div class="card">
+  <div class="ct">📋 VIP销售明细</div>
+  <div style="overflow-x:auto"><table><thead><tr><th>单号</th><th>日期</th><th>会员</th><th>货号</th><th>品名</th><th class="text-right">数量</th><th class="text-right">金额</th><th class="text-right">折扣</th></tr></thead><tbody id="detailBody"></tbody></table></div>
+</div>
+
+<footer>伯俊ERP · VIP数据分析 · 生成于2026-05-07</footer>
+
+<script>
+// 数据从Python生成的JSON注入
+var __VIP_DATA__ = {"vip_cnt": 3, "total_orders": 56, "total_qty": 56, "total_amt": 19418.0, "vip_rank": [{"name": "9059", "orders": 42, "qty": 42, "amt": 13643}, {"name": "5040", "orders": 7, "qty": 7, "amt": 3332}, {"name": "6973", "orders": 7, "qty": 7, "amt": 2443}], "detail": [{"doc": "RE2605010000008", "date": "20260501", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605010000001", "date": "20260501", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605010000003", "date": "20260501", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605010000004", "date": "20260501", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605010000005", "date": "20260501", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605010000006", "date": "20260501", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605010000007", "date": "20260501", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605010000002", "date": "20260501", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605020000008", "date": "20260502", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605020000006", "date": "20260502", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605020000005", "date": "20260502", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605020000004", "date": "20260502", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605020000001", "date": "20260502", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605020000002", "date": "20260502", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605020000003", "date": "20260502", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605020000007", "date": "20260502", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605030000007", "date": "20260503", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605030000006", "date": "20260503", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605030000005", "date": "20260503", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605030000008", "date": "20260503", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605030000003", "date": "20260503", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605030000002", "date": "20260503", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605030000001", "date": "20260503", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605030000004", "date": "20260503", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605040000003", "date": "20260504", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605040000002", "date": "20260504", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605040000001", "date": "20260504", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605040000004", "date": "20260504", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605040000008", "date": "20260504", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605040000007", "date": "20260504", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605040000006", "date": "20260504", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605040000005", "date": "20260504", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605050000002", "date": "20260505", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605050000003", "date": "20260505", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605050000007", "date": "20260505", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605050000006", "date": "20260505", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605050000005", "date": "20260505", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605050000004", "date": "20260505", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605050000001", "date": "20260505", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605050000008", "date": "20260505", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605060000008", "date": "20260506", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605060000007", "date": "20260506", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605060000006", "date": "20260506", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605060000005", "date": "20260506", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605060000004", "date": "20260506", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605060000003", "date": "20260506", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605060000002", "date": "20260506", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605060000001", "date": "20260506", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605070000008", "date": "20260507", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605070000006", "date": "20260507", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}, {"doc": "RE2605070000005", "date": "20260507", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605070000004", "date": "20260507", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605070000003", "date": "20260507", "vip": "散客", "prod": "WX1MYLE273", "pval": "连衣裙", "qty": 1, "amt": 476.0, "disc": 1.0}, {"doc": "RE2605070000002", "date": "20260507", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605070000001", "date": "20260507", "vip": "散客", "prod": "WQ1MKK2139", "pval": "微喇裤", "qty": 1, "amt": 349.0, "disc": 1.0}, {"doc": "RE2605070000007", "date": "20260507", "vip": "散客", "prod": "WX1DDT2101", "pval": "套装", "qty": 1, "amt": 216.0, "disc": 1.0}], "daily_amt": [0, 0, 0, 0, 0, 0, 0, 0], "daily_cnt": [0, 0, 0, 0, 0, 0, 0, 0]};
+
+// 如果没有注入数据，尝试从vip-data.json加载
+if (!DATA) {
+  fetch('vip-data.json').then(function(r){return r.json()}).then(function(d){
+    DATA = d;
+    renderPage();
+  })['catch'](function(){ /* 数据加载失败，使用内联数据 */ });
+}
+
+// 也尝试内联方式
+if (typeof window.__VIP_DATA__ === 'undefined') {
+  // 从页面嵌入的数据对象
+}
+</script>
+
+<script>
+function fmt(n){return n.toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1})}
+
+function renderPage(){
+  if(!DATA) return;
+  var d = DATA;
+  
+  // KPI
+  document.getElementById('kpiRow').innerHTML =
+    '<div class="kpi-card"><div class="kl">消费VIP</div><div class="kv" style="color:#f5576c">'+d.vip_cnt+'</div><div class="ks">人</div></div>'+
+    '<div class="kpi-card"><div class="kl">交易笔数</div><div class="kv" style="color:#4361ee">'+d.total_orders+'</div><div class="ks">笔</div></div>'+
+    '<div class="kpi-card"><div class="kl">销售件数</div><div class="kv" style="color:#06d6a0">'+d.total_qty+'</div><div class="ks">件</div></div>'+
+    '<div class="kpi-card"><div class="kl">销售金额</div><div class="kv" style="color:#10b981">¥'+fmt(d.total_amt)+'</div><div class="ks">元</div></div>';
+  
+  // VIP排行
+  var vb = document.getElementById('vipRankBody');
+  vb.innerHTML = '';
+  d.vip_rank.forEach(function(v){
+    vb.innerHTML += '<tr><td style="font-weight:600">'+v.name+'</td><td class="text-right">'+v.orders+'</td><td class="text-right">'+v.qty+'</td><td class="text-right" style="color:#be185d;font-weight:700">¥'+fmt(v.amt)+'</td></tr>';
+  });
+  
+  // 明细
+  var dt = document.getElementById('detailBody');
+  dt.innerHTML = '';
+  d.detail.forEach(function(r){
+    var ds = r.date.toString();
+    var dd = ds.substring(0,4)+'-'+ds.substring(4,6)+'-'+ds.substring(6,8);
+    var disc = r.disc ? (r.disc < 1 ? (r.disc*10).toFixed(0)+'折' : r.disc.toFixed(1)+'折') : '-';
+    dt.innerHTML += '<tr><td style="font-size:10px">'+r.doc+'</td><td>'+dd+'</td><td>'+r.vip+'</td><td>'+r.prod+'</td><td>'+r.pval+'</td><td class="text-right">'+r.qty+'</td><td class="text-right" style="font-weight:600">¥'+fmt(r.amt)+'</td><td class="text-right">'+disc+'</td></tr>';
+  });
+  dt.innerHTML += '<tr class="total-row"><td colspan="5">合计</td><td class="text-right">'+d.total_qty+'</td><td class="text-right" style="font-weight:700">¥'+fmt(d.total_amt)+'</td><td></td></tr>';
+  
+  // 图表
+  drawCharts(d);
+}
+
+function drawCharts(d){
+  // VIP排行图
+  new Chart(document.getElementById('vipChart'), {
+    type: 'bar',
+    data: {
+      labels: d.vip_rank.map(function(v){return v.name.substring(0,6)}),
+      datasets: [{label:'消费金额',data:d.vip_rank.map(function(v){return v.amt}),backgroundColor:'#f5576c',borderRadius:4}]
+    },
+    options: {indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,ticks:{font:{size:9}}},y:{ticks:{font:{size:9,weight:'bold'}}}}}
+  });
+  
+  // 每日趋势
+  new Chart(document.getElementById('dailyChart'), {
+    type: 'line',
+    data: {
+      labels: ['5.1','5.2','5.3','5.4','5.5','5.6','5.7','5.8'],
+      datasets: [
+        {label:'金额(元)',data:d.daily_amt,borderColor:'#f5576c',backgroundColor:'rgba(245,87,108,.1)',fill:true,tension:.3,pointRadius:4},
+        {label:'笔数',data:d.daily_cnt,borderColor:'#4361ee',backgroundColor:'transparent',tension:.3,pointRadius:3,yAxisID:'y1',borderDash:[5,3]}
+      ]
+    },
+    options: {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10}}}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:9}}},y1:{position:'right',beginAtZero:true,ticks:{font:{size:9}}}}}
+  });
+}
+
+// 初始化
+if(DATA) renderPage();
+</script>
+</body>
+</html>
