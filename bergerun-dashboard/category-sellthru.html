@@ -1,43 +1,64 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>品类售罄</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f5f6fa;padding:15px;color:#333}
-.header{background:#1a1a2e;color:#fff;padding:15px 20px;border-radius:8px;margin-bottom:12px}
+.header{background:#1a1a2e;color:#fff;padding:15px 20px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .header h1{font-size:20px}.header p{font-size:12px;color:#aaa;margin-top:3px}
+.btn{background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px;text-decoration:none}
+.btn2{background:#555;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;text-decoration:none;margin-right:8px}
 .summary{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .kpi{background:#fff;padding:10px 15px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center;flex:1;min-width:100px}
 .kpi .num{font-size:20px;font-weight:700;color:#1a1a2e}.kpi .label{font-size:11px;color:#888;margin-top:2px}
-.controls{margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.controls input,.controls select{padding:5px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px}
-.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:75vh}
+.controls{margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap}
+.controls input,.controls select{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px}
+.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:78vh}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#1a1a2e;color:#fff;padding:5px 8px;text-align:center;position:sticky;top:0;z-index:1}
-td{padding:3px 8px;text-align:center;border-bottom:1px solid #eee}
-tr:hover{background:#eef2ff}
-.num{text-align:right}
-.sr-high{color:#27ae60;font-weight:600}.sr-low{color:#e74c3c}
+th{background:#1a1a2e;color:#fff;padding:6px 8px;text-align:center;position:sticky;top:0;z-index:1;white-space:nowrap}
+td{padding:4px 8px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
+tr:hover{background:#f0f3ff}.num{text-align:right}
 </style></head><body>
-<div class="header"><h1>品类售罄</h1><p>数据透视表 · 来源：零售库存母表(4505条) · Q2(2026.04-06)</p></div>
-<div class="summary">
-<div class="kpi"><div class="num">91</div><div class="label">品类数</div></div>
-<div class="kpi"><div class="num">3,016,689</div><div class="label">订货总量</div></div>
-<div class="kpi"><div class="num" style="color:#27ae60">257</div><div class="label">销售数量</div></div>
-<div class="kpi"><div class="num" style="color:#e67e22">0.01%</div><div class="label">总体售罄</div></div>
+<div class="header">
+<div><h1>品类售罄</h1><p>数据透视表 · 91个品类</p></div>
+<div><a class="btn2" href="index.html">← 返回</a><button class="btn" onclick="exportExcel()">⬇ 导出Excel</button></div>
 </div>
+<div class="summary" id="kpi"></div>
 <div class="controls">
-<label>品类:</label><input id="search" placeholder="搜索品类名..." oninput="filterTable()">
-<label>大类:</label><select id="catFilter" onchange="filterTable()"><option value="">全部</option><option value="T恤">T恤</option><option value="上衣">上衣</option><option value="半裙">半裙</option><option value="外套">外套</option><option value="外套类">外套类</option><option value="套装">套装</option><option value="服饰">服饰</option><option value="毛衫">毛衫</option><option value="衬衫">衬衫</option><option value="裙子">裙子</option><option value="裤子">裤子</option><option value="裤类">裤类</option><option value="连衣裙">连衣裙</option><option value="配饰">配饰</option><option value="针织裤">针织裤</option><option value="鞋">鞋</option><option value="鞋子">鞋子</option></select>
-<label>显示:</label><select id="showOpt" onchange="filterTable()"><option value="all">全部品类</option><option value="sold">有销售的</option><option value="high">订货&gt;1000</option></select>
+<input id="search" placeholder="搜索品类..." oninput="go()">
+<select id="catFilter" onchange="go()"><option value="">全部</option><option value="T恤">T恤</option><option value="上衣">上衣</option><option value="上装外套">上装外套</option><option value="半裙">半裙</option><option value="外套">外套</option><option value="外套类">外套类</option><option value="大衣">大衣</option><option value="套装">套装</option><option value="服饰">服饰</option><option value="梭织裤">梭织裤</option><option value="毛衫">毛衫</option><option value="羽绒服">羽绒服</option><option value="衬衫">衬衫</option><option value="裙子">裙子</option><option value="裤子">裤子</option><option value="裤类">裤类</option><option value="连衣裙">连衣裙</option><option value="配饰">配饰</option><option value="针织裤">针织裤</option><option value="鞋">鞋</option><option value="鞋子">鞋子</option><option value="饰品">饰品</option></select>
 </div>
-<div class="table-wrap"><table><thead><tr><th>大类</th><th>性别</th><th>品类</th><th style="text-align:right">订货量</th><th style="text-align:right">销售数量</th><th style="text-align:right">预计库存</th><th style="text-align:right">售罄</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>大类</th><th>性别</th><th>品类</th><th>订货量</th><th>销售数量</th><th>预计库存</th><th>售罄(%)</th></tr></thead><tbody id="tbody"></tbody></table></div>
 <script>
-const DATA = [["", "", "裤子", 778472, 0, 778472, 0.0], ["", "", "衬衫", 581233, 0, 581233, 0.0], ["", "", "鞋子", 495396, 0, 495396, 0.0], ["", "", "T恤", 375033, 0, 375033, 0.0], ["裤子", "", "裤子", 158953, 76, 158877, 0.05], ["外套", "男", "上衣", 157873, 0, 157873, 0.0], ["上衣", "", "T恤", 78207, 0, 78207, 0.0], ["裙子", "", "裙子", 64152, 0, 64152, 0.0], ["", "", "项链", 47990, 0, 47990, 0.0], ["鞋子", "", "鞋子", 42083, 0, 42083, 0.0], ["", "", "风衣", 30456, 0, 30456, 0.0], ["", "", "", 28511, 0, 28511, 0.0], ["裤类", "", "长裤", 23093, 0, 23093, 0.0], ["", "", "短袖T恤", 14674, 0, 14674, 0.0], ["裤类", "", "裤子", 12625, 0, 12625, 0.0], ["鞋子", "", "", 12204, 0, 12204, 0.0], ["", "", "小上衣", 11988, 0, 11988, 0.0], ["裤子", "", "哈伦裤", 10708, 0, 10708, 0.0], ["T恤", "", "T恤", 9120, 0, 9120, 0.0], ["上衣", "", "上衣", 8735, 0, 8735, 0.0], ["外套", "", "外套", 6292, 0, 6292, 0.0], ["裤子", "", "牛仔裤", 6156, 0, 6156, 0.0], ["衬衫", "", "衬衫", 4634, 0, 4634, 0.0], ["", "", "毛衫", 4530, 0, 4530, 0.0], ["套装", "", "", 4439, 0, 4439, 0.0], ["连衣裙", "", "连衣裙", 4273, 0, 4273, 0.0], ["服饰", "", "衬衫", 3317, 0, 3317, 0.0], ["衬衫", "", "", 3181, 0, 3181, 0.0], ["半裙", "", "毛衫", 2832, 0, 2832, 0.0], ["配饰", "", "", 2750, 0, 2750, 0.0], ["套装", "", "套装", 2625, 180, 2445, 6.86], ["裤类", "", "短裤", 2212, 0, 2212, 0.0], ["衬衫", "", "毛衫", 2207, 0, 2207, 0.0], ["外套类", "", "外套", 2139, 0, 2139, 0.0], ["毛衫", "", "针织衫", 2076, 0, 2076, 0.0], ["", "", "R斜挎包", 1646, 0, 1646, 0.0], ["针织裤", "", "裤子", 1538, 0, 1538, 0.0], ["鞋", "", "", 1439, 0, 1439, 0.0], ["套装", "", "裤子", 1227, 0, 1227, 0.0], ["", "", "外套", 1182, 0, 1182, 0.0], ["", "", "上衣", 1120, 0, 1120, 0.0], ["裤子", "", "短裤", 1030, 0, 1030, 0.0], ["服饰", "", "", 1015, 0, 1015, 0.0], ["", "", "其他", 543, 1, 542, 0.18]];
-function filterTable(){
-const q=document.getElementById('search').value;const c=document.getElementById('catFilter').value;const s=document.getElementById('showOpt').value;
-const filtered=DATA.filter(r=>{if(c&&r[0]!==c)return false;if(q&&!r[2].includes(q))return false;if(s==='sold'&&!r[4])return false;if(s==='high'&&r[3]<1000)return false;return true;});
-const tb=document.getElementById('tbody');tb.innerHTML='';
-filtered.forEach(r=>{const cls=r[6]>=5?'sr-high':r[6]<0.1?'sr-low':'';tb.innerHTML+='<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td style="text-align:left">'+r[2]+'</td><td class="num">'+r[3].toLocaleString()+'</td><td class="num">'+r[4].toLocaleString()+'</td><td class="num">'+r[5].toLocaleString()+'</td><td class="num '+cls+'">'+r[6]+'%</td></tr>';});}
-filterTable();
+var H = ["大类","性别","品类","订货量","销售数量","预计库存","售罄(%)"];
+var D=[["", "", "裤子", 778472, 0, 778472, 0.0], ["", "", "衬衫", 581233, 0, 581233, 0.0], ["", "", "鞋子", 495396, 0, 495396, 0.0], ["", "", "T恤", 375033, 0, 375033, 0.0], ["裤子", "", "裤子", 158953, 76, 158877, 0.05], ["外套", "男", "上衣", 157873, 0, 157873, 0.0], ["上衣", "", "T恤", 78207, 0, 78207, 0.0], ["裙子", "", "裙子", 64152, 0, 64152, 0.0], ["", "", "项链", 47990, 0, 47990, 0.0], ["鞋子", "", "鞋子", 42083, 0, 42083, 0.0], ["", "", "风衣", 30456, 0, 30456, 0.0], ["", "", "", 28511, 0, 28511, 0.0], ["裤类", "", "长裤", 23093, 0, 23093, 0.0], ["", "", "短袖T恤", 14674, 0, 14674, 0.0], ["裤类", "", "裤子", 12625, 0, 12625, 0.0], ["鞋子", "", "", 12204, 0, 12204, 0.0], ["", "", "小上衣", 11988, 0, 11988, 0.0], ["裤子", "", "哈伦裤", 10708, 0, 10708, 0.0], ["T恤", "", "T恤", 9120, 0, 9120, 0.0], ["上衣", "", "上衣", 8735, 0, 8735, 0.0], ["外套", "", "外套", 6292, 0, 6292, 0.0], ["裤子", "", "牛仔裤", 6156, 0, 6156, 0.0], ["衬衫", "", "衬衫", 4634, 0, 4634, 0.0], ["", "", "毛衫", 4530, 0, 4530, 0.0], ["套装", "", "", 4439, 0, 4439, 0.0], ["连衣裙", "", "连衣裙", 4273, 0, 4273, 0.0], ["服饰", "", "衬衫", 3317, 0, 3317, 0.0], ["衬衫", "", "", 3181, 0, 3181, 0.0], ["半裙", "", "毛衫", 2832, 0, 2832, 0.0], ["配饰", "", "", 2750, 0, 2750, 0.0], ["套装", "", "套装", 2625, 180, 2445, 6.86], ["裤类", "", "短裤", 2212, 0, 2212, 0.0], ["衬衫", "", "毛衫", 2207, 0, 2207, 0.0], ["外套类", "", "外套", 2139, 0, 2139, 0.0], ["毛衫", "", "针织衫", 2076, 0, 2076, 0.0], ["", "", "R斜挎包", 1646, 0, 1646, 0.0], ["针织裤", "", "裤子", 1538, 0, 1538, 0.0], ["鞋", "", "", 1439, 0, 1439, 0.0], ["套装", "", "裤子", 1227, 0, 1227, 0.0], ["", "", "外套", 1182, 0, 1182, 0.0], ["", "", "上衣", 1120, 0, 1120, 0.0], ["裤子", "", "短裤", 1030, 0, 1030, 0.0], ["服饰", "", "", 1015, 0, 1015, 0.0], ["外套", "", "毛衫", 838, 0, 838, 0.0], ["", "", "配件", 833, 0, 833, 0.0], ["大衣", "", "大衣", 638, 0, 638, 0.0], ["外套类", "", "马甲", 627, 0, 627, 0.0], ["上衣", "", "衬衣", 558, 0, 558, 0.0], ["", "", "其他", 543, 1, 542, 0.18], ["上衣", "", "衬衫", 540, 0, 540, 0.0], ["上衣", "", "背心", 524, 0, 524, 0.0], ["", "", "R双肩包", 515, 0, 515, 0.0], ["梭织裤", "", "阔腿梭织裤", 473, 0, 473, 0.0], ["", "", "冲饮", 472, 0, 472, 0.0], ["裤子", "", "背带裤", 400, 0, 400, 0.0], ["裤子", "女", "裤子", 300, 0, 300, 0.0], ["裙子", "", "中裙", 280, 0, 280, 0.0], ["裙子", "", "短裙", 280, 0, 280, 0.0], ["", "女", "", 274, 0, 274, 0.0], ["裤子", "", "牛仔短裤", 254, 0, 254, 0.0], ["羽绒服", "", "羽绒服", 250, 0, 250, 0.0], ["外套类", "", "毛织外套", 250, 0, 250, 0.0], ["上衣", "", "吊带", 240, 0, 240, 0.0], ["裤子", "", "裙子", 210, 0, 210, 0.0], ["上装外套", "", "", 200, 0, 200, 0.0], ["", "", "R单皮衣", 200, 0, 200, 0.0], ["饰品", "", "耳环", 193, 0, 193, 0.0], ["", "", "内搭", 179, 0, 179, 0.0], ["上衣", "", "打底衫", 140, 0, 140, 0.0], ["裤子", "", "连体裤", 140, 0, 140, 0.0], ["上衣", "", "卫衣", 140, 0, 140, 0.0], ["", "", "首饰", 137, 0, 137, 0.0], ["裙子", "", "半裙", 120, 0, 120, 0.0], ["外套", "", "牛仔外套", 99, 0, 99, 0.0], ["", "", "无", 99, 0, 99, 0.0], ["饰品", "", "鞋子", 94, 0, 94, 0.0], ["上衣", "", "风衣", 82, 0, 82, 0.0], ["", "", "R休闲长裤", 40, 0, 40, 0.0], ["", "", "R便西", 35, 0, 35, 0.0], ["配饰", "", "帽子", 21, 0, 21, 0.0], ["外套", "", "", 20, 0, 20, 0.0], ["", "", "R单便装", 20, 0, 20, 0.0], ["配饰", "", "配饰", 14, 0, 14, 0.0], ["裙子", "", "", 13, 0, 13, 0.0], ["", "", "裙子", 10, 0, 10, 0.0], ["", "", "半裙", 10, 0, 10, 0.0], ["配饰", "", "包包", 9, 0, 9, 0.0], ["上衣", "", "", 4, 0, 4, 0.0], ["裤子", "", "", 3, 0, 3, 0.0], ["裙子", "", "针/梭织中裙", 1, 0, 1, 0.0], ["大衣", "", "风衣", 1, 0, 1, 0.0]];var F=D;
+function exportExcel(){{
+    var c="\uFEFF"+H.join(",")+"\n";
+    for(var i=0;i<F.length;i++){{var r=F[i];var row=[];
+        for(var j=0;j<r.length;j++){{var v=r[j];
+            if(typeof v==='number')row.push(v===Math.floor(v)?v:v.toFixed(2));
+            else row.push('"'+v.replace(/"/g,'""')+'"');
+        }}c+=row.join(",")+"\n";
+    }}
+    var b=new Blob([c],{{type:'text/csv;charset=utf-8;'}});
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='品类售罄.csv';a.click();
+}}
+function go(){{
+    var q=document.getElementById('search').value,c=document.getElementById('catFilter').value;
+    if(!q&&!c){{F=D;}}else{{F=[];for(var i=0;i<D.length;i++){{var r=D[i];
+        if(c&&r[0]!==c)continue;if(q&&r[2].indexOf(q)===-1&&r[0].indexOf(q)===-1)continue;F.push(r);
+    }}}}
+    var tb=document.getElementById('tbody');tb.innerHTML='';
+    for(var i=0;i<F.length;i++){{var r=F[i];var h='<tr>';
+        for(var j=0;j<r.length;j++){{var v=r[j];
+            if(typeof v==='number')h+='<td class="num">'+(v===Math.floor(v)?v.toLocaleString():v.toFixed(2))+'</td>';
+            else h+='<td>'+(v||'')+'</td>';
+        }}h+='</tr>';tb.innerHTML+=h;
+    }}
+}}
+document.getElementById('kpi').innerHTML=
+'<div class="kpi"><div class="num">{len(cat_rows)}</div><div class="label">品类数</div></div>'+
+'<div class="kpi"><div class="num">{tot_order:,}</div><div class="label">订货总量</div></div>'+
+'<div class="kpi"><div class="num">{tot_sale:,}</div><div class="label">销售数量</div></div>'+
+'<div class="kpi"><div class="num">{tot_sale/max(1,tot_order)*100:.2f}%</div><div class="label">总体售罄</div></div>';
+go();
 </script></body></html>
