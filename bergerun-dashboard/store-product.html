@@ -188,55 +188,42 @@ rawData = [
 
 // ========== 生成表头 ==========
 function buildHeader() {
-  // 第一行：分组名（106列全部铺满）
+  // 第一行：分组名（colspan合并）
   let r0 = '<tr>';
-  // 12个基本信息（每个占1列）
+  // 12个基本信息 - 使用rowspan=2跨两行
   for (let c = 0; c < 12; c++) {
-    r0 += `<th class="${c<3?'':'group-header'}" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
+    r0 += `<th rowspan="2" class="${c<3?'':'group-header'}" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
   }
-  // 8组7列
+  // 8组7列 - colspan=7合并
   for (let i = 0; i < 8; i++) {
-    for (let s of SIZE_NAMES) {
-      if (s === 'XS') r0 += `<th colspan="1" class="group-header">${GROUP_NAMES[i].label}</th>`;
-      else r0 += `<th colspan="1" class="group-header"></th>`;  // 合并单元格背景
-    }
+    r0 += `<th colspan="7" class="group-header">${GROUP_NAMES[i].label}</th>`;
   }
-  // 平均折扣(1列)
-  r0 += '<th>平均折扣</th>';
-  // 周销7列
-  for (let s of SIZE_NAMES) r0 += `<th class="group-header">${s==='XS'?'周销':''}</th>`;
-  // 售罄率1列
-  r0 += '<th>售罄率</th>';
+  // 平均折扣 - rowspan=2
+  r0 += '<th rowspan="2">平均折扣</th>';
+  // 周销 - colspan=7
+  r0 += '<th colspan="7" class="group-header">周销</th>';
+  // 售罄率 - rowspan=2
+  r0 += '<th rowspan="2">售罄率</th>';
   // 4组7列
   for (let i = 12; i < 16; i++) {
-    for (let s of SIZE_NAMES) {
-      r0 += `<th class="group-header">${s==='XS'?GROUP_NAMES[i].label:''}</th>`;
-    }
+    r0 += `<th colspan="7" class="group-header">${GROUP_NAMES[i].label}</th>`;
   }
-  // 最后空列
-  r0 += '<th></th>';
+  // 最后空列 - rowspan=2
+  r0 += '<th rowspan="2" style="min-width:20px"></th>';
   r0 += '</tr>';
   
   // 第二行：尺码子列
   let r1 = '<tr>';
-  // 前12个空列
-  for (let i = 0; i < 12; i++) r1 += '<th></th>';
-  // 8组尺码 × 7列
+  // 8组尺码 × 7列（前12+平均折扣+售罄率+空列已被rowspan占住）
   for (let i = 0; i < 8; i++) {
     for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
   }
-  // 平均折扣(空)
-  r1 += '<th></th>';
   // 周销7列尺码
   for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
-  // 售罄率(空)
-  r1 += '<th></th>';
   // 4组尺码 × 7列
   for (let i = 0; i < 4; i++) {
     for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
   }
-  // 最后空列
-  r1 += '<th></th>';
   r1 += '</tr>';
   
   return r0 + r1;
