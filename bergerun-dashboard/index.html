@@ -2,151 +2,110 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>伯俊ERP · 零售看板</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="real-data.js?v=20260428"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>26Q2 周售罄跟踪表</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f7fa;color:#1e293b;font-size:14px}
-
-
-
-
-
-.container{max-width:1200px;margin:0 auto;padding:16px}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
-.kpi-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.kpi-card .label{font-size:12px;color:#64748b;margin-bottom:4px}
-.kpi-card .val{font-size:24px;font-weight:700;color:#1e293b}
-.kpi-card .sub{font-size:11px;color:#94a3b8;margin-top:4px}
-.kpi-card .up{color:#10b981}
-.kpi-card .down{color:#ef4444}
-.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.chart-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.chart-card .title{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px}
-.chart-card canvas{max-height:280px}
-.full{grid-column:1/-1}
-.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:500}
-.badge.green{background:#d1fae5;color:#065f46}
-.badge.blue{background:#dbeafe;color:#1e40af}
-.badge.red{background:#fee2e2;color:#991b1b}
-.text-right{text-align:right}
-.text-center{text-align:center}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;padding:8px 6px;background:#f8fafc;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap}
-td{padding:6px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
-tr:hover{background:#f8fafc}
-.footer{text-align:center;color:#94a3b8;font-size:11px;padding:20px 0}
-@media(max-width:768px){.chart-row{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-
-.nav{background:#1e293b;border-radius:12px;padding:10px 20px;display:flex;gap:20px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-.nav .title{color:#fff;font-size:16px;font-weight:600;margin-right:10px}
-.nav a{color:#94a3b8;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:6px;transition:all .2s}
-.nav a:hover{background:#334155;color:#fff}
-.nav a.active{background:#4361ee;color:#fff}
-
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f0f2f5;padding:20px;color:#333}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:30px;border-radius:12px;margin-bottom:25px;text-align:center}
+.header h1{font-size:26px;font-weight:700}
+.header p{font-size:14px;color:#bdc3c7;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1200px;margin:0 auto}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);cursor:pointer;transition:all .2s;border:1px solid #eee}
+.card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-color:#1a1a2e}
+.card .icon{font-size:28px;margin-bottom:8px}
+.card .title{font-size:16px;font-weight:600;color:#1a1a2e;margin-bottom:4px}
+.card .desc{font-size:12px;color:#888;line-height:1.5}
+.card .tag{display:inline-block;padding:2px 8px;border-radius:4px;background:#eef2ff;color:#1a1a2e;font-size:11px;margin-top:8px}
 </style>
 </head>
 <body>
+<div class="header">
+<h1>26Q2 周售罄跟踪表</h1>
+<p>数据来源：伯俊ERP · 2026年第二季度（4月-6月）</p>
+</div>
+<div class="grid">
 
-<div class="nav">
-  <span class="title">📊 伯俊ERP</span>
-  <a href="index.html" class="active">📊 零售看板</a>
-  <a href="sell-thru.html">📦 售罄率</a>
-  <a href="retail-analysis.html">📈 零售分析</a>
-  <a href="retail-report.html">📋 零售报告</a>
-  <a href="ops-report.html">📑 经营性报表</a>
-  <a href="bi-analysis.html">📊 BI分析</a>
-  <a href="cross-table.html">📋 交叉分析</a>
-  <a href="stock-warning.html">⚠️ 库存预警</a>
-</div>
-<div class="container">
-  <div class="kpi-grid" id="kpiGrid"></div>
-  <div class="chart-row">
-    <div class="chart-card full">
-      <div class="title">📈 月度趋势</div>
-      <canvas id="trendChart"></canvas>
-    </div>
-  </div>
-  <div class="chart-row">
-    <div class="chart-card">
-      <div class="title">🏬 门店排行</div>
-      <canvas id="storeChart"></canvas>
-    </div>
-    <div class="chart-card">
-      <div class="title">📦 品类分布</div>
-      <canvas id="catChart"></canvas>
-    </div>
-  </div>
-  <div class="chart-card full">
-    <div class="title">📋 门店明细</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>门店</th><th>订单数</th><th>成交金额</th><th>销量(件)</th><th>占比</th></tr></thead>
-        <tbody id="storeTable"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-<div class="footer">
-  伯俊科技(云南)有限公司 · REST API数据 · 更新时间: <span id="updateTime"></span>
+<div class="card" onclick="location.href='category-sellthru.html'">
+<div class="icon">📊</div>
+<div class="title">品类售罄</div>
+<div class="desc">按大类、性别、品类汇总的订货量、销售数量、预计库存及售罄率</div>
+<span class="tag">数据透视表</span>
 </div>
 
-<script>
-var R = REAL_DATA;
+<div class="card" onclick="location.href='stock-master.html'">
+<div class="icon">📦</div>
+<div class="title">零售库存母表</div>
+<div class="desc">全量库存明细，按店仓×货号，含库存数量、销售数据、预计数量</div>
+<span class="tag">明细数据 · 4505条</span>
+</div>
 
-// KPI
-var g = document.getElementById('kpiGrid');
-var s = R.summary;
-var yoy = s.last_amt > 0 ? ((s.total_amt - s.last_amt) / s.last_amt * 100).toFixed(1) : 0;
-var gr = (s.total_amt / (s.total_amt * 1.15) * 100).toFixed(1);
-g.innerHTML =
-  '<div class="kpi-card"><div class="label">💰 成交金额</div><div class="val">¥' + (s.total_amt / 10000).toFixed(1) + '</div><div class="sub">同比' + (yoy >= 0 ? '<span class="up">↑' : '<span class="down">↓') + Math.abs(yoy) + '%</span></div></div>' +
-  '<div class="kpi-card"><div class="label">📦 总销量</div><div class="val">' + s.total_qty + '</div><div class="sub">' + s.total_orders + '笔订单</div></div>' +
-  '<div class="kpi-card"><div class="label">🏬 活跃门店</div><div class="val">' + Object.keys(R.store_rank).length + '</div><div class="sub">总计' + Object.keys(R.stores).length + '个门店</div></div>' +
-  '<div class="kpi-card"><div class="label">📈 客单价</div><div class="val">¥' + (s.total_orders > 0 ? Math.round(s.total_amt / s.total_orders) : 0) + '</div><div class="sub">件单价 ¥' + (s.total_qty > 0 ? Math.round(s.total_amt / s.total_qty) : 0) + '</div></div>' +
-  '<div class="kpi-card"><div class="label">📊 折扣率</div><div class="val">89.1%</div><div class="sub">原价 ¥' + Math.round(s.total_amt / 0.891) + '</div></div>' +
-  '<div class="kpi-card"><div class="label">🆕 产品种类</div><div class="val">' + s.products + '</div><div class="sub">30个款在售</div></div>';
+<div class="card" onclick="location.href='total-stock.html'">
+<div class="icon">🏬</div>
+<div class="title">总零售库存</div>
+<div class="desc">按货号汇总的库存数量、库存金额、销售数量、成交金额</div>
+<span class="tag">货号级汇总</span>
+</div>
 
-// 趋势图
-new Chart(document.getElementById('trendChart'), {
-  type: 'bar',
-  data: { labels: Object.keys(R.trend).map(function(m) { return m.substring(0,4) + '.' + m.substring(4,6); }), datasets: [{ label: '成交金额', data: Object.values(R.trend).map(function(v) { return Math.round(v.amt); }), backgroundColor: '#4361ee', borderRadius: 4, barPercentage: .5 }] },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return '¥' + ctx.raw.toLocaleString(); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '¥' + (v / 10000).toFixed(1) + '万'; } }, grid: { color: 'rgba(0,0,0,.04)' } }, x: { grid: { display: false } } } }
-});
+<div class="card" onclick="location.href='weekly-trend.html'">
+<div class="icon">📈</div>
+<div class="title">周总销售透视</div>
+<div class="desc">按货号×周的趋势分析，展示各周销售数量变化</div>
+<span class="tag">趋势分析</span>
+</div>
 
-// 门店排行
-var sr = Object.entries(R.store_rank).sort(function(a, b) { return b[1].amt - a[1].amt; });
-var colors = ['#4361ee','#3a86ff','#8338ec','#ff006e','#fb5607','#ff9f1c','#06d6a0','#118ab2','#7209b7','#4cc9f0'];
-new Chart(document.getElementById('storeChart'), {
-  type: 'bar',
-  data: { labels: sr.map(function(s) { return s[1].n.substring(0,6) + '…'; }), datasets: [{ label: '成交金额', data: sr.map(function(s) { return Math.round(s[1].amt); }), backgroundColor: sr.map(function(_,i) { return colors[i % colors.length]; }), borderRadius: 3, barPercentage: .6 }] },
-  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return '¥' + ctx.raw.toLocaleString('zh-CN'); } } } }, scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return '¥' + (v / 10000).toFixed(1) + '万'; } }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { grid: { display: false }, ticks: { font: { size: 9 } } } } }
-});
+<div class="card" onclick="location.href='q2-rank.html'">
+<div class="icon">🏆</div>
+<div class="title">Q2销售排名</div>
+<div class="desc">全维度销售排名分析，含货号、品类、上市月份、周趋势等</div>
+<span class="tag">排名分析 · 80列</span>
+</div>
 
-// 品类分布
-var pd = { '裤子': 0, '连衣裙': 0, '外套': 0, '上衣': 0, '其他': 0, '小配件': 0 };
-R.sell_thru.forEach(function(p) {
-  var v = p.pval || '其他';
-  if (pd[v] === undefined) pd['其他'] = (pd['其他'] || 0) + p.sold;
-  else pd[v] = (pd[v] || 0) + p.sold;
-});
-var pd2 = Object.entries(pd).filter(function(e) { return e[1] > 0; });
-new Chart(document.getElementById('catChart'), {
-  type: 'doughnut',
-  data: { labels: pd2.map(function(e) { return e[0]; }), datasets: [{ data: pd2.map(function(e) { return e[1]; }), backgroundColor: ['#4361ee','#ff9f1c','#06d6a0','#8338ec','#ff006e','#94a3b8'] }] },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
-});
+<div class="card" onclick="location.href='store-sellthru.html'">
+<div class="icon">📍</div>
+<div class="title">区域售罄汇总</div>
+<div class="desc">按区域、店仓属性、区域经理汇总的售罄分析</div>
+<span class="tag">区域分析</span>
+</div>
 
-// 门店明细表
-var tb = document.getElementById('storeTable');
-tb.innerHTML = sr.map(function(s) {
-  var pct = s[1].amt / s.total_amt * 100;
-  return '<tr><td><span class="badge blue">' + s[1].n + '</span></td><td>' + s[1].ord + '</td><td class="text-right">¥' + s[1].amt.toLocaleString() + '</td><td class="text-right">' + s[1].qty + '</td><td class="text-right">' + pct.toFixed(1) + '%</td></tr>';
-}).join('');
-document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-</script>
+<div class="card" onclick="location.href='weekly-summary.html'">
+<div class="icon">📋</div>
+<div class="title">周销售汇总母表</div>
+<div class="desc">周销售明细流水，含店仓、货号、数量、金额、折扣</div>
+<span class="tag">流水明细</span>
+</div>
+
+<div class="card" onclick="location.href='first-sale.html'">
+<div class="icon">📅</div>
+<div class="title">第一次销售日期</div>
+<div class="desc">各货号第一次销售日期记录</div>
+<span class="tag">日期查询</span>
+</div>
+
+<div class="card" onclick="location.href='store-sellthru-join.html'">
+<div class="icon">🤝</div>
+<div class="title">单店联营售罄</div>
+<div class="desc">代理联营门店的售罄分析（品类级）</div>
+<span class="tag">联营门店</span>
+</div>
+
+<div class="card" onclick="location.href='store-sellthru-direct.html'">
+<div class="icon">🏪</div>
+<div class="title">单店直营售罄</div>
+<div class="desc">代理直营门店的售罄分析（品类级）</div>
+<span class="tag">直营门店</span>
+</div>
+
+<div class="card" onclick="location.href='store-sellthru-franchise.html'">
+<div class="icon">🤲</div>
+<div class="title">单店加盟售罄</div>
+<div class="desc">代理加盟门店的售罄分析（品类级）</div>
+<span class="tag">加盟门店</span>
+</div>
+
+</div>
+<div style="text-align:center;margin-top:30px;padding:20px;color:#aaa;font-size:12px">
+伯俊科技(云南) · 26Q2周售罄跟踪表排名系统
+</div>
 </body>
 </html>
