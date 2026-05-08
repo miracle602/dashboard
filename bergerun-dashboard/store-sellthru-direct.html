@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>单店直营售罄</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f5f6fa;padding:15px;color:#333}
+.header{background:#1a1a2e;color:#fff;padding:15px 20px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px}.header p{font-size:12px;color:#aaa;margin-top:3px}
+.btn-export{background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.btn-back{background:#555;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;text-decoration:none;margin-right:8px}
+.summary{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.kpi{background:#fff;padding:10px 15px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center;flex:1;min-width:100px}
+.kpi .num{font-size:20px;font-weight:700;color:#1a1a2e}.kpi .label{font-size:11px;color:#888;margin-top:2px}
+.controls{margin-bottom:10px}.controls input{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;width:300px}
+.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:78vh}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#1a1a2e;color:#fff;padding:6px 8px;text-align:center;position:sticky;top:0;z-index:1;white-space:nowrap}
+td{padding:4px 8px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
+tr:hover{background:#eef2ff}.num{text-align:right}
+</style></head><body>
+<div class="header">
+<div><h1>单店直营售罄</h1><p>77条记录</p></div>
+<div><a class="btn-back" href="index.html">← 返回</a><button class="btn-export" onclick="exportExcel()">⬇ 导出Excel</button></div>
+</div>
+<div class="summary" id="kpi"></div>
+<div class="controls"><input id="search" placeholder="搜索门店..." oninput="go()"></div>
+<div class="table-wrap"><table><thead><tr><th>店仓属性</th><th>地区</th><th>店仓</th><th>订货数量</th><th>销售数量</th><th>预计数量</th><th>售罄率</th><th>标准金额</th><th>成交金额</th><th>折扣(%)</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<script>
+var H = ["店仓属性","地区","店仓","订货数量","销售数量","预计数量","售罄率","标准金额","成交金额","折扣(%)"];
+var D=[["代理直营", "", "YYY005店仓", 1003198, 0, 1003198, 0.0, 0, 0, 0], ["代理直营", "", "总部仓库", 892052, 0, 892052, 0.0, 0, 0, 0], ["代理直营", "", "YYY-店仓", 622010, 0, 622010, 0.0, 0, 0, 0], ["代理直营", "", "南屏街1店", 127748, 0, 127748, 0.0, 0, 0, 0], ["代理直营", "", "小西门店", 81231, 257, 80974, 0.32, 73752, 65482.0, 88.8], ["代理直营", "", "南屏街2店", 58923, 0, 58923, 0.0, 0, 0, 0], ["代理直营", "", "会泽1店", 22754, 0, 22754, 0.0, 0, 0, 0], ["代理直营", "", "SEPTWOLVES直营店", 20000, 0, 20000, 0.0, 0, 0, 0], ["代理直营", "", "TEDELON、直营店", 19322, 0, 19322, 0.0, 0, 0, 0], ["代理直营", "", "东川1店", 19260, 0, 19260, 0.0, 0, 0, 0], ["代理直营", "", "曲靖分店１", 18364, 0, 18364, 0.0, 0, 0, 0], ["代理直营", "", "测试店仓", 17374, 0, 17374, 0.0, 0, 0, 0], ["代理直营", "", "测试店仓001", 12145, 0, 12145, 0.0, 0, 0, 0], ["代理直营", "", "东川店", 10961, 0, 10961, 0.0, 0, 0, 0], ["代理直营", "", "LEI总仓", 7295, 0, 7295, 0.0, 0, 0, 0], ["代理直营", "", "世纪城店", 6202, 0, 6202, 0.0, 0, 0, 0], ["代理直营", "", "巧家", 5939, 0, 5939, 0.0, 0, 0, 0], ["代理直营", "", "大都摩天1店新", 3903, 0, 3903, 0.0, 0, 0, 0], ["代理直营", "", "曲靖分店5", 3544, 0, 3544, 0.0, 0, 0, 0], ["代理直营", "", "北辰一店店仓", 3374, 0, 3374, 0.0, 0, 0, 0], ["代理直营", "", "安宁服装店", 2620, 0, 2620, 0.0, 0, 0, 0], ["代理直营", "", "MB店仓", 2527, 0, 2527, 0.0, 0, 0, 0], ["代理直营", "", "大都摩天2店", 2467, 0, 2467, 0.0, 0, 0, 0], ["代理直营", "", "曲靖分店3", 2162, 0, 2162, 0.0, 0, 0, 0], ["代理直营", "", "曲靖分店２", 2026, 0, 2026, 0.0, 0, 0, 0], ["代理直营", "", "北辰店仓", 1340, 0, 1340, 0.0, 0, 0, 0], ["代理直营", "", "ZCW店仓", 933, 0, 933, 0.0, 0, 0, 0], ["代理直营", "", "雷婷婷的店仓", 575, 0, 575, 0.0, 0, 0, 0], ["代理直营", "", "总部ZYX店仓", 551, 0, 551, 0.0, 0, 0, 0], ["代理直营", "", "ZY测试1", 498, 0, 498, 0.0, 0, 0, 0], ["代理直营", "", "联大街店", 421, 0, 421, 0.0, 0, 0, 0], ["代理直营", "", "百盛REVAN", 400, 0, 400, 0.0, 0, 0, 0], ["代理直营", "", "建水人民商场1店", 385, 0, 385, 0.0, 0, 0, 0], ["代理直营", "", "安宁砂之船全棉时代", 365, 0, 365, 0.0, 0, 0, 0], ["代理直营", "", "CHUU昆明同德广场店", 358, 0, 358, 0.0, 0, 0, 0], ["代理直营", "", "LEI一级仓", 329, 0, 329, 0.0, 0, 0, 0], ["代理直营", "", "TX店仓", 303, 0, 303, 0.0, 0, 0, 0], ["代理直营", "", "XKY店仓02", 298, 0, 298, 0.0, 0, 0, 0], ["代理直营", "", "昆明店仓", 260, 0, 260, 0.0, 0, 0, 0], ["代理直营", "", "孟定中缅街店", 230, 0, 230, 0.0, 0, 0, 0], ["代理直营", "", "NO ONE ELSE昆明同德广场店", 220, 0, 220, 0.0, 0, 0, 0], ["代理直营", "", "呈贡奥斯迪店", 220, 0, 220, 0.0, 0, 0, 0], ["代理直营", "", "ZCW03店仓", 201, 0, 201, 0.0, 0, 0, 0], ["代理直营", "", "马街南路店", 200, 0, 200, 0.0, 0, 0, 0], ["代理直营", "", "红河店", 185, 0, 185, 0.0, 0, 0, 0], ["代理直营", "", "瑞丽彩云城店", 181, 0, 181, 0.0, 0, 0, 0], ["代理直营", "", "XSC的店仓2", 170, 0, 170, 0.0, 0, 0, 0], ["代理直营", "", "CHUU昆明金鹰购物中心店", 161, 0, 161, 0.0, 0, 0, 0], ["代理直营", "", "XSC的店仓", 153, 0, 153, 0.0, 0, 0, 0], ["代理直营", "", "ZZ店仓", 120, 0, 120, 0.0, 0, 0, 0], ["代理直营", "", "新奇迹咖啡分仓001", 120, 0, 120, 0.0, 0, 0, 0], ["代理直营", "", "新奇迹咖啡总仓", 112, 0, 112, 0.0, 0, 0, 0], ["代理直营", "", "ZYX店仓", 84, 0, 84, 0.0, 0, 0, 0], ["代理直营", "", "呈贡聚贤街6店", 70, 0, 70, 0.0, 0, 0, 0], ["代理直营", "", "物料仓库", 61, 0, 61, 0.0, 0, 0, 0], ["代理直营", "", "TEST-XY-店仓", 55, 0, 55, 0.0, 0, 0, 0], ["代理直营", "", "凤庆壹号路店", 53, 0, 53, 0.0, 0, 0, 0], ["代理直营", "", "祥云龙翔路店", 52, 0, 52, 0.0, 0, 0, 0], ["代理直营", "", "新奇迹咖啡分仓004", 41, 0, 41, 0.0, 0, 0, 0], ["代理直营", "", "ZY测试2", 39, 0, 39, 0.0, 0, 0, 0], ["代理直营", "", "官渡环城南路店", 20, 0, 20, 0.0, 0, 0, 0], ["代理直营", "", "南亚第一城店", 19, 0, 19, 0.0, 0, 0, 0], ["代理直营", "", "蒙自俊豪商都店", 13, 0, 13, 0.0, 0, 0, 0], ["代理直营", "", "中转仓库", 12, 0, 12, 0.0, 0, 0, 0], ["代理直营", "", "次品仓库", 11, 0, 11, 0.0, 0, 0, 0], ["代理直营", "", "同德2号店", 10, 0, 10, 0.0, 0, 0, 0], ["代理直营", "", "XSC二级门店", 10, 0, 10, 0.0, 0, 0, 0], ["代理直营", "", "呈贡仕林街店", 10, 0, 10, 0.0, 0, 0, 0], ["代理直营", "", "顺城LEFAME", 9, 0, 9, 0.0, 0, 0, 0], ["代理直营", "", "XKY店仓04", 7, 0, 7, 0.0, 0, 0, 0], ["代理直营", "", "同德4号店", 4, 0, 4, 0.0, 0, 0, 0], ["代理直营", "", "CHUU昆明七彩云南第壹城店", 3, 0, 3, 0.0, 0, 0, 0], ["代理直营", "", "南屏街1店买断", 3, 0, 3, 0.0, 0, 0, 0], ["代理直营", "", "CHUU昆明万象城店", 2, 0, 2, 0.0, 0, 0, 0], ["代理直营", "", "XKY店仓03", 2, 0, 2, 0.0, 0, 0, 0], ["代理直营", "", "双桥海明路1店", 1, 0, 1, 0.0, 0, 0, 0], ["代理直营", "", "NO ONE ELSE云南昆明顺城店", 1, 0, 1, 0.0, 0, 0, 0]];
+var F=D;
+function exportExcel(){{
+    var c="\uFEFF"+H.join(",")+"\n";
+    for(var i=0;i<F.length;i++){{var r=F[i];var row=[];
+        for(var j=0;j<r.length;j++){{var v=r[j];
+            if(typeof v==='number')row.push(v===Math.floor(v)?v:v.toFixed(2));
+            else row.push('"'+v.replace(/"/g,'""')+'"');
+        }}c+=row.join(",")+"\n";
+    }}
+    var b=new Blob([c],{{type:'text/csv;charset=utf-8;'}});
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='{name}.csv';a.click();
+}}
+function go(){{
+    var q=document.getElementById('search').value;
+    if(!q){{F=D;}}else{{F=[];for(var i=0;i<D.length;i++){{if(D[i][2].indexOf(q)>-1)F.push(D[i]);}}}}
+    var tb=document.getElementById('tbody');tb.innerHTML='';
+    for(var i=0;i<F.length;i++){{var r=F[i];var h='<tr>';
+        for(var j=0;j<r.length;j++){{var v=r[j];
+            if(typeof v==='number'){{h+='<td class="num">'+(v===Math.floor(v)?v.toLocaleString():v.toFixed(2))+'</td>';}}
+            else{{h+='<td>'+(v||'')+'</td>';}}
+        }}h+='</tr>';tb.innerHTML+=h;
+    }}
+}}
+document.getElementById('kpi').innerHTML=
+    '<div class="kpi"><div class="num">{kpi_count}</div><div class="label">门店数</div></div>'+
+    '<div class="kpi"><div class="num">{kpi_order:,}</div><div class="label">订货总量</div></div>'+
+    '<div class="kpi"><div class="num" style="color:#27ae60">{kpi_sale:,}</div><div class="label">总销售</div></div>'+
+    '<div class="kpi"><div class="num" style="color:#e67e22">{kpi_sale/max(1,kpi_order)*100:.2f}%</div><div class="label">总体售罄</div></div>';
+go();
+</script></body></html>

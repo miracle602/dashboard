@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>单店加盟售罄</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f5f6fa;padding:15px;color:#333}
+.header{background:#1a1a2e;color:#fff;padding:15px 20px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px}.header p{font-size:12px;color:#aaa;margin-top:3px}
+.btn-export{background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.btn-back{background:#555;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;text-decoration:none;margin-right:8px}
+.summary{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.kpi{background:#fff;padding:10px 15px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center;flex:1;min-width:100px}
+.kpi .num{font-size:20px;font-weight:700;color:#1a1a2e}.kpi .label{font-size:11px;color:#888;margin-top:2px}
+.controls{margin-bottom:10px}.controls input{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;width:300px}
+.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:78vh}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#1a1a2e;color:#fff;padding:6px 8px;text-align:center;position:sticky;top:0;z-index:1;white-space:nowrap}
+td{padding:4px 8px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
+tr:hover{background:#eef2ff}.num{text-align:right}
+</style></head><body>
+<div class="header">
+<div><h1>单店加盟售罄</h1><p>2条记录</p></div>
+<div><a class="btn-back" href="index.html">← 返回</a><button class="btn-export" onclick="exportExcel()">⬇ 导出Excel</button></div>
+</div>
+<div class="summary" id="kpi"></div>
+<div class="controls"><input id="search" placeholder="搜索门店..." oninput="go()"></div>
+<div class="table-wrap"><table><thead><tr><th>店仓属性</th><th>地区</th><th>店仓</th><th>订货数量</th><th>销售数量</th><th>预计数量</th><th>售罄率</th><th>标准金额</th><th>成交金额</th><th>折扣(%)</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<script>
+var H = ["店仓属性","地区","店仓","订货数量","销售数量","预计数量","售罄率","标准金额","成交金额","折扣(%)"];
+var D=[["代理加盟", "", "TEDELON加盟店", 20007, 0, 20007, 0.0, 0, 0, 0], ["代理加盟", "", "SEPTWOLVES加盟店", 19400, 0, 19400, 0.0, 0, 0, 0]];
+var F=D;
+function exportExcel(){{
+    var c="\uFEFF"+H.join(",")+"\n";
+    for(var i=0;i<F.length;i++){{var r=F[i];var row=[];
+        for(var j=0;j<r.length;j++){{var v=r[j];
+            if(typeof v==='number')row.push(v===Math.floor(v)?v:v.toFixed(2));
+            else row.push('"'+v.replace(/"/g,'""')+'"');
+        }}c+=row.join(",")+"\n";
+    }}
+    var b=new Blob([c],{{type:'text/csv;charset=utf-8;'}});
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='{name}.csv';a.click();
+}}
+function go(){{
+    var q=document.getElementById('search').value;
+    if(!q){{F=D;}}else{{F=[];for(var i=0;i<D.length;i++){{if(D[i][2].indexOf(q)>-1)F.push(D[i]);}}}}
+    var tb=document.getElementById('tbody');tb.innerHTML='';
+    for(var i=0;i<F.length;i++){{var r=F[i];var h='<tr>';
+        for(var j=0;j<r.length;j++){{var v=r[j];
+            if(typeof v==='number'){{h+='<td class="num">'+(v===Math.floor(v)?v.toLocaleString():v.toFixed(2))+'</td>';}}
+            else{{h+='<td>'+(v||'')+'</td>';}}
+        }}h+='</tr>';tb.innerHTML+=h;
+    }}
+}}
+document.getElementById('kpi').innerHTML=
+    '<div class="kpi"><div class="num">{kpi_count}</div><div class="label">门店数</div></div>'+
+    '<div class="kpi"><div class="num">{kpi_order:,}</div><div class="label">订货总量</div></div>'+
+    '<div class="kpi"><div class="num" style="color:#27ae60">{kpi_sale:,}</div><div class="label">总销售</div></div>'+
+    '<div class="kpi"><div class="num" style="color:#e67e22">{kpi_sale/max(1,kpi_order)*100:.2f}%</div><div class="label">总体售罄</div></div>';
+go();
+</script></body></html>
