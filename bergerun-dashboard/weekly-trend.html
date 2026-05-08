@@ -1,60 +1,46 @@
-<!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>周总销售透视</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f5f6fa;padding:15px;color:#333}
 .header{background:#1a1a2e;color:#fff;padding:15px 20px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .header h1{font-size:20px}.header p{font-size:12px;color:#aaa;margin-top:3px}
-.btn-export{background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px}
-.btn-back{background:#555;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;text-decoration:none;margin-right:8px}
+.btn{background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.btn2{background:#555;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;text-decoration:none;margin-right:8px}
 .summary{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .kpi{background:#fff;padding:10px 15px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center;flex:1;min-width:100px}
 .kpi .num{font-size:20px;font-weight:700;color:#1a1a2e}.kpi .label{font-size:11px;color:#888;margin-top:2px}
 .controls{margin-bottom:10px}.controls input{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;width:300px}
-.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:75vh}
+.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:78vh}
 table{width:100%;border-collapse:collapse;font-size:11px}
 th{background:#1a1a2e;color:#fff;padding:5px 6px;text-align:center;position:sticky;top:0;z-index:1;white-space:nowrap}
 td{padding:3px 6px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
-tr:hover{background:#eef2ff}.num{text-align:right}
+tr:hover{background:#f0f3ff}.num{text-align:right}
 </style></head><body>
-<div class="header">
-<div><h1>周总销售透视</h1><p>7个货号 · 7个周</p></div>
-<div><a class="btn-back" href="index.html">← 返回</a><button class="btn-export" onclick="exportExcel()">⬇ 导出Excel</button></div>
-</div>
+<div class="header"><div><h1>周总销售透视</h1><p>7个货号 · 7个周</p></div>
+<div><a class="btn2" href="index.html">← 返回</a><button class="btn" onclick="exportExcel()">⬇ 导出</button></div></div>
 <div class="summary" id="kpi"></div>
 <div class="controls"><input id="search" placeholder="搜索货号..." oninput="go()"></div>
 <div class="table-wrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
 <script>
 var H = ["货号", "26W4W1", "26W4W2", "26W4W3", "26W4W4", "26W4W5", "26W5W1", "26W5W2", "合计"];
-var D = [["WX1DDT2101", 25, 35, 35, 35, 15, 30, 10, 185], ["WX1MYLE273", 15, 21, 21, 21, 9, 18, 6, 111], ["WQ1MKK2139", 10, 14, 14, 14, 6, 12, 4, 74], ["888888", 0, 0, 1, 3, 0, 0, 0, 4], ["WQ1LYK5921", 0, 2, 0, 0, 0, 0, 0, 2], ["GQ0LYK5834", 0, 2, 0, 0, 0, 0, 0, 2], ["奶粉1", 0, 0, 1, 0, 0, 0, 0, 1]];
-var F = D;
-
-function exportExcel() {
-    var csv = "\uFEFF"+H.join(",")+"\n";
-    for (var i=0;i<F.length;i++){var r=F[i];var row=[];
-        row.push('"'+r[0]+'"');
-        for (var j=1;j<r.length;j++){row.push(r[j]);}
-        csv+=row.join(",")+"\n";
+var D=[["WX1DDT2101", 25, 35, 35, 35, 15, 30, 10, 185], ["WX1MYLE273", 15, 21, 21, 21, 9, 18, 6, 111], ["WQ1MKK2139", 10, 14, 14, 14, 6, 12, 4, 74], ["888888", 0, 0, 1, 3, 0, 0, 0, 4], ["WQ1LYK5921", 0, 2, 0, 0, 0, 0, 0, 2], ["GQ0LYK5834", 0, 2, 0, 0, 0, 0, 0, 2], ["奶粉1", 0, 0, 1, 0, 0, 0, 0, 1]];var F=D;
+function exportExcel(){
+    var c="\uFEFF"+H.join(",")+"\n";
+    for(var i=0;i<F.length;i++){var r=F[i];var row=['"'+r[0].replace(/"/g,'""')+'"'];
+        for(var j=1;j<r.length;j++){row.push(r[j]);}c+=row.join(",")+"\n";
     }
-    var b=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='周总销售透视.csv';a.click();
+    var b=new Blob([c],{type:'text/csv;charset=utf-8;'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='周总销售透视.csv';a.click();
 }
-
-function go(){
-    var q=document.getElementById('search').value;
+function go(){var q=document.getElementById('search').value;
     if(!q){F=D;}else{F=[];for(var i=0;i<D.length;i++){if(D[i][0].indexOf(q)>-1)F.push(D[i]);}}
     var tb=document.getElementById('tbody');tb.innerHTML='';
-    for(var i=0;i<F.length;i++){var r=F[i];var h='<tr>';
-        h+='<td style="text-align:left">'+r[0]+'</td>';
-        for(var j=1;j<r.length;j++){h+='<td class="num">'+r[j].toLocaleString()+'</td>';}
-        h+='</tr>';tb.innerHTML+=h;
+    for(var i=0;i<F.length;i++){var r=F[i];var h='<tr><td style="text-align:left">'+r[0]+'</td>';
+        for(var j=1;j<r.length;j++){h+='<td class="num">'+r[j].toLocaleString()+'</td>';}h+='</tr>';tb.innerHTML+=h;
     }
 }
-document.getElementById('thead').innerHTML = H.map(function(h){return '<th>'+h+'</th>';}).join('');
-var ts=0;for(var i=0;i<D.length;i++){ts+=D[i][D[i].length-1];}
-document.getElementById('kpi').innerHTML=
-    '<div class="kpi"><div class="num">'+D.length+'</div><div class="label">货号数</div></div>'+
-    '<div class="kpi"><div class="num">'+ts.toLocaleString()+'</div><div class="label">总销售</div></div>';
+document.getElementById('thead').innerHTML=H.map(function(h){return '<th>'+h+'</th>';}).join('');
+document.getElementById('kpi').innerHTML='<div class="kpi"><div class="num">7</div><div class="label">货号数</div></div>'+
+    '<div class="kpi"><div class="num">379</div><div class="label">总销售</div></div>';
 go();
 </script></body></html>
