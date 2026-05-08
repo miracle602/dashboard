@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>门店同款比分析</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f5f6fa;padding:15px;color:#333}
+.header{background:#1a1a2e;color:#fff;padding:15px 20px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px}.header p{font-size:12px;color:#aaa;margin-top:3px}
+.btn{background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.btn2{background:#555;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;text-decoration:none;margin-right:8px}
+.summary{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.kpi{background:#fff;padding:10px 15px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center;flex:1;min-width:100px}
+.kpi .num{font-size:20px;font-weight:700;color:#1a1a2e}.kpi .label{font-size:11px;color:#888;margin-top:2px}
+.controls{margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.controls input,.controls select{padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px}
+.table-wrap{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:80vh}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#1a1a2e;color:#fff;padding:6px 8px;text-align:center;position:sticky;top:0;z-index:1;white-space:nowrap}
+td{padding:4px 8px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
+tr:hover{background:#f0f3ff}.num{text-align:right}
+.store-row{cursor:pointer;font-weight:600;background:#fafbfc}
+.store-row:hover{background:#e8ebf5}
+.detail-table-wrap{padding:8px 8px 8px 30px;background:#f8f9ff}
+.sub-table{font-size:11px}.sub-table th{background:#4a4a6a;padding:4px 6px}
+</style></head><body>
+<div class="header"><div><h1>门店同款比分析</h1><p>4月 vs 5月(1-8日) · 点击门店展开同款明细 · 1家门店</p></div>
+<div><a class="btn2" href="index.html">← 返回</a><button class="btn" onclick="exportExcel()">⬇ 导出</button></div></div>
+<div class="summary">
+<div class="kpi"><div class="num">1</div><div class="label">门店数</div></div>
+<div class="kpi"><div class="num">299</div><div class="label">4月总件数</div></div>
+<div class="kpi"><div class="num">¥95,876</div><div class="label">4月总金额</div></div>
+<div class="kpi"><div class="num">80</div><div class="label">5月总件数</div></div>
+<div class="kpi"><div class="num">¥25,648</div><div class="label">5月总金额</div></div>
+</div>
+<div class="controls">
+<input id="search" placeholder="搜索门店..." oninput="filterStores()">
+<select id="sortBy" onchange="location.href='?sort='+this.value"><option value="sales">按销售排序</option>
+<option value="name">按门店名</option></select>
+<span style="font-size:11px;color:#888">提示：点击门店行展开同款明细</span>
+</div>
+<div class="table-wrap"><table><thead><tr><th>门店</th><th>4月件数</th><th>5月件数</th><th>件数环比</th><th>4月金额</th><th>5月金额</th><th>同款数</th><th>同款比</th></tr></thead>
+<tbody><tr class="store-row" onclick="toggleStore('10')">
+        <td>小西门店</td>
+        <td class="num">299</td>
+        <td class="num">80</td>
+        <td class="num" style="color:red">↓ -73.2%</td>
+        <td class="num">¥95,876</td>
+        <td class="num">¥25,648</td>
+        <td class="num">3款</td>
+        <td class="num">27.6%</td>
+    </tr><tr id="detail-10" style="display:none"><td colspan="8" style="padding:0">
+        <div class="detail-table-wrap"><table class="sub-table"><thead><tr><th>货号</th><th>品名</th><th>吊牌价</th>
+        <th>4月数量</th><th>4月金额</th><th>5月数量</th><th>5月金额</th><th>环比</th></tr></thead><tbody><tr><td>WX1DDT2101</td><td>套装</td><td class="num">¥216</td>
+        <td class="num">145</td><td class="num">¥31,320</td>
+        <td class="num">40</td><td class="num">¥8,640</td>
+        <td class="num" style="color:red">↓ -72.4%</td></tr><tr><td>WX1MYLE273</td><td>连衣裙</td><td class="num">¥476</td>
+        <td class="num">87</td><td class="num">¥41,412</td>
+        <td class="num">24</td><td class="num">¥11,424</td>
+        <td class="num" style="color:red">↓ -72.4%</td></tr><tr><td>WQ1MKK2139</td><td>微喇裤</td><td class="num">¥349</td>
+        <td class="num">58</td><td class="num">¥20,242</td>
+        <td class="num">16</td><td class="num">¥5,584</td>
+        <td class="num" style="color:red">↓ -72.4%</td></tr></tbody></table></div></td></tr></tbody></table></div>
+<script>
+function toggleStore(sid){var d=document.getElementById('detail-'+sid);d.style.display=d.style.display==='none'?'':'none';}
+function filterStores(){var q=document.getElementById('search').value.toLowerCase();
+    var rows=document.querySelectorAll('.store-row');rows.forEach(function(r){var t=r.cells[0].textContent.toLowerCase();
+        r.style.display=t.indexOf(q)===-1?'none':'';});}
+function exportExcel(){
+    var h=["门店","4月件数","5月件数","环比","4月金额","5月金额","同款数","同款比"];
+    var c="\uFEFF"+h.join(",")+"\n";
+    var rows=document.querySelectorAll('.store-row');rows.forEach(function(r){
+        var row=[];for(var i=0;i<8;i++){var t=r.cells[i].textContent.trim();row.push('"'+t+'"');}
+        c+=row.join(",")+"\n";
+    });
+    var b=new Blob([c],{type:'text/csv;charset=utf-8;'});var a=document.createElement('a');
+    a.href=URL.createObjectURL(b);a.download='门店同款比分析.csv';a.click();
+}
+</script></body></html>
