@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>门店商品专用数据管控</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f0f2f5; padding: 16px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.toolbar-left a { text-decoration: none; color: #1890ff; font-size: 13px; padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; transition: .2s; }
+.toolbar-left a:hover { border-color: #1890ff; color: #1890ff; }
+.toolbar-left a i { margin-right: 4px; }
+.search-box { display: flex; gap: 6px; align-items: center; }
+.search-box input { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 180px; }
+.search-box input:focus { outline: none; border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+.search-box button { padding: 6px 14px; background: #1890ff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.search-box button:active { background: #096dd9; }
+.search-box button.export-btn { background: #52c41a; }
+.search-box button.export-btn:active { background: #389e0d; }
+.kpi-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.kpi-card { background: #fff; border-radius: 6px; padding: 10px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); flex: 1; min-width: 120px; text-align: center; }
+.kpi-card .kpi-num { font-size: 20px; font-weight: 700; color: #262626; }
+.kpi-card .kpi-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
+.table-wrap { overflow-x: auto; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+table { border-collapse: collapse; width: 100%; font-size: 12px; white-space: nowrap; min-width: 3000px; }
+thead th { position: sticky; top: 0; z-index: 10; background: #1a3a5c; color: #fff; padding: 4px 6px; text-align: center; border: 1px solid #2a4a6c; font-weight: 600; font-size: 11px; }
+thead th.group-header { background: #2a5a8c; }
+tbody td { padding: 3px 5px; text-align: center; border: 1px solid #e8e8e8; color: #262626; }
+tbody tr:nth-child(even) { background: #fafafa; }
+tbody tr:hover { background: #e6f7ff; }
+tbody td.text-left { text-align: left; }
+tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.pagination button { padding: 5px 12px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.pagination button:disabled { opacity: .4; cursor: default; }
+.pagination button.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+.pagination .page-info { font-size: 13px; color: #595959; }
+.page-size-select { padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+@media (max-width: 768px) {
+  body { padding: 8px; }
+  .kpi-card { min-width: 80px; padding: 6px 10px; }
+  .kpi-card .kpi-num { font-size: 16px; }
+  .search-box input { width: 120px; }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <a href=".">← 返回</a>
+  </div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索款号/品名/门店..." oninput="doSearch()">
+    <button onclick="doSearch()">搜索</button>
+    <button class="export-btn" onclick="exportExcel()">导出Excel</button>
+  </div>
+</div>
+
+<div class="kpi-row" id="kpiRow"></div>
+
+<div class="table-wrap">
+  <table id="dataTable">
+    <thead id="tableHead"></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="pagination" id="pagination">
+  <select class="page-size-select" id="pageSizeSelect" onchange="changePageSize()">
+    <option value="20">20条/页</option><option value="50" selected>50条/页</option>
+    <option value="100">100条/页</option><option value="200">200条/页</option>
+  </select>
+  <button onclick="goPage(1)" :disabled="page===1">首页</button>
+  <button onclick="goPage(page-1)" :disabled="page===1">‹ 上一页</button>
+  <span class="page-info" id="pageInfo"></span>
+  <button onclick="goPage(page+1)" :disabled="page>=totalPages">下一页 ›</button>
+  <button onclick="goPage(totalPages)" :disabled="page>=totalPages">末页</button>
+</div>
+
+<script>
+// ========== 列定义 ==========
+// ========== 列定义（严格按Excel106列） ==========
+const COL_NAMES = [
+  '店仓名称', '店仓类别', '年份', '季节', '品名', '款号', '颜色', '吊牌价',
+  '波段', '主推款', '单店单款\n单色零售排名', '到店天数'
+];
+
+const SIZE_NAMES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '合计'];
+
+// 分组：每7列一组(尺码)，单列单独
+const COL_GROUPS_FIRST = [
+  '期初订单', '订单进货\n（订单，正常）', '换货进货', '补货，调货进货',
+  '退货数量', '调出', '实际发货数量', '累计销售'
+];
+// 单列：平均折扣
+// 然后周销7列
+// 单列：售罄率
+// 然后店铺期末库存7列, 总仓库存7列, 建议补货7列, 与总公司补货建议7列
+// 最后一列空
+const EXTRA_LABELS = ['平均折扣', '周销', '售罄率', '店铺期末\n库存', '总仓库存', '建议补货', '与总公司\n补货建议', ''];
+
+const EXTRA_COLS = ['平均折扣', '', '周销', '', '', '', '', '', '', '', '售罄率', ''];
+
+// ========== 数据 ==========
+let rawData = [];
+let page = 1;
+let pageSize = 50;
+let filteredData = [];
+
+// 模拟数据（2条示例）
+rawData = [
+  {
+    store_name: '云南南涧恩瑞妮（新）', store_type: '加盟ZC', year: '2026', season: '春',
+    prod_name: '衬衫', prod_code: 'M61C155', color: '无花果色', pricelist: 599,
+    boduan: '二波', zhutui: '', rank: '', arrive_days: '',
+    // 期初订单XS~合计
+    qc_so: [0,0,0,0,0,0,0],
+    // 订单进货
+    sale_qty: [0,0,0,0,0,0,0],
+    // 换货进货
+    change_qty: [0,0,0,0,0,0,0],
+    // 补货调货
+    transfer_in: [0,0,0,0,0,0,0],
+    // 退货数量
+    ret_qty: [0,0,0,0,0,0,0],
+    // 调出
+    transfer_out: [0,0,0,0,0,0,0],
+    // 实际发货
+    sum_qty: [0,0,0,0,0,0,0],
+    // 累计销售
+    retail_qty: [0,0,0,0,0,0,0],
+    // 平均折扣
+    discount: '',
+    // 周销
+    day_qty: [0,0,0,0,0,0,0],
+    // 售罄率
+    sell_rate: '0%',
+    // 店铺期末库存
+    store_qty: [0,1,1,0,0,0,2],
+    // 总仓库存
+    fa_qty: [0,1,1,0,0,0,2],
+    // 建议补货
+    sug_qty: [1,1,0,0,0,0,2],
+    // 与总公司补货建议
+    final_sug: [2,1,1,0,0,0,4]
+  },
+  {
+    store_name: '云南南涧恩瑞妮（新）', store_type: '加盟ZC', year: '2026', season: '春',
+    prod_name: '衬衫', prod_code: 'M61C158', color: '雪球白', pricelist: 499,
+    boduan: '一波', zhutui: '', rank: '', arrive_days: '',
+    qc_so: [0,0,0,0,0,0,0],
+    sale_qty: [0,0,0,0,0,0,0],
+    change_qty: [0,0,0,0,0,0,0],
+    transfer_in: [0,0,0,0,0,0,0],
+    ret_qty: [0,0,0,0,0,0,0],
+    transfer_out: [0,0,0,0,0,0,0],
+    sum_qty: [0,0,0,0,0,0,0],
+    retail_qty: [0,0,0,0,0,0,0],
+    discount: '',
+    day_qty: [0,0,0,0,0,0,0],
+    sell_rate: '0%',
+    store_qty: [0,0,0,0,0,0,0],
+    fa_qty: [0,0,0,0,0,0,0],
+    sug_qty: [0,0,0,0,0,0,0],
+    final_sug: [0,0,0,0,0,0,0]
+  }
+];
+
+// ========== 生成表头 ==========
+function buildHeader() {
+  let html = '<tr>';
+  // 基本12列
+  for (let c = 0; c < 12; c++) {
+    html += `<th class="${c<3?'':'group-header'}" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
+  }
+  // 8组7列(尺码分组)
+  for (let g of COL_GROUPS_FIRST) {
+    html += `<th colspan="7" class="group-header">${g}</th>`;
+  }
+  // 平均折扣(单列)
+  html += `<th colspan="1" rowspan="2" style="min-width:55px">平均折扣</th>`;
+  // 周销7列
+  html += `<th colspan="7" class="group-header">周销</th>`;
+  // 售罄率(单列)
+  html += `<th colspan="1" rowspan="2" style="min-width:55px">售罄率</th>`;
+  // 店铺期末库存7列
+  html += `<th colspan="7" class="group-header">店铺期末\n库存</th>`;
+  // 总仓库存7列
+  html += `<th colspan="7" class="group-header">总仓库存</th>`;
+  // 建议补货7列
+  html += `<th colspan="7" class="group-header">建议补货</th>`;
+  // 与总公司补货建议7列
+  html += `<th colspan="7" class="group-header">与总公司\n补货建议</th>`;
+  // 最后一列空
+  html += '<th colspan="1" rowspan="2" style="min-width:20px"></th>';
+  
+  // 第二行：尺码名
+  html += '</tr><tr>';
+  // 前12列已在第一行，跳过
+  // 8组尺码 + 1个平均折扣(跳过) + 1组周销尺码 + 1个售罄率(跳过) 
+  // + 4组尺码(店铺期末、总仓、建议补货、与总公司)
+  for (let i = 0; i < 8 + 1 + 4; i++) {
+    for (let s of SIZE_NAMES) {
+      html += `<th>${s}</th>`;
+    }
+  }
+  html += '</tr>';
+  return html;
+}
+
+function fmt(n) { return n == null || n === '' ? '' : n; }
+function fmtPct(n) { return n == null || n === '' ? '' : (typeof n === 'number' ? (n*100).toFixed(1)+'%' : n); }
+
+// ========== 渲染数据行 ==========
+function renderRow(d) {
+  let v = (x) => x != null && x !== '' ? x : '';
+  
+  let html = '<tr>';
+  html += `<td class="text-left">${v(d.store_name)}</td>`;
+  html += `<td>${v(d.store_type)}</td>`;
+  html += `<td>${v(d.year)}</td>`;
+  html += `<td>${v(d.season)}</td>`;
+  html += `<td class="text-left">${v(d.prod_name)}</td>`;
+  html += `<td class="text-left" style="color:#1890ff;font-weight:600">${v(d.prod_code)}</td>`;
+  html += `<td>${v(d.color)}</td>`;
+  html += `<td class="num">${d.pricelist ? '¥'+d.pricelist : ''}</td>`;
+  html += `<td>${v(d.boduan)}</td>`;
+  html += `<td>${v(d.zhutui)}</td>`;
+  html += `<td class="num">${v(d.rank)}</td>`;
+  html += `<td class="num">${v(d.arrive_days)}</td>`;
+  
+  // 按顺序输出：8组尺码数据 + 平均折扣 + 1组尺码 + 售罄率 + 4组尺码 + 空
+  let groups = [
+    d.qc_so, d.sale_qty, d.change_qty, d.transfer_in,
+    d.ret_qty, d.transfer_out, d.sum_qty, d.retail_qty
+  ];
+  for (let g of groups) {
+    if (g) for (let vv of g) html += `<td class="num">${fmt(vv)}</td>`;
+    else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  }
+  // 平均折扣
+  html += `<td class="num">${fmt(d.discount)}</td>`;
+  // 周销
+  if (d.day_qty) for (let vv of d.day_qty) html += `<td class="num">${fmt(vv)}</td>`;
+  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  // 售罄率
+  html += `<td class="num">${fmtPct(d.sell_rate)}</td>`;
+  // 店铺期末库存
+  if (d.store_qty) for (let vv of d.store_qty) html += `<td class="num">${fmt(vv)}</td>`;
+  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  // 总仓库存
+  if (d.fa_qty) for (let vv of d.fa_qty) html += `<td class="num">${fmt(vv)}</td>`;
+  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  // 建议补货
+  if (d.sug_qty) for (let vv of d.sug_qty) html += `<td class="num">${fmt(vv)}</td>`;
+  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  // 与总公司补货建议
+  if (d.final_sug) for (let vv of d.final_sug) html += `<td class="num">${fmt(vv)}</td>`;
+  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  // 最后空列
+  html += '<td></td>';
+  
+  html += '</tr>';
+  return html;
+}
+
+function renderTable() {
+  let kw = document.getElementById('searchInput').value.trim().toLowerCase();
+  filteredData = rawData.filter(d => {
+    if (!kw) return true;
+    return (d.store_name||'').toLowerCase().includes(kw) ||
+           (d.prod_code||'').toLowerCase().includes(kw) ||
+           (d.prod_name||'').toLowerCase().includes(kw) ||
+           (d.color||'').toLowerCase().includes(kw);
+  });
+  
+  // KPI
+  let totalStores = new Set(filteredData.map(d=>d.store_name)).size;
+  let totalProducts = filteredData.length;
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num">${totalStores}</div><div class="kpi-label">门店数</div></div>
+    <div class="kpi-card"><div class="kpi-num">${totalProducts}</div><div class="kpi-label">款色数</div></div>
+  `;
+  
+  // 分页
+  let totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+  if (page > totalPages) page = totalPages;
+  let start = (page - 1) * pageSize;
+  let end = Math.min(start + pageSize, filteredData.length);
+  
+  let body = '';
+  for (let i = start; i < end; i++) {
+    body += renderRow(filteredData[i]);
+  }
+  document.getElementById('tableBody').innerHTML = body;
+  
+  document.getElementById('pageInfo').textContent = `第${page}/${totalPages}页 (共${filteredData.length}条)`;
+  document.querySelectorAll('#pagination button').forEach(b => b.disabled = false);
+}
+
+function doSearch() { page = 1; renderTable(); }
+function goPage(p) {
+  let totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+  if (p < 1 || p > totalPages) return;
+  page = p; renderTable();
+}
+function changePageSize() {
+  pageSize = parseInt(document.getElementById('pageSizeSelect').value);
+  page = 1; renderTable();
+}
+
+function exportExcel() {
+  let rows = [];
+  // 表头
+  let h = [...COL_NAMES.map(x=>x.replace(/\n/g,''))];
+  let gnames = ['期初订单','订单进货','换货进货','补货调货进货','退货数量','调出','实际发货数量','累计销售','平均折扣','周销','售罄率','店铺期末库存','总仓库存','建议补货','与总公司补货建议',''];
+  for (let g of gnames) {
+    if (g === '平均折扣' || g === '售罄率' || g === '') {
+      h.push(g);
+    } else {
+      for (let s of SIZE_NAMES) h.push(s);
+    }
+  }
+  rows.push(h);
+  
+  for (let d of filteredData) {
+    let r = [d.store_name, d.store_type, d.year, d.season, d.prod_name, d.prod_code,
+      d.color, d.pricelist, d.boduan, d.zhutui, d.rank||'', d.arrive_days||''];
+    // 8组尺码
+    for (let arr of [d.qc_so, d.sale_qty, d.change_qty, d.transfer_in,
+      d.ret_qty, d.transfer_out, d.sum_qty, d.retail_qty]) {
+      if (arr) arr.forEach(x=>r.push(x)); else SIZE_NAMES.forEach(()=>r.push(''));
+    }
+    r.push(d.discount||'');
+    if (d.day_qty) d.day_qty.forEach(x=>r.push(x)); else SIZE_NAMES.forEach(()=>r.push(''));
+    r.push(d.sell_rate||'');
+    for (let arr of [d.store_qty, d.fa_qty, d.sug_qty, d.final_sug]) {
+      if (arr) arr.forEach(x=>r.push(x)); else SIZE_NAMES.forEach(()=>r.push(''));
+    }
+    r.push('');
+    rows.push(r);
+  }
+  
+  let csv = '\uFEFF' + rows.map(row => row.map(v => {
+    let s = String(v==null?'':v);
+    if (s.includes(',')||s.includes('"')||s.includes('\n')) {
+      return '"'+s.replace(/"/g,'""')+'"';
+    }
+    return s;
+  }).join(',')).join('\n');
+  
+  let blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  let link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = '门店商品专用数据管控.csv';
+  link.click();
+}
+
+// ========== 初始化 ==========
+document.getElementById('tableHead').innerHTML = buildHeader();
+renderTable();
+</script>
+</body>
+</html>
