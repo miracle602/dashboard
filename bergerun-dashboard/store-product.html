@@ -73,11 +73,11 @@ tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
     <option value="20">20条/页</option><option value="50" selected>50条/页</option>
     <option value="100">100条/页</option><option value="200">200条/页</option>
   </select>
-  <button onclick="goPage(1)" :disabled="page===1">首页</button>
-  <button onclick="goPage(page-1)" :disabled="page===1">‹ 上一页</button>
+  <button onclick="goPage(1)" id="btnFirst">首页</button>
+  <button onclick="goPage(page-1)" id="btnPrev">‹ 上一页</button>
   <span class="page-info" id="pageInfo"></span>
-  <button onclick="goPage(page+1)" :disabled="page>=totalPages">下一页 ›</button>
-  <button onclick="goPage(totalPages)" :disabled="page>=totalPages">末页</button>
+  <button onclick="goPage(page+1)" id="btnNext">下一页 ›</button>
+  <button onclick="goPage(totalPages)" id="btnLast">末页</button>
 </div>
 
 <script>
@@ -308,7 +308,10 @@ function renderTable() {
   document.getElementById('tableBody').innerHTML = body;
   
   document.getElementById('pageInfo').textContent = `第${page}/${totalPages}页 (共${filteredData.length}条)`;
-  document.querySelectorAll('#pagination button').forEach(b => b.disabled = false);
+  document.getElementById('btnFirst').disabled = (page <= 1);
+  document.getElementById('btnPrev').disabled = (page <= 1);
+  document.getElementById('btnNext').disabled = (page >= totalPages);
+  document.getElementById('btnLast').disabled = (page >= totalPages);
 }
 
 function doSearch() { page = 1; renderTable(); }
