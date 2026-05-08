@@ -90,17 +90,34 @@ const COL_NAMES = [
 
 const SIZE_NAMES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '合计'];
 
-// 分组：每7列一组(尺码)，单列单独
-const COL_GROUPS_FIRST = [
-  '期初订单', '订单进货\n（订单，正常）', '换货进货', '补货，调货进货',
-  '退货数量', '调出', '实际发货数量', '累计销售'
+// 分组序列（严格按Excel 106列）
+// R0: 12个单列 + 8个7列组 + 1个单列(平均折扣) + 1个7列组(周销) + 1个单列(售罄率)
+//     + 4个7列组(店铺期末/总仓/建议补货/与总公司) + 1个单列(空)
+// R1: 前12个空 + 8×7尺码 + 空 + 7尺码 + 空 + 4×7尺码 + 空
+const GROUP_NAMES = [
+  // 前8组7列
+  { label: '期初订单', size: 7 },
+  { label: '订单进货\n（订单，正常）', size: 7 },
+  { label: '换货进货', size: 7 },
+  { label: '补货，调货进货', size: 7 },
+  { label: '退货数量', size: 7 },
+  { label: '调出', size: 7 },
+  { label: '实际发货数量', size: 7 },
+  { label: '累计销售', size: 7 },
+  // 单列
+  { label: '平均折扣', size: 1 },
+  // 周销7列
+  { label: '周销', size: 7 },
+  // 单列
+  { label: '售罄率', size: 1 },
+  // 4组7列
+  { label: '店铺期末\n库存', size: 7 },
+  { label: '总仓库存', size: 7 },
+  { label: '建议补货', size: 7 },
+  { label: '与总公司\n补货建议', size: 7 },
+  // 最后空列
+  { label: '', size: 1 }
 ];
-// 单列：平均折扣
-// 然后周销7列
-// 单列：售罄率
-// 然后店铺期末库存7列, 总仓库存7列, 建议补货7列, 与总公司补货建议7列
-// 最后一列空
-const EXTRA_LABELS = ['平均折扣', '周销', '售罄率', '店铺期末\n库存', '总仓库存', '建议补货', '与总公司\n补货建议', ''];
 
 const EXTRA_COLS = ['平均折扣', '', '周销', '', '', '', '', '', '', '', '售罄率', ''];
 
@@ -172,40 +189,26 @@ rawData = [
 // ========== 生成表头 ==========
 function buildHeader() {
   let html = '<tr>';
-  // 基本12列
+  // 前12个单列
   for (let c = 0; c < 12; c++) {
-    html += `<th class="${c<3?'':'group-header'}" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
+    html += `<th class="${c<3?'':'group-header'}" rowspan="2" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
   }
-  // 8组7列(尺码分组)
-  for (let g of COL_GROUPS_FIRST) {
-    html += `<th colspan="7" class="group-header">${g}</th>`;
-  }
-  // 平均折扣(单列)
-  html += `<th colspan="1" rowspan="2" style="min-width:55px">平均折扣</th>`;
-  // 周销7列
-  html += `<th colspan="7" class="group-header">周销</th>`;
-  // 售罄率(单列)
-  html += `<th colspan="1" rowspan="2" style="min-width:55px">售罄率</th>`;
-  // 店铺期末库存7列
-  html += `<th colspan="7" class="group-header">店铺期末\n库存</th>`;
-  // 总仓库存7列
-  html += `<th colspan="7" class="group-header">总仓库存</th>`;
-  // 建议补货7列
-  html += `<th colspan="7" class="group-header">建议补货</th>`;
-  // 与总公司补货建议7列
-  html += `<th colspan="7" class="group-header">与总公司\n补货建议</th>`;
-  // 最后一列空
-  html += '<th colspan="1" rowspan="2" style="min-width:20px"></th>';
-  
-  // 第二行：尺码名
-  html += '</tr><tr>';
-  // 前12列已在第一行，跳过
-  // 8组尺码 + 1个平均折扣(跳过) + 1组周销尺码 + 1个售罄率(跳过) 
-  // + 4组尺码(店铺期末、总仓、建议补货、与总公司)
-  for (let i = 0; i < 8 + 1 + 4; i++) {
-    for (let s of SIZE_NAMES) {
-      html += `<th>${s}</th>`;
+  // 遍历所有分组
+  for (let g of GROUP_NAMES) {
+    if (g.size === 1) {
+      html += `<th rowspan="2" style="min-width:${g.label===''?20:50}px">${g.label}</th>`;
+    } else {
+      html += `<th colspan="${g.size}" class="group-header">${g.label}</th>`;
     }
+  }
+  
+  // 第二行：尺码子列
+  html += '</tr><tr>';
+  for (let g of GROUP_NAMES) {
+    if (g.size === 7) {
+      for (let s of SIZE_NAMES) html += `<th>${s}</th>`;
+    }
+    // size=1的跳过（已在第一行rowspan=2）
   }
   html += '</tr>';
   return html;
@@ -215,10 +218,21 @@ function fmt(n) { return n == null || n === '' ? '' : n; }
 function fmtPct(n) { return n == null || n === '' ? '' : (typeof n === 'number' ? (n*100).toFixed(1)+'%' : n); }
 
 // ========== 渲染数据行 ==========
+// 数组输出辅助
+function outArr(arr, n) {
+  let s = '';
+  if (arr && arr.length >= n) {
+    for (let i=0; i<n; i++) s += `<td class="num">${fmt(arr[i]==null?'':arr[i])}</td>`;
+  } else {
+    for (let i=0; i<n; i++) s += '<td class="num"></td>';
+  }
+  return s;
+}
+
 function renderRow(d) {
   let v = (x) => x != null && x !== '' ? x : '';
-  
   let html = '<tr>';
+  // 前12列
   html += `<td class="text-left">${v(d.store_name)}</td>`;
   html += `<td>${v(d.store_type)}</td>`;
   html += `<td>${v(d.year)}</td>`;
@@ -232,35 +246,31 @@ function renderRow(d) {
   html += `<td class="num">${v(d.rank)}</td>`;
   html += `<td class="num">${v(d.arrive_days)}</td>`;
   
-  // 按顺序输出：8组尺码数据 + 平均折扣 + 1组尺码 + 售罄率 + 4组尺码 + 空
-  let groups = [
-    d.qc_so, d.sale_qty, d.change_qty, d.transfer_in,
-    d.ret_qty, d.transfer_out, d.sum_qty, d.retail_qty
-  ];
-  for (let g of groups) {
-    if (g) for (let vv of g) html += `<td class="num">${fmt(vv)}</td>`;
-    else for (let i=0;i<7;i++) html += '<td class="num"></td>';
-  }
+  // 106列严格按GROUP_NAMES顺序输出
+  // 8组7列：qc_so, sale_qty, change_qty, transfer_in, ret_qty, transfer_out, sum_qty, retail_qty
+  html += outArr(d.qc_so, 7);
+  html += outArr(d.sale_qty, 7);
+  html += outArr(d.change_qty, 7);
+  html += outArr(d.transfer_in, 7);
+  html += outArr(d.ret_qty, 7);
+  html += outArr(d.transfer_out, 7);
+  html += outArr(d.sum_qty, 7);
+  html += outArr(d.retail_qty, 7);
   // 平均折扣
   html += `<td class="num">${fmt(d.discount)}</td>`;
   // 周销
-  if (d.day_qty) for (let vv of d.day_qty) html += `<td class="num">${fmt(vv)}</td>`;
-  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  html += outArr(d.day_qty, 7);
   // 售罄率
   html += `<td class="num">${fmtPct(d.sell_rate)}</td>`;
   // 店铺期末库存
-  if (d.store_qty) for (let vv of d.store_qty) html += `<td class="num">${fmt(vv)}</td>`;
-  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  html += outArr(d.store_qty, 7);
   // 总仓库存
-  if (d.fa_qty) for (let vv of d.fa_qty) html += `<td class="num">${fmt(vv)}</td>`;
-  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  html += outArr(d.fa_qty, 7);
   // 建议补货
-  if (d.sug_qty) for (let vv of d.sug_qty) html += `<td class="num">${fmt(vv)}</td>`;
-  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
+  html += outArr(d.sug_qty, 7);
   // 与总公司补货建议
-  if (d.final_sug) for (let vv of d.final_sug) html += `<td class="num">${fmt(vv)}</td>`;
-  else for (let i=0;i<7;i++) html += '<td class="num"></td>';
-  // 最后空列
+  html += outArr(d.final_sug, 7);
+  // 空列
   html += '<td></td>';
   
   html += '</tr>';
@@ -314,32 +324,49 @@ function changePageSize() {
 
 function exportExcel() {
   let rows = [];
-  // 表头
-  let h = [...COL_NAMES.map(x=>x.replace(/\n/g,''))];
-  let gnames = ['期初订单','订单进货','换货进货','补货调货进货','退货数量','调出','实际发货数量','累计销售','平均折扣','周销','售罄率','店铺期末库存','总仓库存','建议补货','与总公司补货建议',''];
-  for (let g of gnames) {
-    if (g === '平均折扣' || g === '售罄率' || g === '') {
-      h.push(g);
+  // 第一行表头
+  let h1 = [...COL_NAMES.map(x=>x.replace(/\n/g,''))];
+  for (let g of GROUP_NAMES) {
+    let label = g.label.replace(/\n/g,'');
+    if (g.size === 7) {
+      h1.push(label);
+      for (let i=1;i<7;i++) h1.push('');  // Excel合并单元格，只第一个写标签
     } else {
-      for (let s of SIZE_NAMES) h.push(s);
+      h1.push(label);
     }
   }
-  rows.push(h);
+  rows.push(h1);
   
+  // 第二行：尺码子列
+  let h2 = COL_NAMES.map(()=>'');
+  for (let g of GROUP_NAMES) {
+    if (g.size === 7) {
+      for (let s of SIZE_NAMES) h2.push(s);
+    } else {
+      h2.push('');
+    }
+  }
+  rows.push(h2);
+  
+  // 数据行
   for (let d of filteredData) {
     let r = [d.store_name, d.store_type, d.year, d.season, d.prod_name, d.prod_code,
       d.color, d.pricelist, d.boduan, d.zhutui, d.rank||'', d.arrive_days||''];
-    // 8组尺码
-    for (let arr of [d.qc_so, d.sale_qty, d.change_qty, d.transfer_in,
-      d.ret_qty, d.transfer_out, d.sum_qty, d.retail_qty]) {
-      if (arr) arr.forEach(x=>r.push(x)); else SIZE_NAMES.forEach(()=>r.push(''));
-    }
+    r.push(...(d.qc_so||Array(7).fill('')));
+    r.push(...(d.sale_qty||Array(7).fill('')));
+    r.push(...(d.change_qty||Array(7).fill('')));
+    r.push(...(d.transfer_in||Array(7).fill('')));
+    r.push(...(d.ret_qty||Array(7).fill('')));
+    r.push(...(d.transfer_out||Array(7).fill('')));
+    r.push(...(d.sum_qty||Array(7).fill('')));
+    r.push(...(d.retail_qty||Array(7).fill('')));
     r.push(d.discount||'');
-    if (d.day_qty) d.day_qty.forEach(x=>r.push(x)); else SIZE_NAMES.forEach(()=>r.push(''));
+    r.push(...(d.day_qty||Array(7).fill('')));
     r.push(d.sell_rate||'');
-    for (let arr of [d.store_qty, d.fa_qty, d.sug_qty, d.final_sug]) {
-      if (arr) arr.forEach(x=>r.push(x)); else SIZE_NAMES.forEach(()=>r.push(''));
-    }
+    r.push(...(d.store_qty||Array(7).fill('')));
+    r.push(...(d.fa_qty||Array(7).fill('')));
+    r.push(...(d.sug_qty||Array(7).fill('')));
+    r.push(...(d.final_sug||Array(7).fill('')));
     r.push('');
     rows.push(r);
   }
