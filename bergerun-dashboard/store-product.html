@@ -119,7 +119,7 @@ const GROUP_NAMES = [
   { label: '', size: 1 }
 ];
 
-const EXTRA_COLS = ['平均折扣', '', '周销', '', '', '', '', '', '', '', '售罄率', ''];
+
 
 // ========== 数据 ==========
 let rawData = [];
@@ -188,30 +188,58 @@ rawData = [
 
 // ========== 生成表头 ==========
 function buildHeader() {
-  let html = '<tr>';
-  // 前12个单列
+  // 第一行：分组名（106列全部铺满）
+  let r0 = '<tr>';
+  // 12个基本信息（每个占1列）
   for (let c = 0; c < 12; c++) {
-    html += `<th class="${c<3?'':'group-header'}" rowspan="2" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
+    r0 += `<th class="${c<3?'':'group-header'}" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
   }
-  // 遍历所有分组
-  for (let g of GROUP_NAMES) {
-    if (g.size === 1) {
-      html += `<th rowspan="2" style="min-width:${g.label===''?20:50}px">${g.label}</th>`;
-    } else {
-      html += `<th colspan="${g.size}" class="group-header">${g.label}</th>`;
+  // 8组7列
+  for (let i = 0; i < 8; i++) {
+    for (let s of SIZE_NAMES) {
+      if (s === 'XS') r0 += `<th colspan="1" class="group-header">${GROUP_NAMES[i].label}</th>`;
+      else r0 += `<th colspan="1" class="group-header"></th>`;  // 合并单元格背景
     }
   }
+  // 平均折扣(1列)
+  r0 += '<th>平均折扣</th>';
+  // 周销7列
+  for (let s of SIZE_NAMES) r0 += `<th class="group-header">${s==='XS'?'周销':''}</th>`;
+  // 售罄率1列
+  r0 += '<th>售罄率</th>';
+  // 4组7列
+  for (let i = 12; i < 16; i++) {
+    for (let s of SIZE_NAMES) {
+      r0 += `<th class="group-header">${s==='XS'?GROUP_NAMES[i].label:''}</th>`;
+    }
+  }
+  // 最后空列
+  r0 += '<th></th>';
+  r0 += '</tr>';
   
   // 第二行：尺码子列
-  html += '</tr><tr>';
-  for (let g of GROUP_NAMES) {
-    if (g.size === 7) {
-      for (let s of SIZE_NAMES) html += `<th>${s}</th>`;
-    }
-    // size=1的跳过（已在第一行rowspan=2）
+  let r1 = '<tr>';
+  // 前12个空列
+  for (let i = 0; i < 12; i++) r1 += '<th></th>';
+  // 8组尺码 × 7列
+  for (let i = 0; i < 8; i++) {
+    for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
   }
-  html += '</tr>';
-  return html;
+  // 平均折扣(空)
+  r1 += '<th></th>';
+  // 周销7列尺码
+  for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
+  // 售罄率(空)
+  r1 += '<th></th>';
+  // 4组尺码 × 7列
+  for (let i = 0; i < 4; i++) {
+    for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
+  }
+  // 最后空列
+  r1 += '<th></th>';
+  r1 += '</tr>';
+  
+  return r0 + r1;
 }
 
 function fmt(n) { return n == null || n === '' ? '' : n; }
