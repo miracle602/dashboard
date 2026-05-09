@@ -7,6 +7,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;font-size:12px;background:#fff;padding:0;color:#333}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:8px 14px;background:#2b5797;border-radius:0;margin-bottom:0}
+.toolbar label{font-size:12px;color:#fff;white-space:nowrap}
+.toolbar select{padding:2px 6px;font-size:12px;border:1px solid #3b6db5;border-radius:2px;height:24px;background:#fff;outline:none;min-width:85px}
+.toolbar input[type=text]{padding:2px 6px;font-size:12px;border:1px solid #3b6db5;border-radius:2px;height:24px;width:130px;outline:none}
+.toolbar button{padding:1px 14px;font-size:12px;border-radius:2px;cursor:pointer;height:24px;outline:none}
+.toolbar .qbtn{background:#357ae8;color:#fff;border:1px solid #357ae8}
+.toolbar .ebtn{background:#4caf50;color:#fff;border:1px solid #388e3c}
+.toolbar .cbtn{background:#fff;color:#333;border:1px solid #8ab4f8}
+
+.stat{font-size:12px;color:#6b7280;padding:4px 8px 0}
 .table-wrapper{overflow-x:auto}
 table{border-collapse:collapse;width:max-content;min-width:100%;font-size:12px}
 th,td{border:1px solid #d1d5db;padding:6px 8px;text-align:center;white-space:nowrap;line-height:1.5}
@@ -18,17 +28,40 @@ tr:hover td{background:#dbeafe!important}
 td:not(:empty){font-weight:500}
 td.num{color:#1d4ed8;font-weight:600}
 
+/* 漏斗 */
+.fi{cursor:pointer;font-size:8px;margin-left:3px;opacity:0.5;user-select:none;vertical-align:middle}
+.fi:hover{opacity:1}
+.fi.active{opacity:1;color:#ffc107}
+
+/* 漏斗弹出菜单 */
+.fd{position:fixed;background:#fff;border:1px solid #c8c8c8;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:9999;min-width:160px;max-height:280px;overflow-y:auto;padding:4px 0;display:none;font-size:12px}
+.fd .fi2{padding:4px 12px;display:flex;align-items:center;gap:6px;cursor:default}
+.fd .fi2:hover{background:#e6f7ff}
+.fd .fi2 input{cursor:pointer;margin:0}
+.fd .fa{padding:5px 10px;border-top:1px solid #eee;display:flex;gap:4px;justify-content:flex-end}
+.fd .fa button{padding:2px 12px;border:1px solid #d9d9d9;border-radius:3px;font-size:11px;cursor:pointer;background:#fff}
+.fd .fa .ok{background:#1890ff;color:#fff;border-color:#1890ff}
+
 /* 分页 */
-.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:8px 0;flex-wrap:wrap}
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;padding:6px 0;flex-wrap:wrap}
 .pager .pi{padding:3px 10px;border:1px solid #d9d9d9;border-radius:3px;font-size:12px;cursor:pointer;background:#fff}
 .pager .pi:hover{border-color:#1890ff;color:#1890ff}
 .pager .pi.disabled{opacity:0.4;cursor:default}
 .pager .info{font-size:12px;color:#8c8c8c}
 .pager select{padding:3px 6px;border:1px solid #d9d9d9;border-radius:3px;font-size:12px}
-.stat{font-size:12px;color:#6b7280;padding:4px 8px 0}
 </style>
 </head>
 <body>
+<div class="toolbar">
+<label>门店：</label><select id="sf_STORE" onchange="doFilter()"/>
+<label>年份：</label><select id="sf_YEAR" onchange="doFilter()"/>
+<label>季节：</label><select id="sf_SEASON" onchange="doFilter()"/>
+<label>波段：</label><select id="sf_BODUAN" onchange="doFilter()"/>
+<input type="text" id="kw" placeholder="款号/品名..." oninput="doFilter()">
+<button class="qbtn" onclick="doFilter()">查询</button>
+<button class="ebtn" onclick="exportCSV()">CSV</button>
+<button class="cbtn" onclick="clearAll()">清空</button>
+</div>
 <div class="stat" id="stat">共 2 条记录，106 列</div>
 <div class="table-wrapper"><table id="tbl">
 <thead id="thx"></thead>
@@ -39,6 +72,7 @@ td.num{color:#1d4ed8;font-weight:600}
 <script>
 var ALL = [["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C155", "无花果色", 599.0, "二波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, 1.0, 1.0, 0.0, null, null, 2.0, null, 1.0, 1.0, null, null, null, 2.0, 2.0, "", 1.0, 1.0, "", "", 4.0, null], ["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C158", "雪球白", 499.0, "一波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, null, 0.0, 0.0, null, null, 0.0, null, null, null, null, null, null, 0.0, "", "", "", "", "", "", 0.0, null]];
 var NCOLS = 106;
+var fState = {};
 var filtered = [];
 var page = 1, ps = 50;
 
@@ -46,18 +80,89 @@ var page = 1, ps = 50;
   var FW = [130,55,55,55,90,90,55,55,55,55,100,65];
   var H1 = ['店仓名称','店仓类别','年份','季节','品名','款号','颜色','吊牌价','波段','主推款','单店单款单色零售排名','到店天数'];
   var SZ = ['XS','S','M','L','XL','2XL','合计'];
+  var FC = {店仓名称:0,店仓类别:1,年份:2,季节:3,品名:4,款号:5,颜色:6,吊牌价:7,波段:8,主推款:9,'单店单款单色零售排名':10,到店天数:11,平均折扣:68,售罄率:76};
+  function fi(label){
+    var c=FC[label]; if(c===undefined)return '';
+    return '<span class="fi" data-col="'+c+'" onclick="sf('+c+',event)">▼</span>';
+  }
   var r0 = '<tr class="header-row">';
-  for(var i=0;i<12;i++) r0 += '<th rowspan="2" style="min-width:'+FW[i]+'px">'+H1[i]+'</th>';
+  for(var i=0;i<12;i++) r0 += '<th rowspan="2" style="min-width:'+FW[i]+'px">'+H1[i]+fi(H1[i])+'</th>';
   r0 += '<th colspan="7">期初订单</th><th colspan="7">订单进货（订单，正常）</th><th colspan="7">换货进货</th>';
   r0 += '<th colspan="7">补货，调货进货</th><th colspan="7">退货数量</th><th colspan="7">调出</th>';
   r0 += '<th colspan="7">实际发货数量</th><th colspan="7">累计销售</th>';
-  r0 += '<th rowspan="2">平均折扣</th><th colspan="7">周销</th><th rowspan="2">售罄率</th>';
+  r0 += '<th rowspan="2">平均折扣'+fi('平均折扣')+'</th><th colspan="7">周销</th><th rowspan="2">售罄率'+fi('售罄率')+'</th>';
   r0 += '<th colspan="7">店铺期未库存</th><th colspan="7">总仓库存</th><th colspan="7">建议补货</th><th colspan="7">与总公司补货建议</th><th rowspan="2"> </th></tr>';
   var r1 = '<tr class="header-row">';
   for(var g=0;g<13;g++) for(var j=0;j<7;j++) r1 += '<th>'+SZ[j]+'</th>';
   r1 += '</tr>';
   document.getElementById('thx').innerHTML = r0+r1;
+
+  function fillSel(id, col){
+    var el = document.getElementById(id); if(!el) return;
+    var s = {}; for(var i=0;i<ALL.length;i++){ var v=ALL[i][col]; if(v!=null&&v!=='') s[v]=1; }
+    var keys = Object.keys(s).sort();
+    var html = '<option value="">全部</option>';
+    for(var i=0;i<keys.length;i++) html += '<option value="'+keys[i].replace(/"/g,'&quot;')+'">'+keys[i]+'</option>';
+    el.innerHTML = html;
+  }
+  fillSel('sf_STORE',0); fillSel('sf_YEAR',2); fillSel('sf_SEASON',3); fillSel('sf_BODUAN',8);
 })();
+
+function V(d,c){ return d[c]!=null?String(d[c]):'(空白)'; }
+
+function sf(col,ev){
+  ev.stopPropagation(); closeFd();
+  var s={}; for(var i=0;i<ALL.length;i++) s[V(ALL[i],col)]=1;
+  var vals = Object.keys(s).sort();
+  var cur = fState[col];
+  var r = ev.target.getBoundingClientRect();
+  var dd = document.createElement('div'); dd.className='fd'; dd.style.display='block';
+  dd.style.left = Math.min(r.left-20, window.innerWidth-180)+'px';
+  dd.style.top = (r.bottom+2)+'px'; dd.id='fd_'+col;
+  for(var i=0;i<vals.length;i++){
+    var x=document.createElement('div'); x.className='fi2';
+    x.innerHTML = '<input type=checkbox'+(cur&&cur.has(vals[i])?'':' checked')+'> '+vals[i];
+    dd.appendChild(x);
+  }
+  var a=document.createElement('div'); a.className='fa';
+  a.innerHTML='<button class="ok" onclick="aF('+col+')">确定</button><button onclick="cF('+col+')">清除</button>';
+  dd.appendChild(a);
+  document.body.appendChild(dd);
+  window._fd=dd;
+}
+
+function aF(col){
+  var dd=window._fd; if(!dd)return;
+  var items=dd.querySelectorAll('.fi2');
+  var s={}; for(var i=0;i<ALL.length;i++) s[V(ALL[i],col)]=1;
+  var vals=Object.keys(s).sort();
+  var sel=new Set();
+  for(var i=0;i<items.length;i++){ if(items[i].querySelector('input').checked) sel.add(items[i].textContent.trim()); }
+  if(sel.size===vals.length||sel.size===0) delete fState[col]; else fState[col]=sel;
+  closeFd(); doFilter();
+}
+function cF(col){ delete fState[col]; closeFd(); doFilter(); }
+function closeFd(){ if(window._fd){document.body.removeChild(window._fd);window._fd=null;} }
+document.addEventListener('click',closeFd);
+
+function doFilter(){
+  var kw=document.getElementById('kw').value.trim().toLowerCase();
+  var sf0=document.getElementById('sf_STORE'),sf2=document.getElementById('sf_YEAR');
+  var sf3=document.getElementById('sf_SEASON'),sf8=document.getElementById('sf_BODUAN');
+  filtered = ALL.filter(function(d){
+    if(sf0&&sf0.value&&V(d,0)!==sf0.value)return false;
+    if(sf2&&sf2.value&&V(d,2)!==sf2.value)return false;
+    if(sf3&&sf3.value&&V(d,3)!==sf3.value)return false;
+    if(sf8&&sf8.value&&V(d,8)!==sf8.value)return false;
+    for(var c in fState){ var s=fState[c]; if(!s||!s.has(V(d,parseInt(c)))) return false; }
+    if(kw){ for(var ci=0;ci<d.length;ci++){ if(d[ci]!=null&&String(d[ci]).toLowerCase().indexOf(kw)>=0)return true; } return false; }
+    return true;
+  });
+  page=1; render();
+  document.querySelectorAll('.fi').forEach(function(el){
+    el.className='fi'+(fState[parseInt(el.dataset.col)]?' active':'');
+  });
+}
 
 function render(){
   var total=filtered.length, tp=Math.max(1,Math.ceil(total/ps));
@@ -78,16 +183,32 @@ function render(){
     tb.appendChild(tr);
   }
   document.getElementById('stat').textContent='共 '+total+' 条记录，106 列';
-  document.getElementById('pager').innerHTML = tp>1 ? 
-    '<select onchange="cPs(this.value)"><option value=20>20条/页</option><option value=50 selected>50条/页</option><option value=100>100条/页</option><option value=200>200条/页</option></select>'+
-    '<span class=pi'+(page<=1?' disabled':'')+' onclick="goP(1)">首页</span>'+
-    '<span class=pi'+(page<=1?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>'+
-    '<span class=info> 第'+page+'/'+tp+'页 </span>'+
-    '<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>'+
-    '<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+tp+')">末页</span>' : '';
+  var p=document.getElementById('pager'); p.innerHTML='';
+  if(total<=ps&&tp<=1)return;
+  var h='<select onchange="cPs(this.value)"><option value=20>20条/页</option><option value=50 selected>50条/页</option><option value=100>100条/页</option><option value=200>200条/页</option></select>';
+  h+='<span class=pi'+(page<=1?' disabled':'')+' onclick="goP(1)">首页</span>';
+  h+='<span class=pi'+(page<=1?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>';
+  h+='<span class=info> 第'+page+'/'+tp+'页 </span>';
+  h+='<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>';
+  h+='<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+tp+')">末页</span>';
+  p.innerHTML=h;
 }
 function goP(p){page=p;render();}
 function cPs(v){ps=parseInt(v);page=1;render();}
+function clearAll(){
+  fState={};
+  document.getElementById('kw').value='';
+  ['sf_STORE','sf_YEAR','sf_SEASON','sf_BODUAN'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  doFilter();
+}
+function exportCSV(){
+  var csv=[];
+  var h1=[]; document.querySelectorAll('#thx tr:first-child th').forEach(function(t){h1.push(t.textContent.trim().replace(/,/g,''));}); csv.push(h1.join(','));
+  var h2=[]; document.querySelectorAll('#thx tr:last-child th').forEach(function(t){h2.push(t.textContent.trim().replace(/,/g,''));}); csv.push(h2.join(','));
+  for(var i=0;i<filtered.length;i++){ var r=[]; for(var c=0;c<NCOLS;c++) r.push((''+(filtered[i][c]!=null?filtered[i][c]:'')).replace(/,/g,'')); csv.push(r.join(',')); }
+  var b=new Blob(['\ufeff'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='门店商品数据管控.csv';a.click();
+}
 filtered=ALL.slice();render();
 </script>
 </body>
