@@ -6,22 +6,26 @@
 <title>门店商品专用数据管控</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Microsoft YaHei','PingFang SC',sans-serif; background:#f0f2f5; padding:16px; }
-.toolbar { display:flex; align-items:center; gap:8px; margin-bottom:10px; padding:8px 14px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
-.toolbar a { text-decoration:none; color:#1890ff; font-size:13px; }
-.toolbar .title { font-size:15px; font-weight:600; color:#262626; }
-.search-box { display:flex; gap:4px; align-items:center; margin-left:auto; }
-.search-box input { padding:4px 8px; border:1px solid #d9d9d9; border-radius:4px; font-size:13px; width:160px; }
-.search-box input:focus { outline:none; border-color:#1890ff; }
-.search-box button { padding:4px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:12px; cursor:pointer; background:#fff; }
-.search-box button.primary { background:#1890ff; color:#fff; border-color:#1890ff; }
-.search-box button.export { background:#52c41a; color:#fff; border-color:#52c41a; }
+body { font-family:'Microsoft YaHei','PingFang SC',sans-serif; background:#f0f2f5; padding:12px; }
 
-.table-wrap { overflow-x:auto; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+/* 伯俊风格蓝色筛选栏 */
+.sfbar { display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin-bottom:8px; padding:6px 14px; background:#2b5797; border-radius:4px; min-height:32px; }
+.sfi { display:inline-flex; align-items:center; gap:2px; }
+.sfi label { font-size:12px; color:#fff; white-space:nowrap; }
+.sfi select { padding:2px 4px; font-size:12px; border:1px solid #4a7abf; border-radius:2px; background:#fff; min-width:90px; height:22px; }
+.sfi select:focus { outline:none; border-color:#80b5ff; }
+.sfi input { padding:2px 6px; font-size:12px; border:1px solid #4a7abf; border-radius:2px; width:130px; height:22px; }
+.sfi input:focus { outline:none; border-color:#80b5ff; }
+.sfi button { padding:2px 14px; font-size:12px; border:1px solid #4a7abf; border-radius:2px; cursor:pointer; height:22px; }
+.sfi .qbtn { background:#4c8ff7; color:#fff; }
+.sfi .qbtn:active { background:#357ae8; }
+.sfi .ebtn { background:#52c41a; color:#fff; border-color:#388e3c; }
+.sfi .cbtn { background:#fff; color:#333; }
+
+.table-wrap { overflow-x:auto; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
 table { border-collapse:collapse; width:100%; font-size:12px; white-space:nowrap; min-width:3180px; }
-thead th { position:sticky; top:0; z-index:10; background:#1d4ed8; color:#fff; padding:4px 6px; text-align:center; border:1px solid #2563eb; font-weight:600; font-size:11px; }
+thead th { position:sticky; top:0; z-index:10; background:#1d4ed8; color:#fff; padding:3px 5px; text-align:center; border:1px solid #2563eb; font-weight:600; font-size:11px; }
 thead th.group-header { background:#3b82f6; }
-/* 漏斗 */
 .fi { cursor:pointer; font-size:8px; margin-left:2px; opacity:0.5; user-select:none; vertical-align:middle; }
 .fi:hover { opacity:1; }
 .fi.active { opacity:1; color:#fcd34d; }
@@ -31,36 +35,29 @@ tbody tr:hover { background:#dbeafe; }
 tbody td.text-left { text-align:left; }
 tbody td.num { text-align:right; }
 
-/* 漏斗菜单 */
-.fd { position:fixed; background:#fff; border:1px solid #d9d9d9; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,.15); z-index:1000; min-width:150px; max-height:280px; overflow-y:auto; padding:4px 0; display:none; }
-.fd .fi2 { padding:3px 10px; font-size:12px; display:flex; align-items:center; gap:5px; }
+.fd { position:fixed; background:#fff; border:1px solid #d9d9d9; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,.15); z-index:1000; min-width:150px; max-height:270px; overflow-y:auto; padding:4px 0; display:none; }
+.fd .fi2 { padding:3px 10px; font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer; }
 .fd .fi2:hover { background:#e6f7ff; }
 .fd .fa { padding:4px 10px; border-top:1px solid #e8e8e8; display:flex; gap:4px; justify-content:flex-end; }
 .fd .fa button { padding:2px 10px; border:1px solid #d9d9d9; border-radius:3px; font-size:11px; cursor:pointer; background:#fff; }
 .fd .fa .ok { background:#1890ff; color:#fff; border-color:#1890ff; }
 
-/* 分页 */
-.pager { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:10px; flex-wrap:wrap; }
-.pager .pi { padding:4px 10px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; cursor:pointer; background:#fff; }
+.pager { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.pager .pi { padding:3px 10px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; cursor:pointer; background:#fff; }
 .pager .pi:hover { border-color:#1890ff; color:#1890ff; }
 .pager .pi.disabled { opacity:0.4; cursor:default; }
-.pager .pi.active { background:#1890ff; color:#fff; border-color:#1890ff; }
 .pager .info { font-size:12px; color:#8c8c8c; }
-.pager select { padding:3px 6px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; }
-
-.stat { margin-bottom:6px; font-size:12px; color:#8c8c8c; }
+.pager select { padding:2px 6px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; }
+.stat { margin-bottom:4px; font-size:12px; color:#8c8c8c; }
 </style>
 </head>
 <body>
-<div class="toolbar">
-<a href=".">← 返回</a>
-<span class="title">门店商品专用数据管控</span>
-<div class="search-box">
-<input type="text" id="kw" placeholder="搜索款号/品名/颜色..." oninput="onSearch()">
-<button class="primary" onclick="onSearch()">搜索</button>
-<button class="export" onclick="exportCSV()">导出CSV</button>
-<button onclick="clearAll()" style="padding:4px 10px;background:#fff;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;cursor:pointer">清空</button>
-</div>
+<div class="sfbar">
+<span class="sfi"><label>门店：</label><select id="sf_STORE" onchange="doFilter()"><option value="">全部</option><option value="云南南涧恩瑞妮（新）">云南南涧恩瑞妮（新）</option></select></span><span class="sfi"><label>店仓类别：</label><select id="sf_STYPE" onchange="doFilter()"><option value="">全部</option><option value="加盟ZC">加盟ZC</option></select></span><span class="sfi"><label>年份：</label><select id="sf_YEAR" onchange="doFilter()"><option value="">全部</option><option value="2026">2026</option></select></span><span class="sfi"><label>季节：</label><select id="sf_SEASON" onchange="doFilter()"><option value="">全部</option><option value="春">春</option></select></span><span class="sfi"><label>波段：</label><select id="sf_BODUAN" onchange="doFilter()"><option value="">全部</option><option value="一波">一波</option><option value="二波">二波</option></select></span>
+<span class="sfi"><input type="text" id="kw" placeholder="款号/品名/颜色..."></span>
+<span class="sfi"><button class="qbtn" onclick="doFilter()">查 询</button></span>
+<span class="sfi"><button class="ebtn" onclick="exportCSV()">CSV</button></span>
+<span class="sfi"><button class="cbtn" onclick="clearAll()">清空</button></span>
 </div>
 <div class="stat" id="stat">共 2 条记录</div>
 <div class="table-wrap"><table id="tbl"><thead id="th"><tr><th rowspan="2" style="min-width:130px">店仓名称<span class="fi" data-col="0" onclick="showFilter(0,event)">▼</span></th><th rowspan="2" style="min-width:55px">店仓类别<span class="fi" data-col="1" onclick="showFilter(1,event)">▼</span></th><th rowspan="2" style="min-width:55px">年份<span class="fi" data-col="2" onclick="showFilter(2,event)">▼</span></th><th rowspan="2" style="min-width:55px">季节<span class="fi" data-col="3" onclick="showFilter(3,event)">▼</span></th><th rowspan="2" style="min-width:90px">品名<span class="fi" data-col="4" onclick="showFilter(4,event)">▼</span></th><th rowspan="2" style="min-width:90px">款号<span class="fi" data-col="5" onclick="showFilter(5,event)">▼</span></th><th rowspan="2" style="min-width:55px">颜色<span class="fi" data-col="6" onclick="showFilter(6,event)">▼</span></th><th rowspan="2" style="min-width:55px">吊牌价<span class="fi" data-col="7" onclick="showFilter(7,event)">▼</span></th><th rowspan="2" style="min-width:55px">波段<span class="fi" data-col="8" onclick="showFilter(8,event)">▼</span></th><th rowspan="2" style="min-width:55px">主推款<span class="fi" data-col="9" onclick="showFilter(9,event)">▼</span></th><th rowspan="2" style="min-width:55px">单店单款单色零售排名<span class="fi" data-col="10" onclick="showFilter(10,event)">▼</span></th><th rowspan="2" style="min-width:55px">到店天数<span class="fi" data-col="11" onclick="showFilter(11,event)">▼</span></th><th colspan="7" class="group-header">期初订单</th><th colspan="7" class="group-header">订单进货（订单，正常）</th><th colspan="7" class="group-header">换货进货</th><th colspan="7" class="group-header">补货，调货进货</th><th colspan="7" class="group-header">退货数量</th><th colspan="7" class="group-header">调出</th><th colspan="7" class="group-header">实际发货数量</th><th colspan="7" class="group-header">累计销售</th><th rowspan="2" style="min-width:55px">平均折扣<span class="fi" data-col="68" onclick="showFilter(68,event)">▼</span></th><th colspan="7" class="group-header">周销</th><th rowspan="2" style="min-width:55px">售罄率<span class="fi" data-col="76" onclick="showFilter(76,event)">▼</span></th><th colspan="7" class="group-header">店铺期未库存</th><th colspan="7" class="group-header">总仓库存</th><th colspan="7" class="group-header">建议补货</th><th colspan="7" class="group-header">与总公司补货建议</th><th rowspan="2" style="min-width:55px"> </th></tr><tr><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th></tr></thead><tbody id="tb"><tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C155</td><td class="">无花果色</td><td class="num">599</td><td class="">二波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td></td><td></td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td></td><td class="num">2</td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td class="num">4</td><td></td></tr><tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C158</td><td class="">雪球白</td><td class="num">499</td><td class="">一波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td class="num">0</td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td></tr></tbody></table></div>
@@ -104,7 +101,15 @@ document.addEventListener('click',closeFd);
 
 function doFilter() {
   var kw=document.getElementById('kw').value.trim().toLowerCase();
+  var sf = {};
+  ['STORE','STYPE','YEAR','SEASON','BODUAN','ZHUTUI'].forEach(function(k){ var el=document.getElementById('sf_'+k); if(el) sf[k]=el.value; });
   filtered=ALL.filter(function(d){
+    if(sf.STORE && v(d,0)!==sf.STORE) return false;
+    if(sf.STYPE && v(d,1)!==sf.STYPE) return false;
+    if(sf.YEAR && v(d,2)!==sf.YEAR) return false;
+    if(sf.SEASON && v(d,3)!==sf.SEASON) return false;
+    if(sf.BODUAN && v(d,8)!==sf.BODUAN) return false;
+    if(sf.ZHUTUI && v(d,9)!==sf.ZHUTUI) return false;
     for(var c in fState){var s=fState[c];if(!s||!s.has(v(d,parseInt(c))))return false;}
     if(kw){for(var ci=0;ci<d.length;ci++){if(d[ci]!=null&&String(d[ci]).toLowerCase().indexOf(kw)>-1)return true;}return false;}
     return true;
@@ -112,8 +117,6 @@ function doFilter() {
   page=1; renderPage();
   document.querySelectorAll('.fi').forEach(function(el){ el.className='fi'+(fState[parseInt(el.dataset.col)]?' active':''); });
 }
-
-function onSearch() { doFilter(); }
 
 function renderPage() {
   var total=filtered.length; var tp=Math.max(1,Math.ceil(total/ps));
@@ -130,17 +133,25 @@ function renderPage() {
     tr+='</tr>'; tb.innerHTML+=tr;
   }
   document.getElementById('stat').textContent='共 '+total+' 条记录';
-  var h='<select onchange="changePs(this.value)"><option value=20>20条/页</option><option value=50 selected>50条/页</option><option value=100>100条/页</option><option value=200>200条/页</option></select>';
-  h+='<span class=pi'+((page<=1)?' disabled':'')+' onclick="goP(1)">首页</span>';
-  h+='<span class=pi'+((page<=1)?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>';
+  var h='<select onchange="changePs(this.value)"><option value=20>20条</option><option value=50 selected>50条</option><option value=100>100条</option><option value=200>200条</option></select>';
+  if(tp>1) {
+    h+='<span class=pi'+((page<=1)?' disabled':'')+' onclick="goP(1)">首页</span>';
+    h+='<span class=pi'+((page<=1)?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>';
+  }
   h+='<span class=info>第'+page+'/'+tp+'页</span>';
-  h+='<span class=pi'+((page>=tp)?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>';
-  h+='<span class=pi'+((page>=tp)?' disabled':'')+' onclick="goP('+tp+')">末页</span>';
+  if(tp>1) {
+    h+='<span class=pi'+((page>=tp)?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>';
+    h+='<span class=pi'+((page>=tp)?' disabled':'')+' onclick="goP('+tp+')">末页</span>';
+  }
   document.getElementById('pager').innerHTML=h;
 }
 function goP(p) { page=p; renderPage(); }
 function changePs(val) { ps=parseInt(val); page=1; renderPage(); }
-function clearAll() { fState={}; document.getElementById('kw').value=''; doFilter(); }
+function clearAll() {
+  fState={}; document.getElementById('kw').value='';
+  ['STORE','STYPE','YEAR','SEASON','BODUAN','ZHUTUI'].forEach(function(k){ var el=document.getElementById('sf_'+k); if(el) el.value=''; });
+  doFilter();
+}
 
 function exportCSV() {
   var csv=[];
