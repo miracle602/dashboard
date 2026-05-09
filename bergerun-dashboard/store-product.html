@@ -99,25 +99,25 @@ var brandValues = [], deptValues = [];
 
   brandValues = ['恩瑞妮','朗文斯汀','帛逸','帛卡袖','思朋','施喆','婉甸'];
   deptValues = ['服装','鞋','配饰品','道具'];
-  function fillSel(id, vals){
-    var el = document.getElementById(id); if(!el) return;
-    var html = '<option value="">全部</option>';
-    for(var i=0;i<vals.length;i++) html += '<option value="'+vals[i]+'">'+vals[i]+'</option>';
-    el.innerHTML = html;
-  }
   fillSel('sf_BRAND', brandValues); fillSel('sf_DEPT', deptValues);
-  // 年份/季节/款式/波次从现有数据取
-  function fillByData(id, col){
-    var el = document.getElementById(id); if(!el) return;
-    var s={}; for(var i=0;i<ALL.length;i++){var v=ALL[i][col];if(v!=null&&v!=='')s[v]=1;}
-    var keys = Object.keys(s).sort();
-    var html = '<option value="">全部</option>';
-    for(var i=0;i<keys.length;i++) html += '<option value="'+keys[i].replace(/"/g,'&quot;')+'">'+keys[i]+'</option>';
-    el.innerHTML = html;
-  }
   fillByData('sf_YEAR',2); fillByData('sf_SEASON',3);
   fillByData('sf_STYLE',4); fillByData('sf_BODUAN',8);
 })();
+
+function fillSel(id, vals){
+  var el = document.getElementById(id); if(!el) return;
+  var html = '<option value="">全部</option>';
+  for(var i=0;i<vals.length;i++) html += '<option value="'+vals[i]+'">'+vals[i]+'</option>';
+  el.innerHTML = html;
+}
+function fillByData(id, col){
+  var el = document.getElementById(id); if(!el) return;
+  var s={}; for(var i=0;i<ALL.length;i++){var v=ALL[i][col];if(v!=null&&v!=='')s[v]=1;}
+  var keys = Object.keys(s).sort();
+  var html = '<option value="">全部</option>';
+  for(var i=0;i<keys.length;i++) html += '<option value="'+keys[i].replace(/"/g,'&quot;')+'">'+keys[i]+'</option>';
+  el.innerHTML = html;
+}
 
 function V(d,c){ return d[c]!=null?String(d[c]):'(空白)'; }
 
