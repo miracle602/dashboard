@@ -11,14 +11,13 @@ body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-ser
 .sfbar label{font-size:11px;color:#fff;white-space:nowrap}
 .sfbar select,.sfbar input[type=text]{padding:2px 4px;font-size:11px;border:1px solid #3b6db5;border-radius:2px;height:22px;background:#fff;outline:none}
 .sfbar select{min-width:68px;max-width:90px}
-.sfbar .kw-wrap{display:inline-flex;align-items:center;position:relative}
-.sfbar .kw-wrap input[type=text]{width:100px}
-.sfbar .kw-btn{width:22px;height:22px;border:1px solid #3b6db5;border-left:none;background:#3b6db5;color:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:0 2px 2px 0;padding:0}
-.sfbar .kw-btn:hover{background:#4a7dd4}
+
 .sfbar button{padding:1px 12px;font-size:11px;border-radius:2px;cursor:pointer;height:22px}
 .sfbar .qbtn{background:#357ae8;color:#fff;border:1px solid #357ae8}
 .sfbar .ebtn{background:#4caf50;color:#fff;border:1px solid #388e3c}
 .sfbar .cbtn{background:#fff;color:#333;border:1px solid #8ab4f8}
+.sfbar .filter-icon{color:#fff;cursor:pointer;font-size:10px;margin-left:-1px;user-select:none;opacity:0.8}
+.sfbar .filter-icon:hover{opacity:1;color:#ffc107}
 .stat{font-size:11px;color:#6b7280;padding:3px 6px 0}
 .table-wrapper{overflow-x:auto}
 table{border-collapse:collapse;width:max-content;min-width:100%;font-size:11px}
@@ -53,12 +52,12 @@ td.num{color:#1d4ed8;font-weight:600}
 </head>
 <body>
 <div class="sfbar">
-<label>品牌</label><select id="sf_BRAND" onchange="doFilter()"/>
-<label>处份</label><select id="sf_DEPT" onchange="doFilter()"/>
+<label>品牌</label><select id="sf_BRAND" onchange="doFilter()"/><span class="filter-icon" onclick="showFilterPanel('brand')">▼</span>
+<label>处份</label><select id="sf_DEPT" onchange="doFilter()"/><span class="filter-icon" onclick="showFilterPanel('dept')">▼</span>
 <label>年份</label><select id="sf_YEAR" onchange="doFilter()"/>
 <label>季节</label><select id="sf_SEASON" onchange="doFilter()"/>
 <label>款式</label><select id="sf_STYLE" onchange="doFilter()"/>
-<label>款号</label><div class="kw-wrap"><input type="text" id="kw" placeholder="" oninput="doFilter()"><button class="kw-btn" onclick="showFilterPanel()" title="品牌/处份筛选">▼</button></div>
+<label>款号</label><input type="text" id="kw" placeholder="" oninput="doFilter()">
 <label>波次</label><select id="sf_BODUAN" onchange="doFilter()"/>
 <button class="qbtn" onclick="doFilter()">查询</button>
 <button class="ebtn" onclick="exportCSV()">CSV</button>
@@ -129,6 +128,9 @@ function doFilter(){
   filtered = ALL.filter(function(d){
     if(sfBr&&sfBr.value&&V(d,0)!==sfBr.value)return false;
     if(sfDp&&sfDp.value&&V(d,1)!==sfDp.value)return false;
+    // 弹窗品牌/处份过滤
+    if(fState.brand && fState.brand.indexOf(V(d,0))<0) return false;
+    if(fState.dept && fState.dept.indexOf(V(d,1))<0) return false;
     if(sfYr&&sfYr.value&&V(d,2)!==sfYr.value)return false;
     if(sfSs&&sfSs.value&&V(d,3)!==sfSs.value)return false;
     if(sfSt&&sfSt.value&&V(d,4)!==sfSt.value)return false;
@@ -183,22 +185,20 @@ function exportCSV(){
   var b=new Blob(['\ufeff'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
   var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='门店商品数据管控.csv';a.click();
 }
-function showFilterPanel(){
+function showFilterPanel(type){
   closeFp();
   var overlay = document.createElement('div'); overlay.className='fp-overlay'; overlay.onclick=closeFp;
   var panel = document.createElement('div'); panel.className='fp-panel';
   panel.onclick=function(e){e.stopPropagation();};
-  var html = '<div class="fp-title">筛选条件</div>';
-  html += '<div class="fp-group"><div class="fp-label">品牌</div><div class="fp-check-list">';
-  for(var i=0;i<brandValues.length;i++){
-    var chk = fState.brand && fState.brand.indexOf(brandValues[i])>=0 ? ' checked' : '';
-    html += '<label><input type="checkbox" name="fp_brand" value="'+brandValues[i]+'"'+chk+'>'+brandValues[i]+'</label>';
-  }
-  html += '</div></div>';
-  html += '<div class="fp-group"><div class="fp-label">处份（部门）</div><div class="fp-check-list">';
-  for(var i=0;i<deptValues.length;i++){
-    var chk = fState.dept && fState.dept.indexOf(deptValues[i])>=0 ? ' checked' : '';
-    html += '<label><input type="checkbox" name="fp_dept" value="'+deptValues[i]+'"'+chk+'>'+deptValues[i]+'</label>';
+  var vals = type==='brand' ? brandValues : deptValues;
+  var label = type==='brand' ? '品牌' : '处份（部门）';
+  var inputName = type==='brand' ? 'fp_brand' : 'fp_dept';
+  var stateKey = type==='brand' ? 'brand' : 'dept';
+  var html = '<div class="fp-title">筛选条件 - '+label+'</div>';
+  html += '<div class="fp-group"><div class="fp-label">'+label+'</div><div class="fp-check-list">';
+  for(var i=0;i<vals.length;i++){
+    var chk = fState[stateKey] && fState[stateKey].indexOf(vals[i])>=0 ? ' checked' : '';
+    html += '<label><input type="checkbox" name="'+inputName+'" value="'+vals[i]+'"'+chk+'>'+vals[i]+'</label>';
   }
   html += '</div></div>';
   html += '<div class="fp-actions"><button class="fp-ok" onclick="fpApply()">确定</button><button class="fp-cl" onclick="fpClear()">清除筛选</button></div>';
