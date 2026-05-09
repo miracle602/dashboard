@@ -8,9 +8,8 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f0f2f5; padding: 16px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-.toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .toolbar-left a { text-decoration: none; color: #1890ff; font-size: 13px; padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; transition: .2s; }
-.toolbar-left a:hover { border-color: #1890ff; color: #1890ff; }
+.toolbar-left a:hover { border-color: #1890ff; }
 .toolbar-left a i { margin-right: 4px; }
 .search-box { display: flex; gap: 6px; align-items: center; }
 .search-box input { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 180px; }
@@ -19,31 +18,15 @@ body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f
 .search-box button:active { background: #096dd9; }
 .search-box button.export-btn { background: #52c41a; }
 .search-box button.export-btn:active { background: #389e0d; }
-.kpi-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-.kpi-card { background: #fff; border-radius: 6px; padding: 10px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); flex: 1; min-width: 120px; text-align: center; }
-.kpi-card .kpi-num { font-size: 20px; font-weight: 700; color: #262626; }
-.kpi-card .kpi-label { font-size: 12px; color: #8c8c8c; margin-top: 2px; }
 .table-wrap { overflow-x: auto; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-table { border-collapse: collapse; width: 100%; font-size: 12px; white-space: nowrap; min-width: 3000px; }
+table { border-collapse: collapse; width: 100%; font-size: 12px; white-space: nowrap; min-width: 3180px; }
 thead th { position: sticky; top: 0; z-index: 10; background: #1a3a5c; color: #fff; padding: 4px 6px; text-align: center; border: 1px solid #2a4a6c; font-weight: 600; font-size: 11px; }
 thead th.group-header { background: #2a5a8c; }
-tbody td { padding: 3px 5px; text-align: center; border: 1px solid #e8e8e8; color: #262626; }
+tbody td { padding: 2px 4px; text-align: center; border: 1px solid #e8e8e8; font-size: 11px; }
 tbody tr:nth-child(even) { background: #fafafa; }
 tbody tr:hover { background: #e6f7ff; }
 tbody td.text-left { text-align: left; }
 tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
-.pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
-.pagination button { padding: 5px 12px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
-.pagination button:disabled { opacity: .4; cursor: default; }
-.pagination button.active { background: #1890ff; color: #fff; border-color: #1890ff; }
-.pagination .page-info { font-size: 13px; color: #595959; }
-.page-size-select { padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
-@media (max-width: 768px) {
-  body { padding: 8px; }
-  .kpi-card { min-width: 80px; padding: 6px 10px; }
-  .kpi-card .kpi-num { font-size: 16px; }
-  .search-box input { width: 120px; }
-}
 </style>
 </head>
 <body>
@@ -53,360 +36,72 @@ tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
     <a href=".">← 返回</a>
   </div>
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="搜索款号/品名/门店..." oninput="doSearch()">
-    <button onclick="doSearch()">搜索</button>
-    <button class="export-btn" onclick="exportExcel()">导出Excel</button>
+    <input type="text" id="searchInput" placeholder="搜索款号/品名/门店..." oninput="filterTable()">
+    <button onclick="filterTable()">搜索</button>
+    <button class="export-btn" onclick="exportCSV()">导出CSV</button>
   </div>
 </div>
 
-<div class="kpi-row" id="kpiRow"></div>
-
 <div class="table-wrap">
   <table id="dataTable">
-    <thead id="tableHead"></thead>
-    <tbody id="tableBody"></tbody>
+    <thead id="tableHead">
+      <tr><th style="min-width:130px">店仓名称</th><th style="min-width:55px">店仓类别</th><th style="min-width:55px">年份</th><th class="group-header" style="min-width:55px">季节</th><th class="group-header" style="min-width:90px">品名</th><th class="group-header" style="min-width:90px">款号</th><th class="group-header" style="min-width:55px">颜色</th><th class="group-header" style="min-width:55px">吊牌价</th><th class="group-header" style="min-width:55px">波段</th><th class="group-header" style="min-width:55px">主推款</th><th class="group-header" style="min-width:55px">单店单款单色零售排名</th><th class="group-header" style="min-width:55px">到店天数</th><th class="group-header">期初订单</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">订单进货（订单，正常）</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">换货进货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">补货，调货进货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">退货数量</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">调出</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">实际发货数量</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">累计销售</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">平均折扣</th><th class="group-header">周销</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">售罄率</th><th class="group-header">店铺期未库存</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">总仓库存</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">建议补货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">与总公司补货建议</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th></tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C155</td><td class="">无花果色</td><td class="num">599</td><td class="">二波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td></td><td></td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td></td><td class="num">2</td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td class="num">4</td><td></td></tr>
+<tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C158</td><td class="">雪球白</td><td class="num">499</td><td class="">一波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td class="num">0</td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td></tr>
+    </tbody>
   </table>
 </div>
 
-<div class="pagination" id="pagination">
-  <select class="page-size-select" id="pageSizeSelect" onchange="changePageSize()">
-    <option value="20">20条/页</option><option value="50" selected>50条/页</option>
-    <option value="100">100条/页</option><option value="200">200条/页</option>
-  </select>
-  <button onclick="goPage(1)" id="btnFirst">首页</button>
-  <button onclick="goPage(page-1)" id="btnPrev">‹ 上一页</button>
-  <span class="page-info" id="pageInfo"></span>
-  <button onclick="goPage(page+1)" id="btnNext">下一页 ›</button>
-  <button onclick="goPage(totalPages)" id="btnLast">末页</button>
-</div>
-
 <script>
-// ========== 列定义 ==========
-// ========== 列定义（严格按Excel106列） ==========
-const COL_NAMES = [
-  '店仓名称', '店仓类别', '年份', '季节', '品名', '款号', '颜色', '吊牌价',
-  '波段', '主推款', '单店单款\n单色零售排名', '到店天数'
-];
-
-const SIZE_NAMES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '合计'];
-
-// 分组序列（严格按Excel 106列）
-// R0: 12个单列 + 8个7列组 + 1个单列(平均折扣) + 1个7列组(周销) + 1个单列(售罄率)
-//     + 4个7列组(店铺期末/总仓/建议补货/与总公司) + 1个单列(空)
-// R1: 前12个空 + 8×7尺码 + 空 + 7尺码 + 空 + 4×7尺码 + 空
-const GROUP_NAMES = [
-  // 前8组7列
-  { label: '期初订单', size: 7 },
-  { label: '订单进货\n（订单，正常）', size: 7 },
-  { label: '换货进货', size: 7 },
-  { label: '补货，调货进货', size: 7 },
-  { label: '退货数量', size: 7 },
-  { label: '调出', size: 7 },
-  { label: '实际发货数量', size: 7 },
-  { label: '累计销售', size: 7 },
-  // 单列
-  { label: '平均折扣', size: 1 },
-  // 周销7列
-  { label: '周销', size: 7 },
-  // 单列
-  { label: '售罄率', size: 1 },
-  // 4组7列
-  { label: '店铺期末\n库存', size: 7 },
-  { label: '总仓库存', size: 7 },
-  { label: '建议补货', size: 7 },
-  { label: '与总公司\n补货建议', size: 7 },
-  // 最后空列
-  { label: '', size: 1 }
-];
-
-
-
-// ========== 数据 ==========
-let rawData = [];
-let page = 1;
-let pageSize = 50;
-let filteredData = [];
-
-// 模拟数据（2条示例）
-rawData = [
-  {
-    store_name: '云南南涧恩瑞妮（新）', store_type: '加盟ZC', year: '2026', season: '春',
-    prod_name: '衬衫', prod_code: 'M61C155', color: '无花果色', pricelist: 599,
-    boduan: '二波', zhutui: '', rank: '', arrive_days: '',
-    // 期初订单XS~合计
-    qc_so: [0,0,0,0,0,0,0],
-    // 订单进货
-    sale_qty: [0,0,0,0,0,0,0],
-    // 换货进货
-    change_qty: [0,0,0,0,0,0,0],
-    // 补货调货
-    transfer_in: [0,0,0,0,0,0,0],
-    // 退货数量
-    ret_qty: [0,0,0,0,0,0,0],
-    // 调出
-    transfer_out: [0,0,0,0,0,0,0],
-    // 实际发货
-    sum_qty: [0,0,0,0,0,0,0],
-    // 累计销售
-    retail_qty: [0,0,0,0,0,0,0],
-    // 平均折扣
-    discount: '',
-    // 周销
-    day_qty: [0,0,0,0,0,0,0],
-    // 售罄率
-    sell_rate: '0%',
-    // 店铺期末库存
-    store_qty: [0,1,1,0,0,0,2],
-    // 总仓库存
-    fa_qty: [0,1,1,0,0,0,2],
-    // 建议补货
-    sug_qty: [1,1,0,0,0,0,2],
-    // 与总公司补货建议
-    final_sug: [2,1,1,0,0,0,4]
-  },
-  {
-    store_name: '云南南涧恩瑞妮（新）', store_type: '加盟ZC', year: '2026', season: '春',
-    prod_name: '衬衫', prod_code: 'M61C158', color: '雪球白', pricelist: 499,
-    boduan: '一波', zhutui: '', rank: '', arrive_days: '',
-    qc_so: [0,0,0,0,0,0,0],
-    sale_qty: [0,0,0,0,0,0,0],
-    change_qty: [0,0,0,0,0,0,0],
-    transfer_in: [0,0,0,0,0,0,0],
-    ret_qty: [0,0,0,0,0,0,0],
-    transfer_out: [0,0,0,0,0,0,0],
-    sum_qty: [0,0,0,0,0,0,0],
-    retail_qty: [0,0,0,0,0,0,0],
-    discount: '',
-    day_qty: [0,0,0,0,0,0,0],
-    sell_rate: '0%',
-    store_qty: [0,0,0,0,0,0,0],
-    fa_qty: [0,0,0,0,0,0,0],
-    sug_qty: [0,0,0,0,0,0,0],
-    final_sug: [0,0,0,0,0,0,0]
+function filterTable() {
+  var kw = document.getElementById('searchInput').value.trim().toLowerCase();
+  var rows = document.querySelectorAll('#tableBody tr');
+  for (var i = 0; i < rows.length; i++) {
+    var text = rows[i].textContent.toLowerCase();
+    rows[i].style.display = (!kw || text.indexOf(kw) > -1) ? '' : 'none';
   }
-];
-
-// ========== 生成表头 ==========
-function buildHeader() {
-  // 第一行：分组名（colspan合并）
-  let r0 = '<tr>';
-  // 12个基本信息 - 使用rowspan=2跨两行
-  for (let c = 0; c < 12; c++) {
-    r0 += `<th rowspan="2" class="${c<3?'':'group-header'}" style="min-width:${c===4||c===5?90:c===0?130:55}px">${COL_NAMES[c]}</th>`;
-  }
-  // 8组7列 - colspan=7合并
-  for (let i = 0; i < 8; i++) {
-    r0 += `<th colspan="7" class="group-header">${GROUP_NAMES[i].label}</th>`;
-  }
-  // 平均折扣 - rowspan=2
-  r0 += '<th rowspan="2">平均折扣</th>';
-  // 周销 - colspan=7
-  r0 += '<th colspan="7" class="group-header">周销</th>';
-  // 售罄率 - rowspan=2
-  r0 += '<th rowspan="2">售罄率</th>';
-  // 4组7列
-  for (let i = 12; i < 16; i++) {
-    r0 += `<th colspan="7" class="group-header">${GROUP_NAMES[i].label}</th>`;
-  }
-  // 最后空列 - rowspan=2
-  r0 += '<th rowspan="2" style="min-width:20px"></th>';
-  r0 += '</tr>';
-  
-  // 第二行：尺码子列
-  let r1 = '<tr>';
-  // 8组尺码 × 7列（前12+平均折扣+售罄率+空列已被rowspan占住）
-  for (let i = 0; i < 8; i++) {
-    for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
-  }
-  // 周销7列尺码
-  for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
-  // 4组尺码 × 7列
-  for (let i = 0; i < 4; i++) {
-    for (let s of SIZE_NAMES) r1 += `<th>${s}</th>`;
-  }
-  r1 += '</tr>';
-  
-  return r0 + r1;
 }
 
-function fmt(n) { return n == null || n === '' ? '' : n; }
-function fmtPct(n) { return n == null || n === '' ? '' : (typeof n === 'number' ? (n*100).toFixed(1)+'%' : n); }
-
-// ========== 渲染数据行 ==========
-// 数组输出辅助
-function outArr(arr, n) {
-  let s = '';
-  if (arr && arr.length >= n) {
-    for (let i=0; i<n; i++) s += `<td class="num">${fmt(arr[i]==null?'':arr[i])}</td>`;
-  } else {
-    for (let i=0; i<n; i++) s += '<td class="num"></td>';
+function exportCSV() {
+  var kw = document.getElementById('searchInput').value.trim().toLowerCase();
+  var rows = document.querySelectorAll('#tableBody tr');
+  var csv = [];
+  
+  // 表头 R0
+  var h1 = [];
+  for (var c = 0; c < 106; c++) {
+    var th = document.querySelectorAll('#tableHead tr:first-child th')[c];
+    h1.push(th ? th.textContent.trim().replace(/,/g,'') : '');
   }
-  return s;
-}
-
-function renderRow(d) {
-  let v = (x) => x != null && x !== '' ? x : '';
-  let html = '<tr>';
-  // 前12列
-  html += `<td class="text-left">${v(d.store_name)}</td>`;
-  html += `<td>${v(d.store_type)}</td>`;
-  html += `<td>${v(d.year)}</td>`;
-  html += `<td>${v(d.season)}</td>`;
-  html += `<td class="text-left">${v(d.prod_name)}</td>`;
-  html += `<td class="text-left" style="color:#1890ff;font-weight:600">${v(d.prod_code)}</td>`;
-  html += `<td>${v(d.color)}</td>`;
-  html += `<td class="num">${d.pricelist ? '¥'+d.pricelist : ''}</td>`;
-  html += `<td>${v(d.boduan)}</td>`;
-  html += `<td>${v(d.zhutui)}</td>`;
-  html += `<td class="num">${v(d.rank)}</td>`;
-  html += `<td class="num">${v(d.arrive_days)}</td>`;
+  csv.push(h1.join(','));
   
-  // 106列严格按GROUP_NAMES顺序输出
-  // 8组7列：qc_so, sale_qty, change_qty, transfer_in, ret_qty, transfer_out, sum_qty, retail_qty
-  html += outArr(d.qc_so, 7);
-  html += outArr(d.sale_qty, 7);
-  html += outArr(d.change_qty, 7);
-  html += outArr(d.transfer_in, 7);
-  html += outArr(d.ret_qty, 7);
-  html += outArr(d.transfer_out, 7);
-  html += outArr(d.sum_qty, 7);
-  html += outArr(d.retail_qty, 7);
-  // 平均折扣
-  html += `<td class="num">${fmt(d.discount)}</td>`;
-  // 周销
-  html += outArr(d.day_qty, 7);
-  // 售罄率
-  html += `<td class="num">${fmtPct(d.sell_rate)}</td>`;
-  // 店铺期末库存
-  html += outArr(d.store_qty, 7);
-  // 总仓库存
-  html += outArr(d.fa_qty, 7);
-  // 建议补货
-  html += outArr(d.sug_qty, 7);
-  // 与总公司补货建议
-  html += outArr(d.final_sug, 7);
-  // 空列
-  html += '<td></td>';
-  
-  html += '</tr>';
-  return html;
-}
-
-function renderTable() {
-  let kw = document.getElementById('searchInput').value.trim().toLowerCase();
-  filteredData = rawData.filter(d => {
-    if (!kw) return true;
-    return (d.store_name||'').toLowerCase().includes(kw) ||
-           (d.prod_code||'').toLowerCase().includes(kw) ||
-           (d.prod_name||'').toLowerCase().includes(kw) ||
-           (d.color||'').toLowerCase().includes(kw);
-  });
-  
-  // KPI
-  let totalStores = new Set(filteredData.map(d=>d.store_name)).size;
-  let totalProducts = filteredData.length;
-  document.getElementById('kpiRow').innerHTML = `
-    <div class="kpi-card"><div class="kpi-num">${totalStores}</div><div class="kpi-label">门店数</div></div>
-    <div class="kpi-card"><div class="kpi-num">${totalProducts}</div><div class="kpi-label">款色数</div></div>
-  `;
-  
-  // 分页
-  let totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
-  if (page > totalPages) page = totalPages;
-  let start = (page - 1) * pageSize;
-  let end = Math.min(start + pageSize, filteredData.length);
-  
-  let body = '';
-  for (let i = start; i < end; i++) {
-    body += renderRow(filteredData[i]);
+  // 表头 R1
+  var h2 = [];
+  for (var c = 0; c < 106; c++) {
+    var th = document.querySelectorAll('#tableHead tr:last-child th')[c];
+    h2.push(th ? th.textContent.trim().replace(/,/g,'') : '');
   }
-  document.getElementById('tableBody').innerHTML = body;
-  
-  document.getElementById('pageInfo').textContent = `第${page}/${totalPages}页 (共${filteredData.length}条)`;
-  document.getElementById('btnFirst').disabled = (page <= 1);
-  document.getElementById('btnPrev').disabled = (page <= 1);
-  document.getElementById('btnNext').disabled = (page >= totalPages);
-  document.getElementById('btnLast').disabled = (page >= totalPages);
-}
-
-function doSearch() { page = 1; renderTable(); }
-function goPage(p) {
-  let totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
-  if (p < 1 || p > totalPages) return;
-  page = p; renderTable();
-}
-function changePageSize() {
-  pageSize = parseInt(document.getElementById('pageSizeSelect').value);
-  page = 1; renderTable();
-}
-
-function exportExcel() {
-  let rows = [];
-  // 第一行表头
-  let h1 = [...COL_NAMES.map(x=>x.replace(/\n/g,''))];
-  for (let g of GROUP_NAMES) {
-    let label = g.label.replace(/\n/g,'');
-    if (g.size === 7) {
-      h1.push(label);
-      for (let i=1;i<7;i++) h1.push('');  // Excel合并单元格，只第一个写标签
-    } else {
-      h1.push(label);
-    }
-  }
-  rows.push(h1);
-  
-  // 第二行：尺码子列
-  let h2 = COL_NAMES.map(()=>'');
-  for (let g of GROUP_NAMES) {
-    if (g.size === 7) {
-      for (let s of SIZE_NAMES) h2.push(s);
-    } else {
-      h2.push('');
-    }
-  }
-  rows.push(h2);
+  csv.push(h2.join(','));
   
   // 数据行
-  for (let d of filteredData) {
-    let r = [d.store_name, d.store_type, d.year, d.season, d.prod_name, d.prod_code,
-      d.color, d.pricelist, d.boduan, d.zhutui, d.rank||'', d.arrive_days||''];
-    r.push(...(d.qc_so||Array(7).fill('')));
-    r.push(...(d.sale_qty||Array(7).fill('')));
-    r.push(...(d.change_qty||Array(7).fill('')));
-    r.push(...(d.transfer_in||Array(7).fill('')));
-    r.push(...(d.ret_qty||Array(7).fill('')));
-    r.push(...(d.transfer_out||Array(7).fill('')));
-    r.push(...(d.sum_qty||Array(7).fill('')));
-    r.push(...(d.retail_qty||Array(7).fill('')));
-    r.push(d.discount||'');
-    r.push(...(d.day_qty||Array(7).fill('')));
-    r.push(d.sell_rate||'');
-    r.push(...(d.store_qty||Array(7).fill('')));
-    r.push(...(d.fa_qty||Array(7).fill('')));
-    r.push(...(d.sug_qty||Array(7).fill('')));
-    r.push(...(d.final_sug||Array(7).fill('')));
-    r.push('');
-    rows.push(r);
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].style.display === 'none') continue;
+    var cells = rows[i].querySelectorAll('td');
+    var row = [];
+    for (var j = 0; j < cells.length; j++) {
+      row.push(('' + cells[j].textContent).trim().replace(/,/g,''));
+    }
+    csv.push(row.join(','));
   }
   
-  let csv = '\uFEFF' + rows.map(row => row.map(v => {
-    let s = String(v==null?'':v);
-    if (s.includes(',')||s.includes('"')||s.includes('\n')) {
-      return '"'+s.replace(/"/g,'""')+'"';
-    }
-    return s;
-  }).join(',')).join('\n');
-  
-  let blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  let link = document.createElement('a');
+  var blob = new Blob(['\ufeff' + csv.join('\n')], {type: 'text/csv;charset=utf-8;'});
+  var link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = '门店商品专用数据管控.csv';
+  link.download = '门店商品数据管控.csv';
   link.click();
 }
-
-// ========== 初始化 ==========
-document.getElementById('tableHead').innerHTML = buildHeader();
-renderTable();
 </script>
 </body>
 </html>
