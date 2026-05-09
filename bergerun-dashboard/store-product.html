@@ -6,28 +6,8 @@
 <title>门店商品专用数据管控</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;font-size:12px;background:#f0f2f5;padding:16px;color:#333}
-h1{font-size:18px;font-weight:600;color:#1a1a2e;margin-bottom:12px;padding-left:4px;border-left:4px solid #2563eb;display:inline-block}
-
-/* 伯俊经典筛选栏 - 紧凑方块式 */
-.sfbar{background:#2b5797;border-radius:6px;margin-bottom:12px;padding:8px 16px}
-.sfrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
-.sfitem{display:inline-flex;align-items:center;gap:3px}
-.sfitem label{font-size:12px;color:#fff;white-space:nowrap;font-weight:400}
-.sfitem select,.sfitem input[type=text]{padding:2px 6px;font-size:12px;border:1px solid #3b6db5;border-radius:2px;height:24px;background:#fff;outline:none}
-.sfitem select{min-width:85px}
-.sfitem input{width:130px}
-.sfitem select:focus,.sfitem input:focus{border-color:#66aaff}
-.sfitem button{padding:2px 16px;font-size:12px;border-radius:2px;cursor:pointer;height:24px;outline:none}
-.sfitem .qbtn{background:#357ae8;color:#fff;border:1px solid #357ae8}
-.sfitem .qbtn:hover{background:#2860c9}
-.sfitem .ebtn{background:#4caf50;color:#fff;border:1px solid #388e3c}
-.sfitem .cbtn{background:#fff;color:#333;border:1px solid #8ab4f8}
-.sfitem .cbtn:hover{background:#e8e8e8}
-
-.stat{font-size:12px;color:#6b7280;margin-bottom:10px;padding-left:4px}
-
-.table-wrapper{overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;font-size:12px;background:#fff;padding:0;color:#333}
+.table-wrapper{overflow-x:auto}
 table{border-collapse:collapse;width:max-content;min-width:100%;font-size:12px}
 th,td{border:1px solid #d1d5db;padding:6px 8px;text-align:center;white-space:nowrap;line-height:1.5}
 .header-row th{background:#1d4ed8;color:#fff;font-weight:600;font-size:12px;letter-spacing:0.3px;position:sticky;top:0;z-index:10}
@@ -39,37 +19,21 @@ td:not(:empty){font-weight:500}
 td.num{color:#1d4ed8;font-weight:600}
 
 /* 分页 */
-.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:8px 0;flex-wrap:wrap}
 .pager .pi{padding:3px 10px;border:1px solid #d9d9d9;border-radius:3px;font-size:12px;cursor:pointer;background:#fff}
 .pager .pi:hover{border-color:#1890ff;color:#1890ff}
 .pager .pi.disabled{opacity:0.4;cursor:default}
 .pager .info{font-size:12px;color:#8c8c8c}
 .pager select{padding:3px 6px;border:1px solid #d9d9d9;border-radius:3px;font-size:12px}
+.stat{font-size:12px;color:#6b7280;padding:4px 8px 0}
 </style>
 </head>
 <body>
-<h1>门店商品专用数据管控</h1>
-
-<div class="sfbar">
-<div class="sfrow">
-<span class="sfitem"><label>门店</label><select id="sf_STORE" onchange="doFilter()"/></span>
-<span class="sfitem"><label>年份</label><select id="sf_YEAR" onchange="doFilter()"/></span>
-<span class="sfitem"><label>季节</label><select id="sf_SEASON" onchange="doFilter()"/></span>
-<span class="sfitem"><label>波段</label><select id="sf_BODUAN" onchange="doFilter()"/></span>
-<span class="sfitem"><label>款号</label><input type="text" id="kw" placeholder="输入款号/品名..." oninput="doFilter()"></span>
-<span class="sfitem"><button class="qbtn" onclick="doFilter()">查询</button></span>
-<span class="sfitem"><button class="ebtn" onclick="exportCSV()">CSV</button></span>
-<span class="sfitem"><button class="cbtn" onclick="clearAll()">清空</button></span>
-</div>
-</div>
-
 <div class="stat" id="stat">共 2 条记录，106 列</div>
-
 <div class="table-wrapper"><table id="tbl">
 <thead id="thx"></thead>
 <tbody id="tb"></tbody>
 </table></div>
-
 <div class="pager" id="pager"></div>
 
 <script>
@@ -93,38 +57,12 @@ var page = 1, ps = 50;
   for(var g=0;g<13;g++) for(var j=0;j<7;j++) r1 += '<th>'+SZ[j]+'</th>';
   r1 += '</tr>';
   document.getElementById('thx').innerHTML = r0+r1;
-
-  function fillSel(id, col){
-    var el = document.getElementById(id); if(!el) return;
-    var s = {}; for(var i=0;i<ALL.length;i++){ var v=ALL[i][col]; if(v!=null&&v!=='') s[v]=1; }
-    var keys = Object.keys(s).sort();
-    var html = '<option value="">全部</option>';
-    for(var i=0;i<keys.length;i++) html += '<option value="'+keys[i].replace(/"/g,'&quot;')+'">'+keys[i]+'</option>';
-    el.innerHTML = html;
-  }
-  fillSel('sf_STORE',0); fillSel('sf_YEAR',2); fillSel('sf_SEASON',3); fillSel('sf_BODUAN',8);
 })();
-
-function V(d,c){ return d[c]!=null?String(d[c]):'(空白)'; }
-
-function doFilter(){
-  var kw=document.getElementById('kw').value.trim().toLowerCase();
-  var sf0=document.getElementById('sf_STORE'),sf2=document.getElementById('sf_YEAR');
-  var sf3=document.getElementById('sf_SEASON'),sf8=document.getElementById('sf_BODUAN');
-  filtered = ALL.filter(function(d){
-    if(sf0&&sf0.value&&V(d,0)!==sf0.value)return false;
-    if(sf2&&sf2.value&&V(d,2)!==sf2.value)return false;
-    if(sf3&&sf3.value&&V(d,3)!==sf3.value)return false;
-    if(sf8&&sf8.value&&V(d,8)!==sf8.value)return false;
-    if(kw){ for(var c=0;c<d.length;c++){ if(d[c]!=null&&String(d[c]).toLowerCase().indexOf(kw)>=0) return true; } return false; }
-    return true;
-  });
-  page=1; render();
-}
 
 function render(){
   var total=filtered.length, tp=Math.max(1,Math.ceil(total/ps));
-  if(page>tp) page=tp; var start=(page-1)*ps, end=Math.min(start+ps,total);
+  if(page>tp) page=tp;
+  var start=(page-1)*ps, end=Math.min(start+ps,total);
   var tb=document.getElementById('tb'); tb.innerHTML='';
   for(var i=start;i<end;i++){
     var d=filtered[i];
@@ -140,31 +78,16 @@ function render(){
     tb.appendChild(tr);
   }
   document.getElementById('stat').textContent='共 '+total+' 条记录，106 列';
-  var p=document.getElementById('pager'); p.innerHTML='';
-  if(total<=ps&&tp<=1)return;
-  var h='<select onchange="cPs(this.value)"><option value=20>20条/页</option><option value=50 selected>50条/页</option><option value=100>100条/页</option><option value=200>200条/页</option></select>';
-  h+='<span class=pi'+(page<=1?' disabled':'')+' onclick="goP(1)">首页</span>';
-  h+='<span class=pi'+(page<=1?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>';
-  h+='<span class=info> 第'+page+'/'+tp+'页 </span>';
-  h+='<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>';
-  h+='<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+tp+')">末页</span>';
-  p.innerHTML=h;
+  document.getElementById('pager').innerHTML = tp>1 ? 
+    '<select onchange="cPs(this.value)"><option value=20>20条/页</option><option value=50 selected>50条/页</option><option value=100>100条/页</option><option value=200>200条/页</option></select>'+
+    '<span class=pi'+(page<=1?' disabled':'')+' onclick="goP(1)">首页</span>'+
+    '<span class=pi'+(page<=1?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>'+
+    '<span class=info> 第'+page+'/'+tp+'页 </span>'+
+    '<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>'+
+    '<span class=pi'+(page>=tp?' disabled':'')+' onclick="goP('+tp+')">末页</span>' : '';
 }
 function goP(p){page=p;render();}
 function cPs(v){ps=parseInt(v);page=1;render();}
-function clearAll(){
-  document.getElementById('kw').value='';
-  ['sf_STORE','sf_YEAR','sf_SEASON','sf_BODUAN'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  doFilter();
-}
-function exportCSV(){
-  var csv=[];
-  var h1=[]; document.querySelectorAll('#thx tr:first-child th').forEach(function(t){h1.push(t.textContent.trim().replace(/,/g,''));}); csv.push(h1.join(','));
-  var h2=[]; document.querySelectorAll('#thx tr:last-child th').forEach(function(t){h2.push(t.textContent.trim().replace(/,/g,''));}); csv.push(h2.join(','));
-  for(var i=0;i<filtered.length;i++){ var r=[]; for(var c=0;c<NCOLS;c++) r.push((''+(filtered[i][c]!=null?filtered[i][c]:'')).replace(/,/g,'')); csv.push(r.join(',')); }
-  var b=new Blob(['\ufeff'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='门店商品数据管控.csv';a.click();
-}
 filtered=ALL.slice();render();
 </script>
 </body>
