@@ -7,17 +7,25 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f0f2f5; padding: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-.toolbar-left a { text-decoration: none; color: #1890ff; font-size: 13px; padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; transition: .2s; }
-.toolbar-left a:hover { border-color: #1890ff; }
-.toolbar-left a i { margin-right: 4px; }
-.search-box { display: flex; gap: 6px; align-items: center; }
-.search-box input { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 180px; }
-.search-box input:focus { outline: none; border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
-.search-box button { padding: 6px 14px; background: #1890ff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
-.search-box button:active { background: #096dd9; }
-.search-box button.export-btn { background: #52c41a; }
-.search-box button.export-btn:active { background: #389e0d; }
+
+/* 返回链接 */
+.toolbar a { text-decoration: none; color: #1890ff; font-size: 13px; padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; }
+.toolbar a:hover { border-color: #1890ff; }
+
+/* 筛选栏 */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; padding: 10px 14px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.filter-item { display: flex; align-items: center; gap: 4px; }
+.filter-item label { font-size: 13px; color: #595959; white-space: nowrap; min-width: 32px; }
+.filter-item select { padding: 5px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; background: #fff; min-width: 90px; }
+.filter-item select:focus { outline: none; border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+.filter-item input { padding: 5px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 180px; }
+.filter-item input:focus { outline: none; border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+.query-btn { padding: 6px 20px; background: #1890ff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.query-btn:active { background: #096dd9; }
+.export-btn { padding: 6px 14px; background: #52c41a; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.export-btn:active { background: #389e0d; }
+
+/* 表格 */
 .table-wrap { overflow-x: auto; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 table { border-collapse: collapse; width: 100%; font-size: 12px; white-space: nowrap; min-width: 3180px; }
 thead th { position: sticky; top: 0; z-index: 10; background: #1a3a5c; color: #fff; padding: 4px 6px; text-align: center; border: 1px solid #2a4a6c; font-weight: 600; font-size: 11px; }
@@ -27,20 +35,66 @@ tbody tr:nth-child(even) { background: #fafafa; }
 tbody tr:hover { background: #e6f7ff; }
 tbody td.text-left { text-align: left; }
 tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 统计行 */
+.stat-bar { margin-bottom: 8px; font-size: 13px; color: #595959; }
 </style>
 </head>
 <body>
 
-<div class="toolbar">
-  <div class="toolbar-left">
-    <a href=".">← 返回</a>
+<div class="toolbar" style="margin-bottom:8px">
+  <a href=".">← 返回</a>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-item">
+    <label>门店</label>
+    <select id="filter_STORES" onchange="filterTable()">
+      <option value="">全部</option>
+      <option value="云南南涧恩瑞妮（新）">云南南涧恩瑞妮（新）</option>
+    </select>
   </div>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="搜索款号/品名/门店..." oninput="filterTable()">
-    <button onclick="filterTable()">搜索</button>
+  <div class="filter-item">
+    <label>年份</label>
+    <select id="filter_YEARS" onchange="filterTable()">
+      <option value="">全部</option>
+      <option value="2026">2026</option>
+    </select>
+  </div>
+  <div class="filter-item">
+    <label>季节</label>
+    <select id="filter_SEASONS" onchange="filterTable()">
+      <option value="">全部</option>
+      <option value="春">春</option>
+    </select>
+  </div>
+  <div class="filter-item">
+    <label>波段</label>
+    <select id="filter_BODUAN" onchange="filterTable()">
+      <option value="">全部</option>
+      <option value="一波">一波</option>
+      <option value="二波">二波</option>
+    </select>
+  </div>
+  <div class="filter-item">
+    <label>主推款</label>
+    <select id="filter_ZHUTUI" onchange="filterTable()">
+      <option value="">全部</option>
+    </select>
+  </div>
+  <div class="filter-item">
+    <input type="text" id="searchInput" placeholder="款号/品名/颜色..." oninput="filterTable()">
+  </div>
+  <div class="filter-item">
+    <button class="query-btn" onclick="filterTable()">查 询</button>
+  </div>
+  <div class="filter-item" style="margin-left:auto">
     <button class="export-btn" onclick="exportCSV()">导出CSV</button>
   </div>
 </div>
+
+
+<div class="stat-bar" id="statBar">共 2 条记录</div>
 
 <div class="table-wrap">
   <table id="dataTable">
@@ -55,43 +109,108 @@ tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
 </div>
 
 <script>
+// 全量数据
+var ALL_DATA = [["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C155", "无花果色", 599, "二波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, 1, 1, 0, null, null, 2, null, 1, 1, null, null, null, 2, 2, "", 1, 1, "", "", 4, null], ["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C158", "雪球白", 499, "一波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, null, 0, 0, null, null, 0, null, null, null, null, null, null, 0, "", "", "", "", "", "", 0, null]];
+
+function getVal(d, col) {
+  return d[col] != null ? String(d[col]) : '';
+}
+
 function filterTable() {
   var kw = document.getElementById('searchInput').value.trim().toLowerCase();
-  var rows = document.querySelectorAll('#tableBody tr');
-  for (var i = 0; i < rows.length; i++) {
-    var text = rows[i].textContent.toLowerCase();
-    rows[i].style.display = (!kw || text.indexOf(kw) > -1) ? '' : 'none';
+  var storeVal = document.getElementById('filter_STORES').value;
+  var yearVal = document.getElementById('filter_YEARS').value;
+  var seasonVal = document.getElementById('filter_SEASONS').value;
+  var bdVal = document.getElementById('filter_BODUAN').value;
+  var ztVal = document.getElementById('filter_ZHUTUI').value;
+  
+  var filtered = ALL_DATA.filter(function(d) {
+    if (storeVal && getVal(d,0) !== storeVal) return false;
+    if (yearVal && getVal(d,2) !== yearVal) return false;
+    if (seasonVal && getVal(d,3) !== seasonVal) return false;
+    if (bdVal && getVal(d,8) !== bdVal) return false;
+    if (ztVal && getVal(d,9) !== ztVal) return false;
+    if (kw) {
+      var match = false;
+      for (var ci = 0; ci < d.length; ci++) {
+        if ((d[ci] != null && String(d[ci]).toLowerCase().indexOf(kw) > -1)) {
+          match = true; break;
+        }
+      }
+      if (!match) return false;
+    }
+    return true;
+  });
+  
+  // 重新渲染表格体
+  var tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var d = filtered[i];
+    var tr = document.createElement('tr');
+    for (var c = 0; c < d.length; c++) {
+      var td = document.createElement('td');
+      var v = d[c];
+      if (v == null || v === '') {
+        // empty
+      } else if (typeof v === 'number') {
+        td.className = 'num';
+        td.textContent = v;
+      } else {
+        if (c === 0 || c === 4 || c === 5) td.className = 'text-left';
+        if (c === 5) td.style.cssText = 'color:#1890ff;font-weight:600';
+        td.textContent = v;
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
   }
+  
+  document.getElementById('statBar').textContent = '共 ' + filtered.length + ' 条记录（筛选后）';
 }
 
 function exportCSV() {
   var kw = document.getElementById('searchInput').value.trim().toLowerCase();
-  var rows = document.querySelectorAll('#tableBody tr');
+  var storeVal = document.getElementById('filter_STORES').value;
+  var yearVal = document.getElementById('filter_YEARS').value;
+  var seasonVal = document.getElementById('filter_SEASONS').value;
+  var bdVal = document.getElementById('filter_BODUAN').value;
+  var ztVal = document.getElementById('filter_ZHUTUI').value;
+  
+  var filtered = ALL_DATA.filter(function(d) {
+    if (storeVal && getVal(d,0) !== storeVal) return false;
+    if (yearVal && getVal(d,2) !== yearVal) return false;
+    if (seasonVal && getVal(d,3) !== seasonVal) return false;
+    if (bdVal && getVal(d,8) !== bdVal) return false;
+    if (ztVal && getVal(d,9) !== ztVal) return false;
+    if (kw) {
+      var match = false;
+      for (var ci = 0; ci < d.length; ci++) {
+        if ((d[ci] != null && String(d[ci]).toLowerCase().indexOf(kw) > -1)) {
+          match = true; break;
+        }
+      }
+      if (!match) return false;
+    }
+    return true;
+  });
+  
+  var ths = document.querySelectorAll('#tableHead tr:first-child th, #tableHead tr:last-child th');
   var csv = [];
-  
-  // 表头 R0
+  // R0
   var h1 = [];
-  for (var c = 0; c < 106; c++) {
-    var th = document.querySelectorAll('#tableHead tr:first-child th')[c];
-    h1.push(th ? th.textContent.trim().replace(/,/g,'') : '');
-  }
-  csv.push(h1.join(','));
-  
-  // 表头 R1
   var h2 = [];
-  for (var c = 0; c < 106; c++) {
-    var th = document.querySelectorAll('#tableHead tr:last-child th')[c];
-    h2.push(th ? th.textContent.trim().replace(/,/g,'') : '');
-  }
+  var cols = document.querySelectorAll('#tableHead tr:first-child th');
+  for (var i = 0; i < cols.length; i++) h1.push(cols[i].textContent.trim().replace(/,/g,''));
+  cols = document.querySelectorAll('#tableHead tr:last-child th');
+  for (var i = 0; i < cols.length; i++) h2.push(cols[i].textContent.trim().replace(/,/g,''));
+  csv.push(h1.join(','));
   csv.push(h2.join(','));
   
-  // 数据行
-  for (var i = 0; i < rows.length; i++) {
-    if (rows[i].style.display === 'none') continue;
-    var cells = rows[i].querySelectorAll('td');
+  for (var i = 0; i < filtered.length; i++) {
     var row = [];
-    for (var j = 0; j < cells.length; j++) {
-      row.push(('' + cells[j].textContent).trim().replace(/,/g,''));
+    for (var c = 0; c < filtered[i].length; c++) {
+      row.push(('' + (filtered[i][c] != null ? filtered[i][c] : '')).replace(/,/g,''));
     }
     csv.push(row.join(','));
   }
