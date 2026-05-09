@@ -7,11 +7,14 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",Arial,sans-serif;font-size:12px;background:#fff;padding:0 2px;color:#333}
-.sfbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:6px 10px;background:#2b5797;border-radius:0;margin-bottom:0}
+.sfbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:6px 10px;background:#2b5797;border-radius:0;margin-bottom:0;position:relative}
 .sfbar label{font-size:11px;color:#fff;white-space:nowrap;min-width:auto}
 .sfbar select,.sfbar input[type=text]{padding:2px 4px;font-size:11px;border:1px solid #3b6db5;border-radius:2px;height:22px;background:#fff;outline:none}
 .sfbar select{min-width:68px;max-width:90px}
-.sfbar input[type=text]{width:110px}
+.sfbar .kw-wrap{display:inline-flex;align-items:center;position:relative}
+.sfbar .kw-wrap input[type=text]{width:100px}
+.sfbar .kw-btn{width:22px;height:22px;border:1px solid #3b6db5;border-left:none;background:#3b6db5;color:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:0 2px 2px 0;padding:0}
+.sfbar .kw-btn:hover{background:#4a7dd4}
 .sfbar button{padding:1px 12px;font-size:11px;border-radius:2px;cursor:pointer;height:22px}
 .sfbar .qbtn{background:#357ae8;color:#fff;border:1px solid #357ae8}
 .sfbar .ebtn{background:#4caf50;color:#fff;border:1px solid #388e3c}
@@ -34,6 +37,7 @@ td.num{color:#1d4ed8;font-weight:600}
 .pager .pi.disabled{opacity:0.4;cursor:default}
 .pager .info{font-size:11px;color:#8c8c8c}
 .pager select{padding:2px 4px;border:1px solid #d9d9d9;border-radius:3px;font-size:11px}
+
 .fp-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:9998;display:flex;align-items:center;justify-content:center}
 .fp-panel{background:#fff;border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,.2);width:320px;max-height:80vh;overflow-y:auto;padding:16px}
 .fp-title{font-size:14px;font-weight:600;color:#1d4ed8;margin-bottom:12px}
@@ -56,7 +60,7 @@ td.num{color:#1d4ed8;font-weight:600}
 <label>年份</label><select id="sf_YEAR" onchange="doFilter()"/>
 <label>季节</label><select id="sf_SEASON" onchange="doFilter()"/>
 <label>款式</label><select id="sf_STYLE" onchange="doFilter()"/>
-<label>款号</label><input type="text" id="kw" placeholder="" oninput="doFilter()">
+<label>款号</label><div class="kw-wrap"><input type="text" id="kw" placeholder="" oninput="doFilter()"><button class="kw-btn" onclick="showFilterPanel()" title="品牌/处份筛选">▼</button></div>
 <label>波次</label><select id="sf_BODUAN" onchange="doFilter()"/>
 <button class="qbtn" onclick="doFilter()">查询</button>
 <button class="ebtn" onclick="exportCSV()">CSV</button>
@@ -72,6 +76,7 @@ td.num{color:#1d4ed8;font-weight:600}
 <script>
 var ALL = [["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C155", "无花果色", 599.0, "二波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, 1.0, 1.0, 0.0, null, null, 2.0, null, 1.0, 1.0, null, null, null, 2.0, 2.0, "", 1.0, 1.0, "", "", 4.0, null], ["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C158", "雪球白", 499.0, "一波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, null, 0.0, 0.0, null, null, 0.0, null, null, null, null, null, null, 0.0, "", "", "", "", "", "", 0.0, null]];
 var NCOLS = 106;
+var fState = {};
 var filtered = [];
 var page = 1, ps = 50;
 var brandValues = [], deptValues = [];
@@ -92,12 +97,8 @@ var brandValues = [], deptValues = [];
   r1 += '</tr>';
   document.getElementById('thx').innerHTML = r0+r1;
 
-  // 填充筛选选项（从数据中取唯一值）
-  // (老的fillSel保留，但不使用)
-  // 从M_PRODUCT维度字段读品牌/处份等
-  function getBrands(){ return ['恩瑞妮','朗文斯汀','帛逸','帛卡袖','思朋','施喆','婉甸']; }
-  function getDepts(){ return ['服装','鞋','配饰品','道具']; }
-  brandValues = getBrands(); deptValues = getDepts();
+  brandValues = ['恩瑞妮','朗文斯汀','帛逸','帛卡袖','思朋','施喆','婉甸'];
+  deptValues = ['服装','鞋','配饰品','道具'];
   function fillSel(id, vals){
     var el = document.getElementById(id); if(!el) return;
     var html = '<option value="">全部</option>';
@@ -105,6 +106,17 @@ var brandValues = [], deptValues = [];
     el.innerHTML = html;
   }
   fillSel('sf_BRAND', brandValues); fillSel('sf_DEPT', deptValues);
+  // 年份/季节/款式/波次从现有数据取
+  function fillByData(id, col){
+    var el = document.getElementById(id); if(!el) return;
+    var s={}; for(var i=0;i<ALL.length;i++){var v=ALL[i][col];if(v!=null&&v!=='')s[v]=1;}
+    var keys = Object.keys(s).sort();
+    var html = '<option value="">全部</option>';
+    for(var i=0;i<keys.length;i++) html += '<option value="'+keys[i].replace(/"/g,'&quot;')+'">'+keys[i]+'</option>';
+    el.innerHTML = html;
+  }
+  fillByData('sf_YEAR',2); fillByData('sf_SEASON',3);
+  fillByData('sf_STYLE',4); fillByData('sf_BODUAN',8);
 })();
 
 function V(d,c){ return d[c]!=null?String(d[c]):'(空白)'; }
@@ -115,17 +127,12 @@ function doFilter(){
   var sfYr=document.getElementById('sf_YEAR'),sfSs=document.getElementById('sf_SEASON');
   var sfSt=document.getElementById('sf_STYLE'),sfBd=document.getElementById('sf_BODUAN');
   filtered = ALL.filter(function(d){
-    // 品牌 col0(门店), 处份 col1(店仓类别), 年份 col2, 季节 col3, 款式 col4(品名), 波次 col8(波段)
     if(sfBr&&sfBr.value&&V(d,0)!==sfBr.value)return false;
     if(sfDp&&sfDp.value&&V(d,1)!==sfDp.value)return false;
     if(sfYr&&sfYr.value&&V(d,2)!==sfYr.value)return false;
     if(sfSs&&sfSs.value&&V(d,3)!==sfSs.value)return false;
     if(sfSt&&sfSt.value&&V(d,4)!==sfSt.value)return false;
     if(sfBd&&sfBd.value&&V(d,8)!==sfBd.value)return false;
-    // 弹窗中的品牌/处份过滤——先按顶部下拉过滤,品牌/处份用弹窗状态过滤
-    // 弹窗中的品牌和处份：从数据列0,1近似过滤
-    if(fState.brand && fState.brand.indexOf(V(d,0))<0) return false;
-    if(fState.dept && fState.dept.indexOf(V(d,1))<0) return false;
     if(kw){ for(var c=0;c<d.length;c++){ if(d[c]!=null&&String(d[c]).toLowerCase().indexOf(kw)>=0) return true; } return false; }
     return true;
   });
@@ -143,7 +150,7 @@ function render(){
       var td=document.createElement('td'); var v=d[c];
       if(v!=null&&v!==''){
         if(typeof v==='number'){ td.className='num'; td.textContent=v===Math.floor(v)?v:v.toFixed(2); }
-        else{ if(c===5){td.style.color='#1890ff';td.style.fontWeight='600';td.style.cursor='pointer';td.onclick=function(){showFilterPanel(col);}} td.textContent=v; }
+        else{ if(c===5){td.style.color='#1890ff';td.style.fontWeight='600'} td.textContent=v; }
       }
       tr.appendChild(td);
     }
@@ -163,6 +170,7 @@ function render(){
 function goP(p){page=p;render();}
 function cPs(v){ps=parseInt(v);page=1;render();}
 function clearAll(){
+  fState={};
   document.getElementById('kw').value='';
   ['sf_BRAND','sf_DEPT','sf_YEAR','sf_SEASON','sf_STYLE','sf_BODUAN'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   doFilter();
@@ -175,23 +183,21 @@ function exportCSV(){
   var b=new Blob(['\ufeff'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
   var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='门店商品数据管控.csv';a.click();
 }
-filtered=ALL.slice();render();
-// 弹窗：款号点击 → 品牌+处份多选
-function showFilterPanel(col){
+
+// 点击款号输入框右边的 ▼ 按钮 → 弹窗选择品牌+处份
+function showFilterPanel(){
   closeFp();
   var overlay = document.createElement('div'); overlay.className='fp-overlay'; overlay.onclick=closeFp;
   var panel = document.createElement('div'); panel.className='fp-panel';
   panel.onclick=function(e){e.stopPropagation();};
   var html = '<div class="fp-title">筛选条件</div>';
-  html += '<div class="fp-group"><div class="fp-label">品牌</div>';
-  html += '<div class="fp-check-list">';
+  html += '<div class="fp-group"><div class="fp-label">品牌</div><div class="fp-check-list">';
   for(var i=0;i<brandValues.length;i++){
     var chk = fState.brand && fState.brand.indexOf(brandValues[i])>=0 ? ' checked' : '';
     html += '<label><input type="checkbox" name="fp_brand" value="'+brandValues[i]+'"'+chk+'>'+brandValues[i]+'</label>';
   }
   html += '</div></div>';
-  html += '<div class="fp-group"><div class="fp-label">处份（部门）</div>';
-  html += '<div class="fp-check-list">';
+  html += '<div class="fp-group"><div class="fp-label">处份（部门）</div><div class="fp-check-list">';
   for(var i=0;i<deptValues.length;i++){
     var chk = fState.dept && fState.dept.indexOf(deptValues[i])>=0 ? ' checked' : '';
     html += '<label><input type="checkbox" name="fp_dept" value="'+deptValues[i]+'"'+chk+'>'+deptValues[i]+'</label>';
@@ -205,15 +211,14 @@ function showFilterPanel(col){
 function fpApply(){
   var brands = []; document.querySelectorAll('input[name="fp_brand"]:checked').forEach(function(e){brands.push(e.value);});
   var depts = []; document.querySelectorAll('input[name="fp_dept"]:checked').forEach(function(e){depts.push(e.value);});
-  if(brands.length===brandValues.length||brands.length===0) delete fState.brand; else fState.brand = brands;
-  if(depts.length===deptValues.length||depts.length===0) delete fState.dept; else fState.dept = depts;
+  fState.brand = (brands.length>0&&brands.length<brandValues.length) ? brands : undefined;
+  fState.dept = (depts.length>0&&depts.length<deptValues.length) ? depts : undefined;
   closeFp(); doFilter();
 }
 function fpClear(){ delete fState.brand; delete fState.dept; closeFp(); doFilter(); }
 function closeFp(){
   var o = document.querySelector('.fp-overlay'); if(o){document.body.removeChild(o);}
 }
-
 </script>
 </body>
 </html>
