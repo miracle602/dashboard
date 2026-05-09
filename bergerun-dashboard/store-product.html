@@ -7,209 +7,192 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:'Microsoft YaHei','PingFang SC',sans-serif; background:#f0f2f5; padding:12px; }
-
-/* 顶部工具栏 */
 .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:8px 12px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 .toolbar a { text-decoration:none; color:#1890ff; font-size:13px; }
+.toolbar .title { font-size:14px; font-weight:600; color:#262626; }
 .search-box { display:flex; gap:4px; align-items:center; margin-left:auto; }
 .search-box input { padding:4px 8px; border:1px solid #d9d9d9; border-radius:4px; font-size:13px; width:160px; }
 .search-box input:focus { outline:none; border-color:#1890ff; }
 .search-box button { padding:4px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:12px; cursor:pointer; background:#fff; }
 .search-box button.primary { background:#1890ff; color:#fff; border-color:#1890ff; }
 .search-box button.export { background:#52c41a; color:#fff; border-color:#52c41a; }
-.search-box button:hover { opacity:.85; }
 
-/* 表格 */
 .table-wrap { overflow-x:auto; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
 table { border-collapse:collapse; width:100%; font-size:12px; white-space:nowrap; min-width:3180px; }
 thead th { position:sticky; top:0; z-index:10; background:#1a3a5c; color:#fff; padding:3px 5px; text-align:center; border:1px solid #2a4a6c; font-weight:600; font-size:11px; }
 thead th.group-header { background:#2a5a8c; }
-/* 漏斗图标 */
-.filter-icon { cursor:pointer; font-size:8px; margin-left:2px; opacity:0.5; user-select:none; vertical-align:middle; }
-.filter-icon:hover { opacity:1; }
-.filter-icon.active { opacity:1; color:#ffc107; }
-
+.fi { cursor:pointer; font-size:8px; margin-left:2px; opacity:0.5; user-select:none; vertical-align:middle; }
+.fi:hover { opacity:1; }
+.fi.active { opacity:1; color:#ffc107; }
 tbody td { padding:2px 4px; text-align:center; border:1px solid #e8e8e8; font-size:11px; }
 tbody tr:nth-child(even) { background:#fafafa; }
 tbody tr:hover { background:#e6f7ff; }
 tbody td.text-left { text-align:left; }
-tbody td.num { text-align:right; font-variant-numeric:tabular-nums; }
+tbody td.num { text-align:right; }
 
-/* 漏斗下拉 */
-.filter-dropdown { position:fixed; background:#fff; border:1px solid #d9d9d9; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,.15); z-index:1000; min-width:150px; max-height:280px; overflow-y:auto; padding:4px 0; display:none; }
-.filter-dropdown .fd-item { padding:3px 10px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px; }
-.filter-dropdown .fd-item:hover { background:#e6f7ff; }
-.filter-dropdown .fd-item input { margin:0; }
-.filter-dropdown .fd-actions { padding:4px 10px; border-top:1px solid #e8e8e8; display:flex; gap:4px; justify-content:flex-end; }
-.filter-dropdown .fd-actions button { padding:2px 10px; border:1px solid #d9d9d9; border-radius:3px; font-size:11px; cursor:pointer; background:#fff; }
-.filter-dropdown .fd-actions .ok { background:#1890ff; color:#fff; border-color:#1890ff; }
+/* 漏斗菜单 */
+.fd { position:fixed; background:#fff; border:1px solid #d9d9d9; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,.15); z-index:1000; min-width:150px; max-height:280px; overflow-y:auto; padding:4px 0; display:none; }
+.fd .fi2 { padding:3px 10px; font-size:12px; display:flex; align-items:center; gap:5px; }
+.fd .fi2:hover { background:#e6f7ff; }
+.fd .fa { padding:4px 10px; border-top:1px solid #e8e8e8; display:flex; gap:4px; justify-content:flex-end; }
+.fd .fa button { padding:2px 10px; border:1px solid #d9d9d9; border-radius:3px; font-size:11px; cursor:pointer; background:#fff; }
+.fd .fa .ok { background:#1890ff; color:#fff; border-color:#1890ff; }
 
-.stat-bar { margin-bottom:6px; font-size:12px; color:#8c8c8c; }
+/* 分页栏 */
+.pager { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:10px; flex-wrap:wrap; }
+.pager .pi { padding:4px 10px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; cursor:pointer; background:#fff; }
+.pager .pi:hover { border-color:#1890ff; color:#1890ff; }
+.pager .pi.disabled { opacity:0.4; cursor:default; }
+.pager .pi.active { background:#1890ff; color:#fff; border-color:#1890ff; }
+.pager .info { font-size:12px; color:#8c8c8c; }
+.pager select { padding:3px 6px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; }
+
+.stat { margin-bottom:6px; font-size:12px; color:#8c8c8c; }
 </style>
 </head>
 <body>
-<div class="toolbar"><a href=".">← 返回</a><span style="font-size:13px;color:#262626;font-weight:600">门店商品专用数据管控</span><div class="search-box"><input type="text" id="searchInput" placeholder="搜索款号/品名/颜色..." oninput="doFilter()"><button class="primary" onclick="doFilter()">搜索</button><button class="export" onclick="exportCSV()">导出CSV</button><button onclick="clearAll()" style="padding:4px 10px;background:#fff;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;cursor:pointer">清空</button></div></div><div class="stat-bar" id="statBar">共 2 条记录</div><div class="table-wrap"><table id="dataTable"><thead id="tableHead"><tr><th style="min-width:130px">店仓名称<span class="filter-icon" data-col="0" onclick="showFilter(0,event)">▼</span></th><th style="min-width:55px">店仓类别<span class="filter-icon" data-col="1" onclick="showFilter(1,event)">▼</span></th><th style="min-width:55px">年份<span class="filter-icon" data-col="2" onclick="showFilter(2,event)">▼</span></th><th class="group-header" style="min-width:55px">季节<span class="filter-icon" data-col="3" onclick="showFilter(3,event)">▼</span></th><th class="group-header" style="min-width:90px">品名<span class="filter-icon" data-col="4" onclick="showFilter(4,event)">▼</span></th><th class="group-header" style="min-width:90px">款号<span class="filter-icon" data-col="5" onclick="showFilter(5,event)">▼</span></th><th class="group-header" style="min-width:55px">颜色<span class="filter-icon" data-col="6" onclick="showFilter(6,event)">▼</span></th><th class="group-header" style="min-width:55px">吊牌价<span class="filter-icon" data-col="7" onclick="showFilter(7,event)">▼</span></th><th class="group-header" style="min-width:55px">波段<span class="filter-icon" data-col="8" onclick="showFilter(8,event)">▼</span></th><th class="group-header" style="min-width:55px">主推款<span class="filter-icon" data-col="9" onclick="showFilter(9,event)">▼</span></th><th class="group-header" style="min-width:55px">单店单款单色零售排名<span class="filter-icon" data-col="10" onclick="showFilter(10,event)">▼</span></th><th class="group-header" style="min-width:55px">到店天数<span class="filter-icon" data-col="11" onclick="showFilter(11,event)">▼</span></th><th class="group-header">期初订单</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">订单进货（订单，正常）</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">换货进货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">补货，调货进货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">退货数量</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">调出</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">实际发货数量</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">累计销售</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">平均折扣<span class="filter-icon" data-col="68" onclick="showFilter(68,event)">▼</span></th><th class="group-header">周销</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">售罄率<span class="filter-icon" data-col="76" onclick="showFilter(76,event)">▼</span></th><th class="group-header">店铺期未库存</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">总仓库存</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">建议补货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">与总公司补货建议</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th></tr></thead><tbody id="tableBody"><tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C155</td><td class="">无花果色</td><td class="num">599</td><td class="">二波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td></td><td></td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td></td><td class="num">2</td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td class="num">4</td><td></td></tr><tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C158</td><td class="">雪球白</td><td class="num">499</td><td class="">一波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td class="num">0</td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td></tr></tbody></table></div>
+<div class="toolbar">
+<a href=".">← 返回</a>
+<span class="title">门店商品专用数据管控</span>
+<div class="search-box">
+<input type="text" id="kw" placeholder="搜索款号/品名/颜色..." oninput="onSearch()">
+<button class="primary" onclick="onSearch()">搜索</button>
+<button class="export" onclick="exportCSV()">导出CSV</button>
+<button onclick="clearAll()" style="padding:4px 10px;background:#fff;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;cursor:pointer">清空</button>
+</div>
+</div>
+<div class="stat" id="stat">共 2 条记录</div>
+<div class="table-wrap"><table id="tbl"><thead id="th"><tr><th style="min-width:130px">店仓名称<span class="fi" data-col="0" onclick="showFilter(0,event)">▼</span></th><th style="min-width:55px">店仓类别<span class="fi" data-col="1" onclick="showFilter(1,event)">▼</span></th><th style="min-width:55px">年份<span class="fi" data-col="2" onclick="showFilter(2,event)">▼</span></th><th class="group-header" style="min-width:55px">季节<span class="fi" data-col="3" onclick="showFilter(3,event)">▼</span></th><th class="group-header" style="min-width:90px">品名<span class="fi" data-col="4" onclick="showFilter(4,event)">▼</span></th><th class="group-header" style="min-width:90px">款号<span class="fi" data-col="5" onclick="showFilter(5,event)">▼</span></th><th class="group-header" style="min-width:55px">颜色<span class="fi" data-col="6" onclick="showFilter(6,event)">▼</span></th><th class="group-header" style="min-width:55px">吊牌价<span class="fi" data-col="7" onclick="showFilter(7,event)">▼</span></th><th class="group-header" style="min-width:55px">波段<span class="fi" data-col="8" onclick="showFilter(8,event)">▼</span></th><th class="group-header" style="min-width:55px">主推款<span class="fi" data-col="9" onclick="showFilter(9,event)">▼</span></th><th class="group-header" style="min-width:55px">单店单款单色零售排名<span class="fi" data-col="10" onclick="showFilter(10,event)">▼</span></th><th class="group-header" style="min-width:55px">到店天数<span class="fi" data-col="11" onclick="showFilter(11,event)">▼</span></th><th class="group-header">期初订单</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">订单进货（订单，正常）</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">换货进货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">补货，调货进货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">退货数量</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">调出</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">实际发货数量</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">累计销售</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">平均折扣<span class="fi" data-col="68" onclick="showFilter(68,event)">▼</span></th><th class="group-header">周销</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">售罄率<span class="fi" data-col="76" onclick="showFilter(76,event)">▼</span></th><th class="group-header">店铺期未库存</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">总仓库存</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">建议补货</th><th></th><th></th><th></th><th></th><th></th><th></th><th class="group-header">与总公司补货建议</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2XL</th><th>合计</th><th></th></tr></thead><tbody id="tb"><tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C155</td><td class="">无花果色</td><td class="num">599</td><td class="">二波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td></td><td></td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td></td><td class="num">2</td><td class="num">2</td><td></td><td class="num">1</td><td class="num">1</td><td></td><td></td><td class="num">4</td><td></td></tr><tr><td class="text-left">云南南涧恩瑞妮（新）</td><td class="">加盟ZC</td><td class="">2026</td><td class="">春</td><td class="text-left">衬衫</td><td class="text-left" style="color:#1890ff;font-weight:600">M61C158</td><td class="">雪球白</td><td class="num">499</td><td class="">一波</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="">0%</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td class="num">0</td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="num">0</td><td></td></tr></tbody></table></div>
+
+<div class="pager" id="pager"></div>
+
 <script>
-var ALL_DATA = [["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C155", "无花果色", 599.0, "二波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, 1.0, 1.0, 0.0, null, null, 2.0, null, 1.0, 1.0, null, null, null, 2.0, 2.0, "", 1.0, 1.0, "", "", 4.0, null], ["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C158", "雪球白", 499.0, "一波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, null, 0.0, 0.0, null, null, 0.0, null, null, null, null, null, null, 0.0, "", "", "", "", "", "", 0.0, null]];
-var filterState = {};  // col_idx -> Set of strings to include
-var activeDropdown = null;
+var ALL = [["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C155", "无花果色", 599.0, "二波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, 1.0, 1.0, 0.0, null, null, 2.0, null, 1.0, 1.0, null, null, null, 2.0, 2.0, "", 1.0, 1.0, "", "", 4.0, null], ["云南南涧恩瑞妮（新）", "加盟ZC", "2026", "春", "衬衫", "M61C158", "雪球白", 499.0, "一波", null, null, null, "", "", "", "", "", "", "", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "0%", null, null, null, null, null, null, null, null, null, 0.0, 0.0, null, null, 0.0, null, null, null, null, null, null, 0.0, "", "", "", "", "", "", 0.0, null]];
+var NCOLS = 106;
 
-function val(d,col) { return d[col]!=null?String(d[col]):'(空白)'; }
+var fState = {}; // col->Set
+var filtered = [];
+var page = 1;
+var ps = 50;
 
-function getUniqueValues(col) {
-  var s = {};
-  for (var i=0;i<ALL_DATA.length;i++) s[val(ALL_DATA[i],col)]=1;
+function v(d,c) { return d[c]!=null?String(d[c]):'(空白)'; }
+
+function uniq(col) {
+  var s={};
+  for(var i=0;i<ALL.length;i++) s[v(ALL[i],col)]=1;
   return Object.keys(s).sort();
 }
 
 function showFilter(col,ev) {
   ev.stopPropagation();
-  closeDropdown();
-  var el = ev.target;
-  var rect = el.getBoundingClientRect();
-  var vals = getUniqueValues(col);
-  var cur = filterState[col];
-
+  closeFd();
+  var vals = uniq(col);
+  var cur = fState[col];
+  var r = ev.target.getBoundingClientRect();
   var dd = document.createElement('div');
-  dd.className = 'filter-dropdown';
-  dd.style.display = 'block';
-  dd.style.left = (rect.left-40)+'px';
-  dd.style.top = (rect.bottom+2)+'px';
-  dd.id = 'fd_'+col;
-
-  for (var i=0;i<vals.length;i++) {
-    var d = document.createElement('div');
-    d.className = 'fd-item';
-    d.innerHTML = '<input type=checkbox' + (!cur||cur.has(vals[i])?' checked':'') + '> ' + vals[i];
-    d.onclick = function(e){e.stopPropagation();};
-    dd.appendChild(d);
+  dd.className='fd'; dd.style.display='block';
+  dd.style.left=(r.left-40)+'px'; dd.style.top=(r.bottom+2)+'px';
+  dd.id='fd_'+col;
+  for(var i=0;i<vals.length;i++) {
+    var x=document.createElement('div'); x.className='fi2';
+    x.innerHTML='<input type=checkbox'+(cur&&cur.has(vals[i])?'':' checked')+'> '+vals[i];
+    dd.appendChild(x);
   }
-  var a = document.createElement('div');
-  a.className = 'fd-actions';
-  a.innerHTML = '<button class=ok onclick="applyFilter('+col+')">确定</button><button onclick="clearCol('+col+')">清空</button>';
+  var a=document.createElement('div'); a.className='fa';
+  a.innerHTML='<button class=ok onclick="applyF('+col+')">确定</button><button onclick="clearF('+col+')">清除</button>';
   dd.appendChild(a);
   document.body.appendChild(dd);
-  activeDropdown = dd;
+  window._fd=dd;
 }
 
-function applyFilter(col) {
-  var dd = document.getElementById('fd_'+col);
-  if(!dd) return;
-  var items = dd.querySelectorAll('.fd-item');
-  var vals = getUniqueValues(col);
-  var sel = new Set();
+function applyF(col) {
+  var dd=window._fd; if(!dd)return;
+  var items=dd.querySelectorAll('.fi2');
+  var vals=uniq(col);
+  var sel=new Set();
   for(var i=0;i<items.length;i++) {
-    var cb = items[i].querySelector('input');
-    if(cb.checked) sel.add(items[i].textContent.trim());
+    if(items[i].querySelector('input').checked) sel.add(items[i].textContent.trim());
   }
-  if(sel.size==vals.length) delete filterState[col];
-  else filterState[col] = sel;
-  closeDropdown();
-  doFilter();
+  if(sel.size==vals.length||sel.size==0) delete fState[col];
+  else fState[col]=sel;
+  closeFd(); doFilter();
 }
 
-function clearCol(col) {
-  delete filterState[col];
-  closeDropdown();
-  doFilter();
-}
-
-function closeDropdown() {
-  if(activeDropdown) { document.body.removeChild(activeDropdown); activeDropdown=null; }
-}
-document.addEventListener('click',closeDropdown);
+function clearF(col) { delete fState[col]; closeFd(); doFilter(); }
+function closeFd() { if(window._fd){document.body.removeChild(window._fd);window._fd=null;} }
+document.addEventListener('click',closeFd);
 
 function doFilter() {
-  var kw = document.getElementById('searchInput').value.trim().toLowerCase();
-  var filtered = ALL_DATA.filter(function(d){
-    for(var c in filterState) {
-      var s = filterState[c];
-      if(!s||s.size==0) continue;
-      var v = val(d,parseInt(c));
-      if(!s.has(v)) return false;
-    }
-    if(kw) {
-      for(var ci=0;ci<d.length;ci++) {
-        if(d[ci]!=null&&String(d[ci]).toLowerCase().indexOf(kw)>-1) return true;
-      }
-      return false;
-    }
+  var kw=document.getElementById('kw').value.trim().toLowerCase();
+  filtered=ALL.filter(function(d){
+    for(var c in fState){var s=fState[c];if(!s||!s.has(v(d,parseInt(c))))return false;}
+    if(kw){for(var ci=0;ci<d.length;ci++){if(d[ci]!=null&&String(d[ci]).toLowerCase().indexOf(kw)>-1)return true;}return false;}
     return true;
   });
-  render(filtered);
+  page=1; renderPage();
+  // 更新漏斗图标
+  document.querySelectorAll('.fi').forEach(function(el){
+    var col=parseInt(el.dataset.col);
+    el.className='fi'+(fState[col]?' active':'');
+  });
 }
 
-function render(data) {
-  var tb = document.getElementById('tableBody');
-  tb.innerHTML = '';
-  for(var i=0;i<data.length;i++) {
-    var d = data[i];
-    var tr = '<tr>';
+function onSearch() { doFilter(); }
+
+function renderPage() {
+  var total=filtered.length;
+  var totalPages=Math.max(1,Math.ceil(total/ps));
+  if(page>totalPages) page=totalPages;
+  var start=(page-1)*ps;
+  var end=Math.min(start+ps,total);
+  var tb=document.getElementById('tb');
+  tb.innerHTML='';
+  for(var i=start;i<end;i++) {
+    var d=filtered[i];
+    var tr='<tr>';
     for(var c=0;c<d.length;c++) {
-      var v = d[c];
-      if(v==null||v==='') { tr+='<td></td>'; }
-      else if(typeof v==='number') { tr+='<td class=num>'+(v==Math.floor(v)?v:v.toFixed(1))+'</td>'; }
+      var v=d[c];
+      if(v==null||v==='') tr+='<td></td>';
+      else if(typeof v==='number') tr+='<td class=num>'+(v==Math.floor(v)?v:v.toFixed(2))+'</td>';
       else {
-        var cls = (c==0||c==4||c==5)?'text-left':'';
-        var sty = (c==5)?' style="color:#1890ff;font-weight:600"':'';
+        var cls=(c==0||c==4||c==5)?'text-left':'';
+        var sty=(c==5)?' style="color:#1890ff;font-weight:600"':'';
         tr+='<td class="'+cls+'"'+sty+'>'+v+'</td>';
       }
     }
     tr+='</tr>';
-    tb.innerHTML += tr;
+    tb.innerHTML+=tr;
   }
-  document.getElementById('statBar').textContent = '共 '+data.length+' 条记录';
-  
-  // 更新漏斗图标状态
-  var icons = document.querySelectorAll('.filter-icon');
-  for(var i=0;i<icons.length;i++) {
-    var col = parseInt(icons[i].dataset.col);
-    icons[i].className = 'filter-icon' + (filterState[col]?' active':'');
-  }
+  document.getElementById('stat').textContent='共 '+total+' 条记录';
+  renderPager(totalPages);
 }
 
-function clearAll() {
-  filterState = {};
-  document.getElementById('searchInput').value = '';
-  doFilter();
+function renderPager(totalPages) {
+  var h='<select onchange="changePs(this.value)"><option value=20>20条/页</option><option value=50 selected>50条/页</option><option value=100>100条/页</option><option value=200>200条/页</option></select>';
+  h+='<span class=pi'+((page<=1)?' disabled':'')+' onclick="goP(1)">首页</span>';
+  h+='<span class=pi'+((page<=1)?' disabled':'')+' onclick="goP('+(page-1)+')">‹</span>';
+  h+='<span class=info>第'+page+'/'+totalPages+'页</span>';
+  h+='<span class=pi'+((page>=totalPages)?' disabled':'')+' onclick="goP('+(page+1)+')">›</span>';
+  h+='<span class=pi'+((page>=totalPages)?' disabled':'')+' onclick="goP('+totalPages+')">末页</span>';
+  document.getElementById('pager').innerHTML=h;
 }
+
+function goP(p) { page=p; renderPage(); }
+function changePs(val) { ps=parseInt(val); page=1; renderPage(); }
+function clearAll() { fState={}; document.getElementById('kw').value=''; doFilter(); }
 
 function exportCSV() {
-  var kw = document.getElementById('searchInput').value.trim().toLowerCase();
-  var filtered = ALL_DATA.filter(function(d){
-    for(var c in filterState) {
-      var s = filterState[c];
-      if(!s||s.size==0) continue;
-      if(!s.has(val(d,parseInt(c)))) return false;
-    }
-    if(kw) {
-      for(var ci=0;ci<d.length;ci++) {
-        if(d[ci]!=null&&String(d[ci]).toLowerCase().indexOf(kw)>-1) return true;
-      }
-      return false;
-    }
-    return true;
-  });
-  var csv = [];
-  var ths1 = document.querySelectorAll('#tableHead tr:first-child th');
-  var h1 = [];
-  for(var i=0;i<ths1.length;i++) h1.push(ths1[i].textContent.trim().replace(/,/g,''));
-  csv.push(h1.join(','));
-  var ths2 = document.querySelectorAll('#tableHead tr:last-child th');
-  var h2 = [];
-  for(var i=0;i<ths2.length;i++) h2.push(ths2[i].textContent.trim().replace(/,/g,''));
-  csv.push(h2.join(','));
-  for(var i=0;i<filtered.length;i++) {
-    var row = [];
-    for(var c=0;c<filtered[i].length;c++) row.push((''+(filtered[i][c]!=null?filtered[i][c]:'')).replace(/,/g,''));
-    csv.push(row.join(','));
-  }
-  var blob = new Blob(['\ufeff'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '门店商品数据管控.csv';
-  a.click();
+  var csv=[];
+  var h1=[]; document.querySelectorAll('#th tr:first-child th').forEach(function(t){h1.push(t.textContent.trim().replace(/,/g,''));}); csv.push(h1.join(','));
+  var h2=[]; document.querySelectorAll('#th tr:last-child th').forEach(function(t){h2.push(t.textContent.trim().replace(/,/g,''));}); csv.push(h2.join(','));
+  for(var i=0;i<filtered.length;i++){var r=[];for(var c=0;c<filtered[i].length;c++)r.push((''+(filtered[i][c]!=null?filtered[i][c]:'')).replace(/,/g,''));csv.push(r.join(','));}
+  var b=new Blob(['\ufeff'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='门店商品数据管控.csv';a.click();
 }
+
+// 初始化
+filtered = ALL.slice();
+renderPage();
 </script>
 </body>
 </html>
