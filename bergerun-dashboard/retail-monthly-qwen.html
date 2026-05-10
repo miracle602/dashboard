@@ -12,7 +12,7 @@
     .table-row:nth-child(even) {background-color: #f2f2f2;}
     .table-row:hover {background-color: #ddd;}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="header">2026年零售分析报表</div>
@@ -38,6 +38,16 @@
     </thead>
     <tbody id="storeRanking">
     </tbody>
+    <script>
+    var storeTbody = document.getElementById('storeRanking');
+    storeData.forEach(function(s) {
+        var tr = document.createElement('tr');
+        var yoyText = s.yoy !== null ? s.yoy + '%' : (s.newStore ? '新增' : '-');
+        var yoyColor = s.yoy !== null && s.yoy < 0 ? 'red' : 'green';
+        tr.innerHTML = '<td>' + s.rank + '</td><td>' + s.name + '</td><td>' + s.count + '</td><td>¥' + s.amount.toLocaleString() + '</td><td style="color:' + yoyColor + '">' + yoyText + '</td><td>' + s.pct + '%</td>';
+        storeTbody.appendChild(tr);
+    });
+    </script>
 </table>
 
 <script>
