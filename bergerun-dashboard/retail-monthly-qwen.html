@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>2026年零售分析报表</title>
+<style>
+    body, table, th, td {font-family: Arial, sans-serif;}
+    .header {background-color: #2b5797; color: white; padding: 10px; text-align: center;}
+    .kpi-card {border: 1px solid #ddd; margin: 10px; padding: 15px; width: calc(25% - 20px); float: left; text-align: center;}
+    .chart-container {width: 80%; margin: auto; height: 400px;}
+    .table-header {background-color: #1e3a8a; color: white;}
+    .table-row:nth-child(even) {background-color: #f2f2f2;}
+    .table-row:hover {background-color: #ddd;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="header">2026年零售分析报表</div>
+<div style="display: flex; justify-content: space-around; margin-top: 20px;">
+    <div class="kpi-card" id="kpiThisYearAmount"></div>
+    <div class="kpi-card" id="kpiThisYearQuantity"></div>
+    <div class="kpi-card" id="kpiLastYearAmount"></div>
+    <div class="kpi-card" id="kpiYoYPercent"></div>
+</div>
+<div class="chart-container">
+    <canvas id="myChart"></canvas>
+</div>
+<table style="width: 80%; margin: auto; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr class="table-header">
+            <th onclick="sortTable(0)">排名</th>
+            <th onclick="sortTable(1)">名称</th>
+            <th onclick="sortTable(2)">件数</th>
+            <th onclick="sortTable(3)">金额</th>
+            <th onclick="sortTable(4)">同比%</th>
+            <th onclick="sortTable(5)">占比%</th>
+        </tr>
+    </thead>
+    <tbody id="storeRanking">
+    </tbody>
+</table>
+
+<script>
+const data = {
+    monthlyTrend: [
+        {month: '1月', amount2026: 146797, quantity2026: 447, amount2025: 104318, quantity2025: 337},
+        {month: '2月', amount2026: 91866, quantity2026: 289, amount2025: 145301, quantity2025: 462},
+        {month: '3月', amount2026: 105598, quantity2026: 351, amount2025: 196910, quantity2025: 491},
+        {month: '4月', amount2026: 95880, quantity2026: 299, amount2025: 135301, quantity2025: 366},
+        {month: '5月', amount2026: 33401, quantity2026: 104, amount2025: 131655, quantity2025: 349}
+    ],
+    storeRanking: [
+        {rank: 1, name: '小西门店', quantity: 1441, amount: 458130},
+        {rank: 2, name: '雷婷婷的店仓', quantity: 41, amount: 11455},
+        {rank: 3, name: '南屏街1店', quantity: 4, amount: 1510},
+        {rank: 4, name: '测试店仓', quantity: 2, amount: 1298},
+        {rank: 5, name: '总部仓库', quantity: 1, amount: 999},
+        {rank: 6, name: '会泽1店', quantity: 1, amount: 150}
+    ],
+    summary: {
+        thisYearAmount: 473542,
+        thisYearQuantity: 1490,
+        lastYearAmount: 713485,
+        lastYearQuantity: 2005,
+        yoyPercent: -33.6
+    }
+};
+
+document.getElementById('kpiThisYearAmount').innerText = `本年金额: ¥${data.summary.thisYearAmount.toLocaleString()}`;
+document.getElementById('kpiThisYearQuantity').innerText = `本年件数: ${data.summary.thisYearQuantity.toLocaleString()}件`;
+document.getElementById('kpiLastYearAmount').innerText = `去年同期金额: ¥${data.summary.lastYearAmount.toLocaleString()}`;
+document.getElementById('kpiYoYPercent').innerText = `同比%: ${data.summary.yoyPercent}%`;
+
+const ctx = document.getElementById('myChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: data.monthlyTrend.map(item => item.month),
+        datasets: [{
+            label: '2026年',
+            data: data.monthlyTrend.map(item => item.amount2026),
+            backgroundColor: 'blue'
+        }, {
+            label: '2025年',
+            data: data.monthlyTrend.map(item => item.amount2025),
+            backgroundColor: 'grey'
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+const tbody = document.getElementById('storeRanking');
+data.storeRanking.forEach(store => {
+    const row = `<tr><td>${store.rank}</td><td>${store.name}</td><td>${store.quantity}</td><td>¥${store.amount}</td><td>-</td><td>-</td></tr>`;
+    tbody.innerHTML += row;
+});
+
+function sortTable(n) {
+    let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementsByTagName("table")[0];
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch= true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>
+</body>
+</html>
