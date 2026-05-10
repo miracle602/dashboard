@@ -444,7 +444,7 @@
         };
 
         // ---------- 渲染KPI ----------
-        function renderKPI() {
+        window.renderKPI = function() {
             const container = document.getElementById('kpiContainer');
             const yoyClass = summary.yoy < 0 ? 'down' : 'up';
             const sign = summary.yoy < 0 ? '' : '+';
@@ -459,7 +459,7 @@
 
         // ---------- 图表 (Chart.js) ----------
         let chartInstance = null;
-        function renderChart(filterMonth = 'all') {
+        window.renderChart = function(filterMonth = 'all') {
             if (typeof Chart === 'undefined') { return; }
             let labels = [];
             let data26 = [];
@@ -524,7 +524,7 @@
         renderChart('all');
 
         // ---------- 表格渲染 (门店排行) ----------
-        function renderTable(filterStore = 'all', sortedBy = null, sortDir = 'asc') {
+        window.renderTable = function(filterStore = 'all', sortedBy = null, sortDir = 'asc') {
             let filtered = storeData.filter(s => {
                 if (filterStore === 'all') return true;
                 if (Array.isArray(filterStore)) return filterStore.includes(s.name);
@@ -654,7 +654,7 @@
         });
 
         // ---------- 筛选查询/重置 ----------
-        function applyFilters() {
+        window.applyFilters = function() {
             const monthVal = document.getElementById('monthFilter').value;
             const storeVal = getSelectedStores();
             // 图表按月份筛选
