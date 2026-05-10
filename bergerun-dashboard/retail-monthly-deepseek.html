@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2026年零售分析报表</title>
-    <!-- Chart.js 国内 bootcdn 源 -->
-    <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <!-- Chart.js 延迟加载，不阻塞渲染 -->
     <style>
         * {
             margin: 0;
@@ -690,5 +689,6 @@
         // 默认表格排序指示清除
     })();
 </script>
+<script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
 </body>
 </html>
