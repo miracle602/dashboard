@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026年零售分析报表</title>
+    <!-- Chart.js 国内 bootcdn 源 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            padding: 24px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        /* 伯俊蓝头部 */
+        .header {
+            background: #2b5797;
+            color: white;
+            padding: 20px 28px;
+            border-radius: 20px 20px 8px 8px;
+            box-shadow: 0 6px 14px rgba(43, 87, 151, 0.25);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: 1px;
+        }
+        .header .sub {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 16px;
+            border-radius: 40px;
+        }
+        /* KPI卡片 */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 28px 0 24px;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            border: 1px solid #e9edf2;
+            transition: 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(43, 87, 151, 0.08);
+        }
+        .kpi-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .kpi-value {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .kpi-sub {
+            font-size: 0.9rem;
+            margin-top: 6px;
+            color: #475569;
+        }
+        .kpi-change {
+            font-weight: 600;
+        }
+        .kpi-change.down {
+            color: #b91c1c;
+        }
+        .kpi-change.up {
+            color: #15803d;
+        }
+        /* 筛选栏 */
+        .filter-bar {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 18px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px 16px;
+            flex-wrap: wrap;
+        }
+        .filter-group label {
+            font-weight: 500;
+            color: #1e293b;
+            font-size: 0.9rem;
+        }
+        .filter-group select {
+            padding: 8px 18px 8px 14px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            font-size: 0.9rem;
+            min-width: 110px;
+            cursor: pointer;
+            outline: none;
+            transition: 0.15s;
+        }
+        .filter-group select:focus {
+            border-color: #2b5797;
+            box-shadow: 0 0 0 3px rgba(43,87,151,0.2);
+        }
+        .btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #1e293b;
+        }
+        .btn-primary {
+            background: #2b5797;
+            border-color: #2b5797;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1e3f6f;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+        .btn + .btn {
+            margin-left: 6px;
+        }
+        /* 图表 + 表格 双栏 */
+        .row-split {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .chart-box {
+            flex: 1.2;
+            min-width: 380px;
+            background: white;
+            border-radius: 24px;
+            padding: 20px 18px 12px 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #e9edf2;
+        }
+        .chart-box canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 300px;
+        }
+        .table-box {
+            flex: 1;
+            min-width: 320px;
+            background: white;
+            border-radius: 24px;
+            padding: 8px 4px 8px 4px;
+            border: 1px solid #e9edf2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th {
+            background: #1e3a8a;
+            color: white;
+            padding: 14px 10px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        th:after {
+            content: ' ↕';
+            opacity: 0.5;
+            font-size: 0.7rem;
+        }
+        th.sorted-asc:after {
+            content: ' ↑';
+            opacity: 1;
+        }
+        th.sorted-desc:after {
+            content: ' ↓';
+            opacity: 1;
+        }
+        td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #eef2f6;
+        }
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        tr:hover {
+            background: #e6edf8 !important;
+        }
+        .rank-badge {
+            display: inline-block;
+            background: #e9edf2;
+            color: #1e293b;
+            border-radius: 30px;
+            padding: 0 12px;
+            font-weight: 600;
+            min-width: 28px;
+        }
+        .rank-1 {
+            background: #fbbf24;
+            color: #0f172a;
+        }
+        .text-down {
+            color: #b91c1c;
+            font-weight: 500;
+        }
+        .text-up {
+            color: #15803d;
+            font-weight: 500;
+        }
+        .text-muted {
+            color: #64748b;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid #dce2ea;
+            padding-top: 24px;
+            letter-spacing: 0.3px;
+        }
+        .summary-note {
+            background: #f1f5f9;
+            padding: 12px 18px;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 700px) {
+            .header h1 { font-size: 1.5rem; }
+            .kpi-value { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 头部 -->
+    <div class="header">
+        <h1>📊 2026年零售分析报表</h1>
+        <span class="sub">伯俊 · 云南</span>
+    </div>
+
+    <!-- 4个KPI卡片 -->
+    <div class="kpi-grid" id="kpiContainer"></div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label for="monthFilter">📅 月份</label>
+            <select id="monthFilter">
+                <option value="all">全部 (1-5月)</option>
+                <option value="1">1月</option>
+                <option value="2">2月</option>
+                <option value="3">3月</option>
+                <option value="4">4月</option>
+                <option value="5">5月</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="storeFilter">🏬 门店</label>
+            <select id="storeFilter">
+                <option value="all">全部门店</option>
+                <option value="小西门店">小西门店</option>
+                <option value="雷婷婷的店仓">雷婷婷的店仓</option>
+                <option value="南屏街1店">南屏街1店</option>
+                <option value="测试店仓">测试店仓</option>
+                <option value="总部仓库">总部仓库</option>
+                <option value="会泽1店">会泽1店</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 6px;">
+            <button class="btn btn-primary" id="queryBtn">查询</button>
+            <button class="btn btn-outline" id="resetBtn">重置</button>
+        </div>
+    </div>
+
+    <!-- 图表 + 表格 -->
+    <div class="row-split">
+        <div class="chart-box">
+            <canvas id="trendChart"></canvas>
+        </div>
+        <div class="table-box">
+            <table id="storeTable">
+                <thead>
+                    <tr>
+                        <th data-sort="rank">排名</th>
+                        <th data-sort="name">门店名称</th>
+                        <th data-sort="qty">件数</th>
+                        <th data-sort="amount">金额</th>
+                        <th data-sort="yoy">同比%</th>
+                        <th data-sort="pct">占比%</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 汇总信息 + 版权 -->
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+        <div class="summary-note" id="summaryText"></div>
+        <div class="footer">伯俊科技（云南）有限公司</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 原始数据 ----------
+        // 月趋势
+        const monthData = [
+            { month: '1月', amt26: 146797, qty26: 447, amt25: 104318, qty25: 337 },
+            { month: '2月', amt26: 91866,  qty26: 289, amt25: 145301, qty25: 462 },
+            { month: '3月', amt26: 105598, qty26: 351, amt25: 196910, qty25: 491 },
+            { month: '4月', amt26: 95880,  qty26: 299, amt25: 135301, qty25: 366 },
+            { month: '5月', amt26: 33401,  qty26: 104, amt25: 131655, qty25: 349 }
+        ];
+
+        // 门店排行 (2026年1-5月)
+        const storeData = [
+            { rank: 1, name: '小西门店',     amount: 458130, qty: 1441, yoy: -58.6, pct: 96.7 },
+            { rank: 2, name: '雷婷婷的店仓', amount: 11455,  qty: 41,   yoy: null, pct: 2.4 },  // 新增
+            { rank: 3, name: '南屏街1店',    amount: 1510,   qty: 4,    yoy: -95.0, pct: 0.3 },
+            { rank: 4, name: '测试店仓',     amount: 1298,   qty: 2,    yoy: -98.9, pct: 0.3 },
+            { rank: 5, name: '总部仓库',     amount: 999,    qty: 1,    yoy: -88.2, pct: 0.2 },
+            { rank: 6, name: '会泽1店',      amount: 150,    qty: 1,    yoy: null, pct: 0.0 }
+        ];
+
+        // 汇总 (2026年1-5月)
+        const summary = {
+            amt26: 473542,
+            qty26: 1490,
+            amt25: 713485,
+            qty25: 2005,
+            yoy: -33.6
+        };
+
+        // ---------- 渲染KPI ----------
+        function renderKPI() {
+            const container = document.getElementById('kpiContainer');
+            const yoyClass = summary.yoy < 0 ? 'down' : 'up';
+            const sign = summary.yoy < 0 ? '' : '+';
+            container.innerHTML = `
+                <div class="kpi-card"><div class="kpi-label">📆 本年金额 (26)</div><div class="kpi-value">¥${summary.amt26.toLocaleString()}</div><div class="kpi-sub">1-5月累计</div></div>
+                <div class="kpi-card"><div class="kpi-label">📦 本年件数 (26)</div><div class="kpi-value">${summary.qty26.toLocaleString()}</div><div class="kpi-sub">1-5月累计</div></div>
+                <div class="kpi-card"><div class="kpi-label">📅 去年同期金额 (25)</div><div class="kpi-value">¥${summary.amt25.toLocaleString()}</div><div class="kpi-sub">2025年1-5月</div></div>
+                <div class="kpi-card"><div class="kpi-label">📉 同比变化</div><div class="kpi-value ${yoyClass}">${sign}${summary.yoy}%</div><div class="kpi-sub ${yoyClass}">较2025年同期</div></div>
+            `;
+        }
+        renderKPI();
+
+        // ---------- 图表 (Chart.js) ----------
+        let chartInstance = null;
+        function renderChart(filterMonth = 'all') {
+            let labels = [];
+            let data26 = [];
+            let data25 = [];
+
+            monthData.forEach(item => {
+                const monthNum = item.month.replace('月', '');
+                if (filterMonth === 'all' || filterMonth === monthNum) {
+                    labels.push(item.month);
+                    data26.push(item.amt26);
+                    data25.push(item.amt25);
+                }
+            });
+
+            // 如果筛选后没有数据，显示全部
+            if (labels.length === 0) {
+                labels = monthData.map(d => d.month);
+                data26 = monthData.map(d => d.amt26);
+                data25 = monthData.map(d => d.amt25);
+            }
+
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '2026年 (金额)',
+                            data: data26,
+                            backgroundColor: '#2b5797',
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                        },
+                        {
+                            label: '2025年 (金额)',
+                            data: data25,
+                            backgroundColor: '#9aa9b9',
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 14, font: { size: 12 } } },
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ¥${ctx.raw.toLocaleString()}` } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: (val) => '¥' + (val/1000).toFixed(0) + 'k' }
+                        }
+                    }
+                }
+            });
+        }
+        renderChart('all');
+
+        // ---------- 表格渲染 (门店排行) ----------
+        function renderTable(filterStore = 'all', sortedBy = null, sortDir = 'asc') {
+            let filtered = storeData.filter(s => filterStore === 'all' || s.name === filterStore);
+
+            // 排序 (如果传入)
+            if (sortedBy) {
+                const keyMap = {
+                    'rank': 'rank',
+                    'name': 'name',
+                    'qty': 'qty',
+                    'amount': 'amount',
+                    'yoy': 'yoy',
+                    'pct': 'pct'
+                };
+                const key = keyMap[sortedBy];
+                if (key) {
+                    filtered.sort((a, b) => {
+                        let va = a[key];
+                        let vb = b[key];
+                        if (va == null) va = -Infinity;
+                        if (vb == null) vb = -Infinity;
+                        if (typeof va === 'string') {
+                            return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+                        }
+                        return sortDir === 'asc' ? va - vb : vb - va;
+                    });
+                }
+            }
+
+            const tbody = document.getElementById('tableBody');
+            let html = '';
+            filtered.forEach((store, idx) => {
+                const rankClass = store.rank === 1 ? 'rank-1' : '';
+                let yoyDisplay = '';
+                let yoyClass = '';
+                if (store.yoy === null) {
+                    yoyDisplay = '新增';
+                    yoyClass = 'text-up';
+                } else {
+                    yoyDisplay = store.yoy + '%';
+                    yoyClass = store.yoy < 0 ? 'text-down' : 'text-up';
+                }
+                // 占比格式化
+                const pctDisplay = store.pct.toFixed(1) + '%';
+                html += `<tr>
+                    <td><span class="rank-badge ${rankClass}">${store.rank}</span></td>
+                    <td><strong>${store.name}</strong></td>
+                    <td>${store.qty}</td>
+                    <td>¥${store.amount.toLocaleString()}</td>
+                    <td class="${yoyClass}">${yoyDisplay}</td>
+                    <td>${pctDisplay}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+        renderTable('all');
+
+        // ---------- 排序逻辑 (点击表头) ----------
+        let currentSort = { key: null, dir: 'asc' };
+        document.querySelectorAll('#storeTable th[data-sort]').forEach(th => {
+            th.addEventListener('click', function() {
+                const key = this.dataset.sort;
+                const currentKey = currentSort.key;
+                let dir = 'asc';
+                if (currentKey === key) {
+                    dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+                }
+                currentSort = { key, dir };
+                // 清除所有排序样式
+                document.querySelectorAll('#storeTable th').forEach(h => {
+                    h.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                this.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+                const monthVal = document.getElementById('monthFilter').value;
+                const storeVal = document.getElementById('storeFilter').value;
+                // 重新渲染表格 (排序)
+                renderTable(storeVal, key, dir);
+                // 图表不受影响
+            });
+        });
+
+        // ---------- 筛选查询/重置 ----------
+        function applyFilters() {
+            const monthVal = document.getElementById('monthFilter').value;
+            const storeVal = document.getElementById('storeFilter').value;
+            // 图表按月份筛选
+            renderChart(monthVal);
+            // 表格按门店筛选 (保留当前排序)
+            const sortKey = currentSort.key;
+            const sortDir = currentSort.dir;
+            renderTable(storeVal, sortKey, sortDir);
+            // 更新汇总文本 (不变)
+            document.getElementById('summaryText').innerHTML = 
+                `📊 2026年1-5月: ¥${summary.amt26.toLocaleString()}, ${summary.qty26}件 &nbsp;|&nbsp; 2025同期: ¥${summary.amt25.toLocaleString()}, ${summary.qty25}件 &nbsp;|&nbsp; 金额同比: <span class="${summary.yoy<0?'text-down':'text-up'}">${summary.yoy}%</span>`;
+        }
+
+        document.getElementById('queryBtn').addEventListener('click', applyFilters);
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('monthFilter').value = 'all';
+            document.getElementById('storeFilter').value = 'all';
+            currentSort = { key: null, dir: 'asc' };
+            document.querySelectorAll('#storeTable th').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+            renderChart('all');
+            renderTable('all');
+            document.getElementById('summaryText').innerHTML = 
+                `📊 2026年1-5月: ¥${summary.amt26.toLocaleString()}, ${summary.qty26}件 &nbsp;|&nbsp; 2025同期: ¥${summary.amt25.toLocaleString()}, ${summary.qty25}件 &nbsp;|&nbsp; 金额同比: <span class="${summary.yoy<0?'text-down':'text-up'}">${summary.yoy}%</span>`;
+        });
+
+        // 初始化汇总
+        document.getElementById('summaryText').innerHTML = 
+            `📊 2026年1-5月: ¥${summary.amt26.toLocaleString()}, ${summary.qty26}件 &nbsp;|&nbsp; 2025同期: ¥${summary.amt25.toLocaleString()}, ${summary.qty25}件 &nbsp;|&nbsp; 金额同比: <span class="${summary.yoy<0?'text-down':'text-up'}">${summary.yoy}%</span>`;
+
+        // 默认表格排序指示清除
+    })();
+</script>
+</body>
+</html>
