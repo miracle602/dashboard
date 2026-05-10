@@ -585,7 +585,7 @@
         renderTable('all');
 
         // ---------- 多选门店逻辑 ----------
-        function toggleStoreDropdown() {
+        window.toggleStoreDropdown = function() {
             const dd = document.getElementById('storeDropdown');
             dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
         }
@@ -596,12 +596,12 @@
                 document.getElementById('storeDropdown').style.display = 'none';
             }
         });
-        function toggleAllStores(el) {
+        window.toggleAllStores = function(el) {
             const checkboxes = document.querySelectorAll('#storeDropdown .multi-option:not(.all-option) input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = el.checked);
             updateStoreLabel();
         }
-        function updateStoreLabel() {
+        window.updateStoreLabel = function() {
             const checkboxes = document.querySelectorAll('#storeDropdown .multi-option:not(.all-option) input[type="checkbox"]');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
             const someChecked = Array.from(checkboxes).some(cb => cb.checked);
@@ -622,7 +622,7 @@
                 updateStoreLabel();
             });
         });
-        function getSelectedStores() {
+        window.getSelectedStores = function() {
             const checkboxes = document.querySelectorAll('#storeDropdown .multi-option:not(.all-option) input[type="checkbox"]');
             const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
             return checked.length === checkboxes.length ? 'all' : checked;
