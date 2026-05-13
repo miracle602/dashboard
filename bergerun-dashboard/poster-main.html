@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粽情粽意 - 主KV海报</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;background:#333;padding:20px}
+.poster{width:540px;height:960px;background:linear-gradient(180deg,#1A4A2B 0%,#2D7D46 40%,#1A4A2B 100%);position:relative;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#fff}
+/* 装饰 */
+.bg-pattern{position:absolute;top:0;left:0;right:0;bottom:0;opacity:.08;background:radial-gradient(circle at 30% 20%,#fff 1px,transparent 1px),radial-gradient(circle at 70% 60%,#fff 2px,transparent 2px),radial-gradient(circle at 50% 80%,#fff 1px,transparent 1px);background-size:60px 60px,80px 80px,40px 40px}
+.zongzi{position:absolute;top:80px;left:50%;transform:translateX(-50%);font-size:140px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.3))}
+.dragon{position:absolute;bottom:100px;right:20px;font-size:80px;opacity:.15}
+.bamboo{position:absolute;left:-20px;top:200px;font-size:40px;opacity:.1;transform:rotate(15deg)}
+/* 标题区 */
+.title-area{position:absolute;top:270px;left:0;right:0;text-align:center;z-index:2}
+.main-title{font-size:72px;font-weight:900;letter-spacing:12px;text-shadow:0 4px 20px rgba(0,0,0,.4);line-height:1.1}
+.sub-title{font-size:26px;margin-top:8px;color:#E8C97A;letter-spacing:6px;font-weight:300}
+.divider{width:120px;height:2px;background:linear-gradient(90deg,transparent,#E8C97A,transparent);margin:16px auto}
+.date{font-size:20px;color:#E8C97A;letter-spacing:4px;margin-top:4px}
+/* 卖点气泡 */
+.selling-points{position:absolute;top:490px;left:30px;right:30px;display:flex;flex-direction:column;gap:12px;z-index:2}
+.sp-item{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 20px;display:flex;align-items:center;gap:14px;font-size:18px}
+.sp-item .icon{font-size:30px}
+.sp-item .highlight{color:#D4A017;font-weight:700;font-size:22px}
+/* 底部 */
+.footer{position:absolute;bottom:40px;left:0;right:0;text-align:center;z-index:2}
+.footer .store{font-size:22px;font-weight:700;letter-spacing:4px}
+.footer .addr{font-size:13px;color:rgba(255,255,255,.6);margin-top:6px}
+.footer .qr-hint{font-size:12px;color:#E8C97A;margin-top:10px;letter-spacing:2px}
+/* 顶部装饰 */
+.top-ribbon{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#D4A017,#E8C97A,#D4A017);z-index:3}
+/* 金色圆环 */
+.circle-gold{position:absolute;top:420px;left:50%;transform:translateX(-50%);width:76px;height:76px;border:2px solid rgba(212,160,23,.4);border-radius:50%}
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <div class="bg-pattern"></div>
+  <div class="top-ribbon"></div>
+  <div class="bamboo">🎋🎋🎋</div>
+  <div class="zongzi">🫔</div>
+  <div class="dragon">🐉</div>
+
+  <div class="title-area">
+    <div class="main-title">粽情粽意</div>
+    <div class="sub-title">积分翻倍兑 · 端午专享</div>
+    <div class="divider"></div>
+    <div class="date">6月18日 — 6月20日</div>
+  </div>
+
+  <div class="circle-gold"></div>
+
+  <div class="selling-points">
+    <div class="sp-item"><span class="icon">💚</span> 积分翻倍兑 · <span class="highlight">100积分=¥2</span></div>
+    <div class="sp-item"><span class="icon">🎁</span> 满 <span class="highlight">¥399</span> 送粽子礼盒 · 满 <span class="highlight">¥699</span> 加赠丝巾</div>
+    <div class="sp-item"><span class="icon">💥</span> 爆品专区 <span class="highlight">¥99/¥199</span> · 限量50款</div>
+    <div class="sp-item"><span class="icon">📱</span> 扫码领 <span class="highlight">¥20</span> 端午专享券</div>
+  </div>
+
+  <div class="footer">
+    <div class="store">🏪 小西门店</div>
+    <div class="addr">昆明市 · 小西门商圈</div>
+    <div class="qr-hint">⬡ 扫码领券 ⬡</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好久不见 - VIP唤醒海报</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;background:#333;padding:20px}
+.poster{width:540px;height:960px;background:linear-gradient(180deg,#3D1C00 0%,#6B3A2A 30%,#5C2D1E 70%,#3D1C00 100%);position:relative;overflow:hidden;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#fff}
+.bg-dots{position:absolute;top:0;left:0;right:0;bottom:0;opacity:.06;background:radial-gradient(circle,#fff 1px,transparent 1px);background-size:30px 30px}
+/* 粽子主视觉 */
+.zongzi-main{position:absolute;top:60px;left:50%;transform:translateX(-50%);font-size:160px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.5))}
+.glow{position:absolute;top:120px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(232,201,122,.2),transparent);border-radius:50%}
+/* 标题 */
+.title-area{position:absolute;top:280px;left:0;right:0;text-align:center;z-index:2}
+.hello{font-size:60px;font-weight:900;letter-spacing:8px;text-shadow:0 4px 16px rgba(0,0,0,.5)}
+.warn-box{background:rgba(212,54,62,.2);border:1px solid rgba(212,54,62,.3);border-radius:12px;margin:20px 40px;padding:16px;text-align:center}
+.warn-box .big-num{font-size:42px;font-weight:900;color:#D4A017}
+.warn-box .warn-text{font-size:16px;color:rgba(255,255,255,.7);margin-top:4px}
+/* 卖点 */
+.points{position:absolute;top:490px;left:30px;right:30px;display:flex;flex-direction:column;gap:10px;z-index:2}
+.point{display:flex;align-items:center;gap:12px;font-size:18px;padding:10px 16px;background:rgba(255,255,255,.08);border-radius:10px}
+.point .em{color:#E8C97A;font-weight:700;font-size:20px}
+.point .icon{font-size:26px}
+/* 底部 */
+.footer{position:absolute;bottom:50px;left:0;right:0;text-align:center;z-index:2}
+.cta{background:linear-gradient(135deg,#D4A017,#E8C97A);color:#3D1C00;display:inline-block;padding:14px 40px;border-radius:30px;font-size:22px;font-weight:700;letter-spacing:4px}
+.date-line{font-size:14px;color:rgba(255,255,255,.4);margin-top:14px;letter-spacing:3px}
+.store-name{font-size:16px;color:#E8C97A;margin-top:6px}
+.top-ribbon{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#D4A017,#E8C97A,#D4A017);z-index:3}
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="bg-dots"></div>
+  <div class="top-ribbon"></div>
+  <div class="glow"></div>
+  <div class="zongzi-main">🫔</div>
+
+  <div class="title-area">
+    <div class="hello">好久不见</div>
+    <div class="warn-box">
+      <div class="big-num">273万 积分</div>
+      <div class="warn-text">51位VIP积分待唤醒，其中也有您的</div>
+    </div>
+  </div>
+
+  <div class="points">
+    <div class="point"><span class="icon">💰</span> 端午3天 · <span class="em">100积分=¥2</span> 翻倍兑</div>
+    <div class="point"><span class="icon">🎁</span> 满 <span class="em">¥399</span> 即送粽子礼盒</div>
+    <div class="point"><span class="icon">🔥</span> 爆品 <span class="em">¥99起</span> · 仅限3天</div>
+  </div>
+
+  <div class="footer">
+    <div class="cta">到店即兑</div>
+    <div class="date-line">6月18日 — 6月20日</div>
+    <div class="store-name">🏪 小西门店</div>
+  </div>
+</div>
+</body>
+</html>
