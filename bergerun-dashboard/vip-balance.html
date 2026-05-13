@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP余额明细 - 各门店VIP卡号/余额/积分/累计消费</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei",SimHei,sans-serif;font-size:12px;background:#fff;color:#333}
+.header{padding:14px 16px;border-bottom:1px solid #e0e0e0;background:#fafafa;position:sticky;top:0;z-index:10}
+.header h1{font-size:16px;margin-bottom:8px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{padding:4px 8px;border:1px solid #ccc;border-radius:3px;font-size:12px}
+.filters button{padding:5px 14px;border:none;border-radius:3px;cursor:pointer;font-size:12px;color:#fff}
+.filters .btn-go{background:#1890ff}
+.filters .btn-clr{background:#999}
+.filters .btn-go:hover{background:#096dd9}
+.stats{display:flex;gap:16px;padding:8px 0;font-size:12px;color:#666}
+.stats strong{color:#333}
+.scroll-wrap{overflow-x:auto;margin:8px}
+table{border-collapse:collapse;font-size:11px}
+th{background:#f5f5f5;border:1px solid #d9d9d9;padding:6px 8px;position:sticky;top:60px;z-index:1;white-space:nowrap}
+td{border:1px solid #e8e8e8;padding:5px 8px;white-space:nowrap}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:#e6f7ff}
+tr.dormant td{background:#fff7e6}
+tr.dormant:hover td{background:#ffe7ba}
+.zero{color:#ccc}
+.export-btn{background:#52c41a!important}
+</style></head>
+<body>
+<div class="header">
+  <h1>📋 VIP余额明细 — 卡号/余额/积分/累计消费</h1>
+  <div class="filters">
+    <select id="fstore"><option value="">全部门店</option>
+      <option value="LEI总仓">LEI总仓</option><option value="SEPTWOLVES加盟店">SEPTWOLVES加盟店</option><option value="SEPTWOLVES直营店">SEPTWOLVES直营店</option><option value="TEDELON、直营店">TEDELON、直营店</option><option value="TEDELON加盟店">TEDELON加盟店</option><option value="TEST-XY-店仓">TEST-XY-店仓</option><option value="XSC的店仓">XSC的店仓</option><option value="YYY-店仓">YYY-店仓</option><option value="ZCW店仓">ZCW店仓</option><option value="ZY测试1">ZY测试1</option><option value="东川1店">东川1店</option><option value="东川店">东川店</option><option value="会泽1店">会泽1店</option><option value="会泽2店">会泽2店</option><option value="北辰一店店仓">北辰一店店仓</option><option value="南屏街1店">南屏街1店</option><option value="小西门店">小西门店</option><option value="巧家">巧家</option><option value="总部仓库">总部仓库</option><option value="新奇迹咖啡总仓">新奇迹咖啡总仓</option><option value="曲靖分店5">曲靖分店5</option><option value="测试店仓">测试店仓</option><option value="雷婷婷的店仓">雷婷婷的店仓</option>
+    </select>
+    <input id="fname" placeholder="搜姓名/卡号/手机..." style="width:160px">
+    <button class="btn-go" onclick="filter()">🔍 筛选</button>
+    <button class="btn-clr" onclick="clearF()">↺ 清除</button>
+    <button class="export-btn" onclick="exportExcel()">📥 导出Excel</button>
+  </div>
+  <div class="stats" id="stats"></div>
+</div>
+<div class="scroll-wrap">
+<table id="tbl">
+<thead><tr>
+  <th>会员名</th><th>卡号</th><th>手机号</th><th>门店</th>
+  <th>余额</th><th>积分</th><th>累计消费</th><th>最后消费</th>
+</tr></thead>
+<tbody>
+<tr>
+      <td>陈明飞</td><td>18487101031</td><td>18487101031</td><td>南屏街1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥150,439</td><td>20231123</td>
+    </tr><tr>
+      <td>小普</td><td>18101862160</td><td>18101862156</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">90,780</td><td class="num">¥91,187</td><td>20241216</td>
+    </tr><tr>
+      <td>文青</td><td>15388865040</td><td>15388865040</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">962,450</td><td class="num">¥88,491</td><td>20250421</td>
+    </tr><tr>
+      <td>吴兴南</td><td>18565138861</td><td>18565138861</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥78,411</td><td>20230712</td>
+    </tr><tr>
+      <td>彭明波</td><td>15096671631</td><td>15096671631</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">2,563,598</td><td class="num">¥44,544</td><td>20240520</td>
+    </tr><tr>
+      <td>hh</td><td>15154886102</td><td>15154886102</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">162,526</td><td class="num">¥39,324</td><td>20260509</td>
+    </tr><tr>
+      <td>吴烦恼</td><td>15912087682</td><td>15912087682</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">110</td><td class="num">¥24,123</td><td>20260131</td>
+    </tr><tr>
+      <td>yy</td><td>yy01</td><td>19000000000</td><td>YYY-店仓</td>
+      <td class="num">-</td><td class="num">243,593</td><td class="num">¥23,859</td><td>20240829</td>
+    </tr><tr>
+      <td>彭明波</td><td>15096671632</td><td>15096671632</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">¥22,301</td><td>20240309</td>
+    </tr><tr>
+      <td>YB</td><td>15911417658</td><td>15911417658</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">27,822</td><td class="num">¥22,166</td><td>20250519</td>
+    </tr><tr>
+      <td>周琳琳</td><td>11111111111</td><td>11111111111</td><td>南屏街1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥21,226</td><td>20230925</td>
+    </tr><tr>
+      <td>熊某某1</td><td>SVIP6666</td><td>17842241846</td><td>XSC的店仓</td>
+      <td class="num">-</td><td class="num">44,357</td><td class="num">¥19,223</td><td>20240314</td>
+    </tr><tr>
+      <td>学仔</td><td>13508896973</td><td>13508896973</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">291,653</td><td class="num">¥17,392</td><td>20250818</td>
+    </tr><tr>
+      <td>耿耿</td><td>18313005169</td><td>18313005169</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">35,767</td><td class="num">¥13,596</td><td>20260416</td>
+    </tr><tr>
+      <td>兴南</td><td>18565138862</td><td>18565138862</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥12,953</td><td>20230630</td>
+    </tr><tr>
+      <td>aa</td><td>15154886101</td><td>15154886105</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">6,697</td><td class="num">¥11,900</td><td>20250322</td>
+    </tr><tr>
+      <td>wyl</td><td>18487801042</td><td>18487801042</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">5,167</td><td class="num">¥9,160</td><td>20250630</td>
+    </tr><tr>
+      <td>小飞飞</td><td>18213029790</td><td>18213029790</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">7,140</td><td class="num">¥7,140</td><td>20241202</td>
+    </tr><tr>
+      <td>ZYX</td><td>15125842375</td><td>15125842375</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">1,717</td><td class="num">¥6,870</td><td>20260123</td>
+    </tr><tr>
+      <td>雷婷婷</td><td>18187120091</td><td>18187120091</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">98,047</td><td class="num">¥5,788</td><td>20260121</td>
+    </tr><tr>
+      <td>xiaoming</td><td>15096671699</td><td>15096671699</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">-559</td><td class="num">¥4,871</td><td>20240528</td>
+    </tr><tr>
+      <td>张</td><td>13987169059</td><td>13987169059</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">1,287,442</td><td class="num">¥4,469</td><td>20240401</td>
+    </tr><tr>
+      <td>1</td><td>15154886103</td><td>15154886104</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">7,703</td><td class="num">¥4,440</td><td>20251121</td>
+    </tr><tr>
+      <td>陈</td><td>15186336864</td><td>15186336864</td><td>东川店</td>
+      <td class="num">-</td><td class="num">6,640</td><td class="num">¥3,220</td><td>20250419</td>
+    </tr><tr>
+      <td>PM</td><td>S15096671698</td><td>15096671698</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">13,051</td><td class="num">¥2,938</td><td>20240614</td>
+    </tr><tr>
+      <td>pmb</td><td>13708722839</td><td>13708722839</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">1,196</td><td class="num">¥2,696</td><td>20240528</td>
+    </tr><tr>
+      <td>zcw</td><td>123456</td><td>123456</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">1,198</td><td class="num">¥2,595</td><td>20250114</td>
+    </tr><tr>
+      <td>xt </td><td>13987169051</td><td>13987169051</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">2,425</td><td class="num">¥2,500</td><td>20250710</td>
+    </tr><tr>
+      <td>丹丹</td><td>15287476052</td><td>15287476052</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-16,792</td><td class="num">¥2,094</td><td>20250304</td>
+    </tr><tr>
+      <td>1213</td><td>15096671666</td><td>15096671666</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">1,487</td><td class="num">¥1,860</td><td>20250322</td>
+    </tr><tr>
+      <td>测试</td><td>091435678</td><td>091435678</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">917</td><td class="num">¥1,834</td><td>20250630</td>
+    </tr><tr>
+      <td>鹏</td><td>15096671633</td><td>15096671633</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">1,598</td><td class="num">¥1,598</td><td>20240528</td>
+    </tr><tr>
+      <td>YY</td><td>15911417656</td><td>15911417656</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">643</td><td class="num">¥1,240</td><td>20250322</td>
+    </tr><tr>
+      <td>小普</td><td>YNBJ00050035</td><td>15287908462</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥1,018</td><td>20240308</td>
+    </tr><tr>
+      <td>王</td><td>19202093007</td><td>19202093007</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">839</td><td class="num">¥840</td><td>20250222</td>
+    </tr><tr>
+      <td>YT</td><td>15911454697</td><td>15911454697</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-10,000</td><td class="num">¥836</td><td>20250304</td>
+    </tr><tr>
+      <td>测试</td><td>13466012354</td><td>13466012354</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">1,340</td><td class="num">¥830</td><td>20250322</td>
+    </tr><tr>
+      <td>52衣服</td><td>15205124665</td><td>15205124665</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">521</td><td class="num">¥321</td><td>20240527</td>
+    </tr><tr>
+      <td></td><td>18187120092</td><td>18187120092</td><td>雷婷婷的店仓</td>
+      <td class="num">-</td><td class="num">269</td><td class="num">¥269</td><td>20260121</td>
+    </tr><tr>
+      <td>崔</td><td>15186977267</td><td>15186977267</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">468</td><td class="num">¥268</td><td>20240524</td>
+    </tr><tr>
+      <td>yyy</td><td>19200000000</td><td>19200000000</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">2,450</td><td class="num">¥245</td><td>20240819</td>
+    </tr><tr>
+      <td>胡汉三</td><td>13002399542</td><td>13002399542</td><td>巧家</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥199</td><td>20231027</td>
+    </tr><tr>
+      <td>余晓梅</td><td>15887812811</td><td>15887812811</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">1,332</td><td class="num">¥190</td><td>20240611</td>
+    </tr><tr>
+      <td>测试卡</td><td>13555555543</td><td>13555555543</td><td>南屏街1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">¥185</td><td>20250708</td>
+    </tr><tr>
+      <td>YS</td><td>15911417655</td><td>15911417655</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">-9,840</td><td class="num">¥160</td><td>20250304</td>
+    </tr><tr>
+      <td>好烦好烦</td><td>15394936300</td><td>15394936300</td><td>北辰一店店仓</td>
+      <td class="num">-</td><td class="num">150</td><td class="num">¥150</td><td>20240314</td>
+    </tr><tr>
+      <td>zhl</td><td>15887038164</td><td>15887038164</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">212</td><td class="num">¥112</td><td>20240322</td>
+    </tr><tr>
+      <td>慧慧</td><td>18187139713</td><td>18187139713</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">¥100</td><td>20240607</td>
+    </tr><tr>
+      <td>Y测试</td><td>YAJI00050002</td><td>15331730091</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">6,420</td><td class="num">¥100</td><td>20250222</td>
+    </tr><tr>
+      <td>11</td><td>15096671630</td><td>15096671630</td><td>测试店仓</td>
+      <td class="num">-</td><td class="num">148</td><td class="num">¥69</td><td>20240730</td>
+    </tr><tr>
+      <td>无</td><td>18387297742</td><td>18387297742</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>胡汉四</td><td>17608438416</td><td>17608438416</td><td>巧家</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>1111</td><td>13555555555</td><td>13555555555</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>伯俊测试</td><td>15488865040</td><td>15488865040</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>曾小婷</td><td>15394936600</td><td>15394936600</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>符美惠</td><td>15974527370</td><td>15974527370</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>15808895060</td><td>15808895060</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">110</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>ahdung</td><td>13312553425</td><td>13312553425</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈多多</td><td>15659983537</td><td>15659983537</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王玥越</td><td>YNBJ00050067</td><td>13759164877</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>赵蔚</td><td>18388442507</td><td>18388442507</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>段吉祥</td><td>18687036313</td><td>18687036313</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>穗穗</td><td>17787773323</td><td>17787773323</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张莞萱</td><td>18171194461</td><td>18171194461</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>tongg</td><td>15508771992</td><td>15508771992</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>罗</td><td>13888393567</td><td>13888393567</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>杨树伟</td><td>13888924549</td><td>13888924549</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>贺斌</td><td>18302188990</td><td>18302188990</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>郑</td><td>13508718675</td><td>13508718675</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>女</td><td>女</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>男</td><td>男</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>8000000067</td><td>15911417659</td><td>曲靖分店5</td>
+      <td class="num">-</td><td class="num">3,520</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>叶</td><td>V20240812</td><td>15924822092</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张山1</td><td>13233334444</td><td>13233334444</td><td>TEST-XY-店仓</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>孙</td><td>15200469742</td><td>15200469742</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘</td><td>15192227312</td><td>15192227312</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>沈</td><td>15188186697</td><td>15188186697</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>代</td><td>15186527592</td><td>15186527592</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>何</td><td>15186340397</td><td>15186340397</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15186339392</td><td>15186339392</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>罗</td><td>15186336300</td><td>15186336300</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>罗</td><td>15186331742</td><td>15186331742</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>周</td><td>15186329929</td><td>15186329929</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陶</td><td>15186329581</td><td>15186329581</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15186323156</td><td>15186323156</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>昭通</td><td>15186323153</td><td>15186323153</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘</td><td>15186306707</td><td>15186306707</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>冯</td><td>15186293438</td><td>15186293438</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>徐</td><td>15186291688</td><td>15186291688</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>帅哥</td><td>15186282027</td><td>15186282027</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>孙</td><td>15186269349</td><td>15186269349</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>梦</td><td>15186268480</td><td>15186268480</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>梦</td><td>15186265003</td><td>15186265003</td><td>东川店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>雷</td><td>15186263355</td><td>15186263355</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王</td><td>15186262027</td><td>15186262027</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>黄</td><td>15186261583</td><td>15186261583</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>胡</td><td>15186261003</td><td>15186261003</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>杨</td><td>15186255912</td><td>15186255912</td><td>东川店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>yan</td><td>15186251580</td><td>15186251580</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>韩</td><td>15186248958</td><td>15186248958</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>185</td><td>15186248281</td><td>15186248281</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王</td><td>15186244662</td><td>15186244662</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>鱼</td><td>15186240551</td><td>15186240551</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>唐</td><td>15186229237</td><td>15186229237</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>金沙</td><td>15186100388</td><td>15186100388</td><td>东川店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15185582866</td><td>15185582866</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15180898951</td><td>15180898951</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>毛</td><td>15168630882</td><td>15168630882</td><td>东川店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王</td><td>15157147795</td><td>15157147795</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">200</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘</td><td>15151641649</td><td>15151641649</td><td>东川店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>钱</td><td>15123909578</td><td>15123909578</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈</td><td>15121799568</td><td>15121799568</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱</td><td>15121779060</td><td>15121779060</td><td>东川店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>邓</td><td>15121771928</td><td>15121771928</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15121770316</td><td>15121770316</td><td>东川店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>赵</td><td>15121750550</td><td>15121750550</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘</td><td>15121747097</td><td>15121747097</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>WJC</td><td>18388307901</td><td>18388307901</td><td>曲靖分店5</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>zrjxx</td><td>15559626858</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">4,926</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15121746462</td><td>15121746462</td><td>东川店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15121746378</td><td>15121746378</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>段</td><td>15121733183</td><td>15121733183</td><td>东川店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15121719831</td><td>15121719831</td><td>东川1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>周女士</td><td>15121713764</td><td>15121713764</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>梁</td><td>15121713160</td><td>15121713160</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>黄</td><td>15121702045</td><td>15121702045</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15121700432</td><td>15121700432</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘女士</td><td>15121660603</td><td>15121660603</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>谢华秀</td><td>15121345330</td><td>15121345330</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>何女士</td><td>15120324822</td><td>15120324822</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈</td><td>15120279122</td><td>15120279122</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>赵姐</td><td>15117797910</td><td>15117797910</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15117797190</td><td>15117797190</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>段</td><td>15117766302</td><td>15117766302</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15117507251</td><td>15117507251</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>肖美兰</td><td>15117492057</td><td>15117492057</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李海燕</td><td>15117491560</td><td>15117491560</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>吕先生</td><td>15117474700</td><td>15117474700</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15117458228</td><td>15117458228</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>段</td><td>15117453305</td><td>15117453305</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>史</td><td>15117449558</td><td>15117449558</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>吴女士</td><td>15117449065</td><td>15117449065</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>仇先生</td><td>15117441027</td><td>15117441027</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>郭</td><td>15117436671</td><td>15117436671</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张女仕</td><td>15117430975</td><td>15117430975</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15117428890</td><td>15117428890</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王先生</td><td>15117426879</td><td>15117426879</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">88</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘</td><td>15117419383</td><td>15117419383</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张玉玺</td><td>15125842376</td><td>15125842376</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>胡女士</td><td>15117408865</td><td>15117408865</td><td>会泽1店</td>
+      <td class="num">-</td><td class="num">90</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>罗</td><td>15117406566</td><td>15117406566</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">91</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>杨女士</td><td>15117401126</td><td>15117401126</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">92</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张女士</td><td>15112702045</td><td>15112702045</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">93</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>肖</td><td>15112588691</td><td>15112588691</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">94</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张清珍</td><td>15108586716</td><td>15108586716</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">95</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>钱先生</td><td>15108582792</td><td>15108582792</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈女士</td><td>15096429131</td><td>15096429131</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">97</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张女士</td><td>15086495012</td><td>15086495012</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">98</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张女士</td><td>15086492713</td><td>15086492713</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">99</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>杨女生</td><td>15086492664</td><td>15086492664</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">100</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱</td><td>15086491842</td><td>15086491842</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>代女士</td><td>15086489332</td><td>15086489332</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">102</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张</td><td>15086488800</td><td>15086488800</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">103</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>杨女仕</td><td>15086485165</td><td>15086485165</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">104</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>唐先生</td><td>15086467911</td><td>15086467911</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">105</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>韦女士</td><td>15086467797</td><td>15086467797</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">106</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>孙</td><td>15086467604</td><td>15086467604</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">107</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>赵女士</td><td>15086464030</td><td>15086464030</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>许女士</td><td>15086462628</td><td>15086462628</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">109</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>柒</td><td>15086461971</td><td>15086461971</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">110</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>文</td><td>15086458591</td><td>15086458591</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">111</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘先生</td><td>15086455785</td><td>15086455785</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">112</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李女士</td><td>15086455415</td><td>15086455415</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>舒女士</td><td>15086453578</td><td>15086453578</td><td>会泽2店</td>
+      <td class="num">-</td><td class="num">114</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李督佑</td><td>15432705497</td><td>15432705497</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,350</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王启楷</td><td>15668770318</td><td>15668770318</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">4,364</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王媚括</td><td>18527404019</td><td>18527404019</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">1,397</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王歌电</td><td>19541944485</td><td>19541944485</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">6,754</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>测试wq</td><td>18314209140</td><td>18314209140</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张干推</td><td>15868463278</td><td>15868463278</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">10,928</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张元墅</td><td>17336201680</td><td>17336201680</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">7,920</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普咆陨</td><td>15362925705</td><td>15362925705</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,678</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱枣捡</td><td>18559120129</td><td>18559120129</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">7,101</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱腆疥</td><td>17242889412</td><td>17242889412</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈客裹</td><td>17214392884</td><td>17214392884</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">8,947</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱丝琉</td><td>17140756311</td><td>17140756311</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">444</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘促汾</td><td>17749731598</td><td>17749731598</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">5,447</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈蹲汰</td><td>13926895986</td><td>13926895986</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">53,099</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张剧离</td><td>15226763510</td><td>15226763510</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">4,900</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王袋示</td><td>18734508784</td><td>18734508784</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">53,005</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李酱勤</td><td>19947160773</td><td>19947160773</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">1,299</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李失裳</td><td>18414333881</td><td>18414333881</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">6,809</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王挡讲</td><td>15233715771</td><td>15233715771</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">2,264</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普娟翅</td><td>18456096577</td><td>18456096577</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">4,813</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王拒哇</td><td>18553857133</td><td>18553857133</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">5,946</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王侈须</td><td>19956086969</td><td>19956086969</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">10,215</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李彝生</td><td>13375238750</td><td>13375238750</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">2,272</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱锭百</td><td>15715279820</td><td>15715279820</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">2,113</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普雁迂</td><td>19739704085</td><td>19739704085</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">8,698</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈伐乃</td><td>19691732817</td><td>19691732817</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">9,434</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘汪化</td><td>19747627737</td><td>19747627737</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">7,303</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李隧表</td><td>18723891905</td><td>18723891905</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">3,069</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张滇栈</td><td>17934776531</td><td>17934776531</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">17,501</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘淑栈</td><td>13146464118</td><td>13146464118</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">14,934</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李榨币</td><td>18856990284</td><td>18856990284</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">8,053</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘颗姓</td><td>17166468041</td><td>17166468041</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">8,733</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘氮棋</td><td>15270361785</td><td>15270361785</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">3,772</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>11</td><td>091345678</td><td>091345678</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">1,000</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈耽魁</td><td>15845001298</td><td>15845001298</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">6,616</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普腥耻</td><td>13310490439</td><td>13310490439</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">7,637</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱姨餐</td><td>15612503213</td><td>15612503213</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">801</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱喘卯</td><td>19128698798</td><td>19128698798</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">14,637</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普棵右</td><td>17570144954</td><td>17570144954</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">1,936</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李踌儿</td><td>17896247066</td><td>17896247066</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">8,120</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱净笑</td><td>19631611707</td><td>19631611707</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘幼冀</td><td>19518086236</td><td>19518086236</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王抛枉</td><td>13363333179</td><td>13363333179</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">1,486</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱褂恤</td><td>13621254742</td><td>13621254742</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱伊攀</td><td>17922990280</td><td>17922990280</td><td>SEPTWOLVES加盟店</td>
+      <td class="num">-</td><td class="num">3,949</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘古粉</td><td>17622883899</td><td>17622883899</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">7,913</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李赶痘</td><td>13653040375</td><td>13653040375</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,570</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李甫肖</td><td>13366872802</td><td>13366872802</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">8,405</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱轰景</td><td>19522694247</td><td>19522694247</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">9,095</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王早殉</td><td>17163273850</td><td>17163273850</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">9,211</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘吵你</td><td>18284167074</td><td>18284167074</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">7,381</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张锋登</td><td>18590714070</td><td>18590714070</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">331</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李枯呛</td><td>18253607955</td><td>18253607955</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">12,927</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>PMB</td><td>15096671634</td><td>15096671634</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>15154889876</td><td>15154889876</td><td>ZY测试1</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈赢</td><td>18288726595</td><td>18288726595</td><td>南屏街1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>Dd</td><td>15911486322</td><td>15911486322</td><td>东川店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>19898989898</td><td>19898989898</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">734</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>YS</td><td>15911417659</td><td>15911417659</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>dafeng</td><td>13283891498</td><td>13283891498</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张近</td><td>15559626858</td><td>15559626858</td><td>新奇迹咖啡总仓</td>
+      <td class="num">-</td><td class="num">323</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>lei</td><td>13200000001</td><td>13200000001</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>leilei</td><td>13200000004</td><td>13200000004</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王颂之</td><td>15808867591</td><td>15808867591</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>lei11111</td><td>13200000000</td><td>13200000000</td><td>LEI总仓</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>测试</td><td>13555555553</td><td>13555555553</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>无所谓</td><td>15096671635</td><td>15096671635</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>蔡秋秋</td><td>13362728072</td><td>13362728072</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>15888888888</td><td>15888888888</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>zz</td><td>zcw</td><td>15555555555</td><td>ZCW店仓</td>
+      <td class="num">-</td><td class="num">1,380</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李</td><td>15687740973</td><td>15687740973</td><td>南屏街1店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>201314222</td><td>15911417659</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>13211112222</td><td>13211112222</td><td>TEST-XY-店仓</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>孙</td><td>1510874931</td><td>1510874931</td><td>东川店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>彭明波</td><td>15096671232</td><td>15096671232</td><td>TEDELON、直营店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>测试开卡啦</td><td>18314209199</td><td>18314209199</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td></td><td>13278655643</td><td>13278655643</td><td>总部仓库</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李救韧</td><td>15585842876</td><td>15585842876</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">168</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张甩聘</td><td>13285038757</td><td>13285038757</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈硒孩</td><td>17482042624</td><td>17482042624</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘锭酵</td><td>13473005369</td><td>13473005369</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">4,250</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王尔京</td><td>18245523368</td><td>18245523368</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,965</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普佳阶</td><td>18379197940</td><td>18379197940</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">7,928</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王薁渗</td><td>19360839227</td><td>19360839227</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,407</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘翼械</td><td>13338692596</td><td>13338692596</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,351</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张漆傅</td><td>17164268057</td><td>17164268057</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">426</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王抉遍</td><td>15547527558</td><td>15547527558</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">7,607</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普参杨</td><td>15766421314</td><td>15766421314</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">4,540</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈乖弗</td><td>15184853413</td><td>15184853413</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">19,923</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李痉律</td><td>13938161876</td><td>13938161876</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">4,706</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王梦寇</td><td>19892202054</td><td>19892202054</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">9,348</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张惹虑</td><td>18934539297</td><td>18934539297</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">25</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈讼臼</td><td>18523153986</td><td>18523153986</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">5,385</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈倒砰</td><td>19642980860</td><td>19642980860</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">14,954</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱舅舆</td><td>15971834855</td><td>15971834855</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">714</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱赏舶</td><td>17634722141</td><td>17634722141</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">8,213</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈斑担</td><td>19116951001</td><td>19116951001</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">4,467</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王袍次</td><td>13912861567</td><td>13912861567</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">7,808</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普独操</td><td>15225983041</td><td>15225983041</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">5,034</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱钵菩</td><td>18875539608</td><td>18875539608</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">9,357</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王迭鞍</td><td>17896449265</td><td>17896449265</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">363</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘耕培</td><td>17836775533</td><td>17836775533</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">6,265</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普彦它</td><td>19249733807</td><td>19249733807</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">3,885</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王矩捎</td><td>17512786804</td><td>17512786804</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">4,159</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普磋坤</td><td>18191681951</td><td>18191681951</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">3,188</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普仆凑</td><td>19513904422</td><td>19513904422</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">4,409</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈翠影</td><td>19829868897</td><td>19829868897</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">8,902</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘篱殷</td><td>19186326861</td><td>19186326861</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">5,004</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>李侍蓟</td><td>17246679441</td><td>17246679441</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">4,923</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈暮园</td><td>19799130072</td><td>19799130072</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">8,410</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王操收</td><td>19481843246</td><td>19481843246</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">712</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普箱邻</td><td>18391622179</td><td>18391622179</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">2,606</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普旗渔</td><td>17136658876</td><td>17136658876</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张榔丰</td><td>17995504360</td><td>17995504360</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">3,761</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱捶闹</td><td>18310102796</td><td>18310102796</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">11,113</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈函霹</td><td>18143706711</td><td>18143706711</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">16,630</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张限应</td><td>15665382623</td><td>15665382623</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">6,316</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普亥玛</td><td>15676453414</td><td>15676453414</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">13,221</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈绢攀</td><td>17931936930</td><td>17931936930</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">7,718</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>普者伦</td><td>18442804110</td><td>18442804110</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">8,998</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张聂槽</td><td>19978057271</td><td>19978057271</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王报敌</td><td>17994887399</td><td>17994887399</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">12,791</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王椅吼</td><td>15250233372</td><td>15250233372</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">9,009</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>王牢布</td><td>15116563966</td><td>15116563966</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">19</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>陈命音</td><td>17832024576</td><td>17832024576</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">8,770</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>朱猾皖</td><td>15669703984</td><td>15669703984</td><td>SEPTWOLVES直营店</td>
+      <td class="num">-</td><td class="num">14,320</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>刘鼎防</td><td>18882344289</td><td>18882344289</td><td>TEDELON加盟店</td>
+      <td class="num">-</td><td class="num">231</td><td class="num">-</td><td>从未消费</td>
+    </tr><tr>
+      <td>张京亮</td><td>13987179059</td><td>13987179059</td><td>小西门店</td>
+      <td class="num">-</td><td class="num">-</td><td class="num">-</td><td>从未消费</td>
+    </tr>
+</tbody>
+</table>
+</div>
+<script>
+const DATA = [{"name": "陈明飞", "card": "18487101031", "mobile": "18487101031", "store": "南屏街1店", "balance": 0.0, "integral": 0.0, "spent": 150439.0, "lastDate": "20231123"}, {"name": "小普", "card": "18101862160", "mobile": "18101862156", "store": "小西门店", "balance": 0.0, "integral": 90780.0, "spent": 91187.14, "lastDate": "20241216"}, {"name": "文青", "card": "15388865040", "mobile": "15388865040", "store": "小西门店", "balance": 0.0, "integral": 962450.0, "spent": 88491.27, "lastDate": "20250421"}, {"name": "吴兴南", "card": "18565138861", "mobile": "18565138861", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 78411.0, "lastDate": "20230712"}, {"name": "彭明波", "card": "15096671631", "mobile": "15096671631", "store": "测试店仓", "balance": 0.0, "integral": 2563598.0, "spent": 44544.05, "lastDate": "20240520"}, {"name": "hh", "card": "15154886102", "mobile": "15154886102", "store": "测试店仓", "balance": 0.0, "integral": 162526.0, "spent": 39324.0, "lastDate": "20260509"}, {"name": "吴烦恼", "card": "15912087682", "mobile": "15912087682", "store": "小西门店", "balance": 0.0, "integral": 110.0, "spent": 24123.4, "lastDate": "20260131"}, {"name": "yy", "card": "yy01", "mobile": "19000000000", "store": "YYY-店仓", "balance": 0.0, "integral": 243593.0, "spent": 23859.3, "lastDate": "20240829"}, {"name": "彭明波", "card": "15096671632", "mobile": "15096671632", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 22300.85, "lastDate": "20240309"}, {"name": "YB", "card": "15911417658", "mobile": "15911417658", "store": "测试店仓", "balance": 0.0, "integral": 27822.0, "spent": 22166.0, "lastDate": "20250519"}, {"name": "周琳琳", "card": "11111111111", "mobile": "11111111111", "store": "南屏街1店", "balance": 0.0, "integral": 0.0, "spent": 21225.5, "lastDate": "20230925"}, {"name": "熊某某1", "card": "SVIP6666", "mobile": "17842241846", "store": "XSC的店仓", "balance": 0.0, "integral": 44357.0, "spent": 19223.2, "lastDate": "20240314"}, {"name": "学仔", "card": "13508896973", "mobile": "13508896973", "store": "小西门店", "balance": 0.0, "integral": 291653.0, "spent": 17391.69, "lastDate": "20250818"}, {"name": "耿耿", "card": "18313005169", "mobile": "18313005169", "store": "总部仓库", "balance": 0.0, "integral": 35767.0, "spent": 13596.49, "lastDate": "20260416"}, {"name": "兴南", "card": "18565138862", "mobile": "18565138862", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 12953.0, "lastDate": "20230630"}, {"name": "aa", "card": "15154886101", "mobile": "15154886105", "store": "测试店仓", "balance": 0.0, "integral": 6697.0, "spent": 11900.0, "lastDate": "20250322"}, {"name": "wyl", "card": "18487801042", "mobile": "18487801042", "store": "小西门店", "balance": 0.0, "integral": 5167.0, "spent": 9159.5, "lastDate": "20250630"}, {"name": "小飞飞", "card": "18213029790", "mobile": "18213029790", "store": "小西门店", "balance": 0.0, "integral": 7140.0, "spent": 7140.0, "lastDate": "20241202"}, {"name": "ZYX", "card": "15125842375", "mobile": "15125842375", "store": "小西门店", "balance": 0.0, "integral": 1717.0, "spent": 6870.0, "lastDate": "20260123"}, {"name": "雷婷婷", "card": "18187120091", "mobile": "18187120091", "store": "小西门店", "balance": 0.0, "integral": 98047.0, "spent": 5788.0, "lastDate": "20260121"}, {"name": "xiaoming", "card": "15096671699", "mobile": "15096671699", "store": "TEDELON、直营店", "balance": 0.0, "integral": -559.0, "spent": 4871.0, "lastDate": "20240528"}, {"name": "张", "card": "13987169059", "mobile": "13987169059", "store": "小西门店", "balance": 0.0, "integral": 1287442.0, "spent": 4468.88, "lastDate": "20240401"}, {"name": "1", "card": "15154886103", "mobile": "15154886104", "store": "测试店仓", "balance": 0.0, "integral": 7703.0, "spent": 4440.0, "lastDate": "20251121"}, {"name": "陈", "card": "15186336864", "mobile": "15186336864", "store": "东川店", "balance": 0.0, "integral": 6640.0, "spent": 3220.0, "lastDate": "20250419"}, {"name": "PM", "card": "S15096671698", "mobile": "15096671698", "store": "TEDELON、直营店", "balance": 0.0, "integral": 13051.0, "spent": 2938.4, "lastDate": "20240614"}, {"name": "pmb", "card": "13708722839", "mobile": "13708722839", "store": "TEDELON、直营店", "balance": 0.0, "integral": 1196.0, "spent": 2696.0, "lastDate": "20240528"}, {"name": "zcw", "card": "123456", "mobile": "123456", "store": "小西门店", "balance": 0.0, "integral": 1198.0, "spent": 2595.0, "lastDate": "20250114"}, {"name": "xt ", "card": "13987169051", "mobile": "13987169051", "store": "小西门店", "balance": 0.0, "integral": 2425.0, "spent": 2500.0, "lastDate": "20250710"}, {"name": "丹丹", "card": "15287476052", "mobile": "15287476052", "store": "小西门店", "balance": 0.0, "integral": -16792.0, "spent": 2093.6, "lastDate": "20250304"}, {"name": "1213", "card": "15096671666", "mobile": "15096671666", "store": "测试店仓", "balance": 0.0, "integral": 1487.0, "spent": 1860.0, "lastDate": "20250322"}, {"name": "测试", "card": "091435678", "mobile": "091435678", "store": "小西门店", "balance": 0.0, "integral": 917.0, "spent": 1834.0, "lastDate": "20250630"}, {"name": "鹏", "card": "15096671633", "mobile": "15096671633", "store": "TEDELON、直营店", "balance": 0.0, "integral": 1598.0, "spent": 1598.0, "lastDate": "20240528"}, {"name": "YY", "card": "15911417656", "mobile": "15911417656", "store": "测试店仓", "balance": 0.0, "integral": 643.0, "spent": 1240.0, "lastDate": "20250322"}, {"name": "小普", "card": "YNBJ00050035", "mobile": "15287908462", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 1018.0, "lastDate": "20240308"}, {"name": "王", "card": "19202093007", "mobile": "19202093007", "store": "小西门店", "balance": 0.0, "integral": 839.0, "spent": 840.0, "lastDate": "20250222"}, {"name": "YT", "card": "15911454697", "mobile": "15911454697", "store": "小西门店", "balance": 0.0, "integral": -10000.0, "spent": 836.0, "lastDate": "20250304"}, {"name": "测试", "card": "13466012354", "mobile": "13466012354", "store": "测试店仓", "balance": 0.0, "integral": 1340.0, "spent": 830.0, "lastDate": "20250322"}, {"name": "52衣服", "card": "15205124665", "mobile": "15205124665", "store": "东川1店", "balance": 0.0, "integral": 521.0, "spent": 321.0, "lastDate": "20240527"}, {"name": "", "card": "18187120092", "mobile": "18187120092", "store": "雷婷婷的店仓", "balance": 0.0, "integral": 269.0, "spent": 269.1, "lastDate": "20260121"}, {"name": "崔", "card": "15186977267", "mobile": "15186977267", "store": "东川1店", "balance": 0.0, "integral": 468.0, "spent": 268.0, "lastDate": "20240524"}, {"name": "yyy", "card": "19200000000", "mobile": "19200000000", "store": "小西门店", "balance": 0.0, "integral": 2450.0, "spent": 245.0, "lastDate": "20240819"}, {"name": "胡汉三", "card": "13002399542", "mobile": "13002399542", "store": "巧家", "balance": 0.0, "integral": 0.0, "spent": 199.0, "lastDate": "20231027"}, {"name": "余晓梅", "card": "15887812811", "mobile": "15887812811", "store": "小西门店", "balance": 0.0, "integral": 1332.0, "spent": 190.3, "lastDate": "20240611"}, {"name": "测试卡", "card": "13555555543", "mobile": "13555555543", "store": "南屏街1店", "balance": 0.0, "integral": 0.0, "spent": 185.0, "lastDate": "20250708"}, {"name": "YS", "card": "15911417655", "mobile": "15911417655", "store": "测试店仓", "balance": 0.0, "integral": -9840.0, "spent": 160.0, "lastDate": "20250304"}, {"name": "好烦好烦", "card": "15394936300", "mobile": "15394936300", "store": "北辰一店店仓", "balance": 0.0, "integral": 150.0, "spent": 150.0, "lastDate": "20240314"}, {"name": "zhl", "card": "15887038164", "mobile": "15887038164", "store": "小西门店", "balance": 0.0, "integral": 212.0, "spent": 112.0, "lastDate": "20240322"}, {"name": "慧慧", "card": "18187139713", "mobile": "18187139713", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 100.0, "lastDate": "20240607"}, {"name": "Y测试", "card": "YAJI00050002", "mobile": "15331730091", "store": "小西门店", "balance": 0.0, "integral": 6420.0, "spent": 100.0, "lastDate": "20250222"}, {"name": "11", "card": "15096671630", "mobile": "15096671630", "store": "测试店仓", "balance": 0.0, "integral": 148.0, "spent": 69.3, "lastDate": "20240730"}, {"name": "无", "card": "18387297742", "mobile": "18387297742", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "胡汉四", "card": "17608438416", "mobile": "17608438416", "store": "巧家", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "1111", "card": "13555555555", "mobile": "13555555555", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "伯俊测试", "card": "15488865040", "mobile": "15488865040", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "曾小婷", "card": "15394936600", "mobile": "15394936600", "store": "总部仓库", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "符美惠", "card": "15974527370", "mobile": "15974527370", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "15808895060", "mobile": "15808895060", "store": "总部仓库", "balance": 0.0, "integral": 110.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "ahdung", "card": "13312553425", "mobile": "13312553425", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈多多", "card": "15659983537", "mobile": "15659983537", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王玥越", "card": "YNBJ00050067", "mobile": "13759164877", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "赵蔚", "card": "18388442507", "mobile": "18388442507", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "段吉祥", "card": "18687036313", "mobile": "18687036313", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "穗穗", "card": "17787773323", "mobile": "17787773323", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张莞萱", "card": "18171194461", "mobile": "18171194461", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "tongg", "card": "15508771992", "mobile": "15508771992", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "罗", "card": "13888393567", "mobile": "13888393567", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "杨树伟", "card": "13888924549", "mobile": "13888924549", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "贺斌", "card": "18302188990", "mobile": "18302188990", "store": "小西门店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "郑", "card": "13508718675", "mobile": "13508718675", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "女", "mobile": "女", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "男", "mobile": "男", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "8000000067", "mobile": "15911417659", "store": "曲靖分店5", "balance": 0.0, "integral": 3520.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "叶", "card": "V20240812", "mobile": "15924822092", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张山1", "card": "13233334444", "mobile": "13233334444", "store": "TEST-XY-店仓", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "孙", "card": "15200469742", "mobile": "15200469742", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘", "card": "15192227312", "mobile": "15192227312", "store": "东川1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "沈", "card": "15188186697", "mobile": "15188186697", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "代", "card": "15186527592", "mobile": "15186527592", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "何", "card": "15186340397", "mobile": "15186340397", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15186339392", "mobile": "15186339392", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "罗", "card": "15186336300", "mobile": "15186336300", "store": "东川1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "罗", "card": "15186331742", "mobile": "15186331742", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "周", "card": "15186329929", "mobile": "15186329929", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陶", "card": "15186329581", "mobile": "15186329581", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15186323156", "mobile": "15186323156", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "昭通", "card": "15186323153", "mobile": "15186323153", "store": "东川1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘", "card": "15186306707", "mobile": "15186306707", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "冯", "card": "15186293438", "mobile": "15186293438", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "徐", "card": "15186291688", "mobile": "15186291688", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "帅哥", "card": "15186282027", "mobile": "15186282027", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "孙", "card": "15186269349", "mobile": "15186269349", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "梦", "card": "15186268480", "mobile": "15186268480", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "梦", "card": "15186265003", "mobile": "15186265003", "store": "东川店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "雷", "card": "15186263355", "mobile": "15186263355", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王", "card": "15186262027", "mobile": "15186262027", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "黄", "card": "15186261583", "mobile": "15186261583", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "胡", "card": "15186261003", "mobile": "15186261003", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "杨", "card": "15186255912", "mobile": "15186255912", "store": "东川店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "yan", "card": "15186251580", "mobile": "15186251580", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "韩", "card": "15186248958", "mobile": "15186248958", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "185", "card": "15186248281", "mobile": "15186248281", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王", "card": "15186244662", "mobile": "15186244662", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "鱼", "card": "15186240551", "mobile": "15186240551", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "唐", "card": "15186229237", "mobile": "15186229237", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "金沙", "card": "15186100388", "mobile": "15186100388", "store": "东川店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15185582866", "mobile": "15185582866", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15180898951", "mobile": "15180898951", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "毛", "card": "15168630882", "mobile": "15168630882", "store": "东川店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王", "card": "15157147795", "mobile": "15157147795", "store": "东川1店", "balance": 0.0, "integral": 200.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘", "card": "15151641649", "mobile": "15151641649", "store": "东川店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "钱", "card": "15123909578", "mobile": "15123909578", "store": "东川1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈", "card": "15121799568", "mobile": "15121799568", "store": "东川1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱", "card": "15121779060", "mobile": "15121779060", "store": "东川店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "邓", "card": "15121771928", "mobile": "15121771928", "store": "东川1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15121770316", "mobile": "15121770316", "store": "东川店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "赵", "card": "15121750550", "mobile": "15121750550", "store": "东川1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘", "card": "15121747097", "mobile": "15121747097", "store": "东川1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "WJC", "card": "18388307901", "mobile": "18388307901", "store": "曲靖分店5", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "zrjxx", "mobile": "15559626858", "store": "总部仓库", "balance": 0.0, "integral": 4926.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15121746462", "mobile": "15121746462", "store": "东川店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15121746378", "mobile": "15121746378", "store": "东川1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "段", "card": "15121733183", "mobile": "15121733183", "store": "东川店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15121719831", "mobile": "15121719831", "store": "东川1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "周女士", "card": "15121713764", "mobile": "15121713764", "store": "会泽1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "梁", "card": "15121713160", "mobile": "15121713160", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "黄", "card": "15121702045", "mobile": "15121702045", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15121700432", "mobile": "15121700432", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘女士", "card": "15121660603", "mobile": "15121660603", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "谢华秀", "card": "15121345330", "mobile": "15121345330", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "何女士", "card": "15120324822", "mobile": "15120324822", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈", "card": "15120279122", "mobile": "15120279122", "store": "会泽1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "赵姐", "card": "15117797910", "mobile": "15117797910", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15117797190", "mobile": "15117797190", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "段", "card": "15117766302", "mobile": "15117766302", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15117507251", "mobile": "15117507251", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "肖美兰", "card": "15117492057", "mobile": "15117492057", "store": "会泽1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李海燕", "card": "15117491560", "mobile": "15117491560", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "吕先生", "card": "15117474700", "mobile": "15117474700", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15117458228", "mobile": "15117458228", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "段", "card": "15117453305", "mobile": "15117453305", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "史", "card": "15117449558", "mobile": "15117449558", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "吴女士", "card": "15117449065", "mobile": "15117449065", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "仇先生", "card": "15117441027", "mobile": "15117441027", "store": "会泽1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "郭", "card": "15117436671", "mobile": "15117436671", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张女仕", "card": "15117430975", "mobile": "15117430975", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15117428890", "mobile": "15117428890", "store": "会泽1店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王先生", "card": "15117426879", "mobile": "15117426879", "store": "会泽1店", "balance": 0.0, "integral": 88.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘", "card": "15117419383", "mobile": "15117419383", "store": "会泽1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张玉玺", "card": "15125842376", "mobile": "15125842376", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "胡女士", "card": "15117408865", "mobile": "15117408865", "store": "会泽1店", "balance": 0.0, "integral": 90.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "罗", "card": "15117406566", "mobile": "15117406566", "store": "会泽2店", "balance": 0.0, "integral": 91.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "杨女士", "card": "15117401126", "mobile": "15117401126", "store": "会泽2店", "balance": 0.0, "integral": 92.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张女士", "card": "15112702045", "mobile": "15112702045", "store": "会泽2店", "balance": 0.0, "integral": 93.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "肖", "card": "15112588691", "mobile": "15112588691", "store": "会泽2店", "balance": 0.0, "integral": 94.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张清珍", "card": "15108586716", "mobile": "15108586716", "store": "会泽2店", "balance": 0.0, "integral": 95.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "钱先生", "card": "15108582792", "mobile": "15108582792", "store": "会泽2店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈女士", "card": "15096429131", "mobile": "15096429131", "store": "会泽2店", "balance": 0.0, "integral": 97.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张女士", "card": "15086495012", "mobile": "15086495012", "store": "会泽2店", "balance": 0.0, "integral": 98.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张女士", "card": "15086492713", "mobile": "15086492713", "store": "会泽2店", "balance": 0.0, "integral": 99.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "杨女生", "card": "15086492664", "mobile": "15086492664", "store": "会泽2店", "balance": 0.0, "integral": 100.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱", "card": "15086491842", "mobile": "15086491842", "store": "会泽2店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "代女士", "card": "15086489332", "mobile": "15086489332", "store": "会泽2店", "balance": 0.0, "integral": 102.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张", "card": "15086488800", "mobile": "15086488800", "store": "会泽2店", "balance": 0.0, "integral": 103.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "杨女仕", "card": "15086485165", "mobile": "15086485165", "store": "会泽2店", "balance": 0.0, "integral": 104.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "唐先生", "card": "15086467911", "mobile": "15086467911", "store": "会泽2店", "balance": 0.0, "integral": 105.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "韦女士", "card": "15086467797", "mobile": "15086467797", "store": "会泽2店", "balance": 0.0, "integral": 106.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "孙", "card": "15086467604", "mobile": "15086467604", "store": "会泽2店", "balance": 0.0, "integral": 107.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "赵女士", "card": "15086464030", "mobile": "15086464030", "store": "会泽2店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "许女士", "card": "15086462628", "mobile": "15086462628", "store": "会泽2店", "balance": 0.0, "integral": 109.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "柒", "card": "15086461971", "mobile": "15086461971", "store": "会泽2店", "balance": 0.0, "integral": 110.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "文", "card": "15086458591", "mobile": "15086458591", "store": "会泽2店", "balance": 0.0, "integral": 111.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘先生", "card": "15086455785", "mobile": "15086455785", "store": "会泽2店", "balance": 0.0, "integral": 112.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李女士", "card": "15086455415", "mobile": "15086455415", "store": "会泽2店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "舒女士", "card": "15086453578", "mobile": "15086453578", "store": "会泽2店", "balance": 0.0, "integral": 114.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李督佑", "card": "15432705497", "mobile": "15432705497", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8350.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王启楷", "card": "15668770318", "mobile": "15668770318", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 4364.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王媚括", "card": "18527404019", "mobile": "18527404019", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 1397.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王歌电", "card": "19541944485", "mobile": "19541944485", "store": "TEDELON加盟店", "balance": 0.0, "integral": 6754.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "测试wq", "card": "18314209140", "mobile": "18314209140", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张干推", "card": "15868463278", "mobile": "15868463278", "store": "TEDELON、直营店", "balance": 0.0, "integral": 10928.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张元墅", "card": "17336201680", "mobile": "17336201680", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 7920.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普咆陨", "card": "15362925705", "mobile": "15362925705", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8678.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱枣捡", "card": "18559120129", "mobile": "18559120129", "store": "TEDELON加盟店", "balance": 0.0, "integral": 7101.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱腆疥", "card": "17242889412", "mobile": "17242889412", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈客裹", "card": "17214392884", "mobile": "17214392884", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 8947.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱丝琉", "card": "17140756311", "mobile": "17140756311", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 444.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘促汾", "card": "17749731598", "mobile": "17749731598", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 5447.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈蹲汰", "card": "13926895986", "mobile": "13926895986", "store": "TEDELON、直营店", "balance": 0.0, "integral": 53099.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张剧离", "card": "15226763510", "mobile": "15226763510", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 4900.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王袋示", "card": "18734508784", "mobile": "18734508784", "store": "TEDELON、直营店", "balance": 0.0, "integral": 53005.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李酱勤", "card": "19947160773", "mobile": "19947160773", "store": "TEDELON加盟店", "balance": 0.0, "integral": 1299.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李失裳", "card": "18414333881", "mobile": "18414333881", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 6809.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王挡讲", "card": "15233715771", "mobile": "15233715771", "store": "TEDELON加盟店", "balance": 0.0, "integral": 2264.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普娟翅", "card": "18456096577", "mobile": "18456096577", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 4813.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王拒哇", "card": "18553857133", "mobile": "18553857133", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 5946.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王侈须", "card": "19956086969", "mobile": "19956086969", "store": "TEDELON、直营店", "balance": 0.0, "integral": 10215.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李彝生", "card": "13375238750", "mobile": "13375238750", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 2272.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱锭百", "card": "15715279820", "mobile": "15715279820", "store": "TEDELON加盟店", "balance": 0.0, "integral": 2113.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普雁迂", "card": "19739704085", "mobile": "19739704085", "store": "TEDELON加盟店", "balance": 0.0, "integral": 8698.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈伐乃", "card": "19691732817", "mobile": "19691732817", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 9434.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘汪化", "card": "19747627737", "mobile": "19747627737", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 7303.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李隧表", "card": "18723891905", "mobile": "18723891905", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 3069.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张滇栈", "card": "17934776531", "mobile": "17934776531", "store": "TEDELON、直营店", "balance": 0.0, "integral": 17501.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘淑栈", "card": "13146464118", "mobile": "13146464118", "store": "TEDELON、直营店", "balance": 0.0, "integral": 14934.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李榨币", "card": "18856990284", "mobile": "18856990284", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 8053.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘颗姓", "card": "17166468041", "mobile": "17166468041", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 8733.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘氮棋", "card": "15270361785", "mobile": "15270361785", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 3772.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "11", "card": "091345678", "mobile": "091345678", "store": "小西门店", "balance": 0.0, "integral": 1000.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈耽魁", "card": "15845001298", "mobile": "15845001298", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 6616.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普腥耻", "card": "13310490439", "mobile": "13310490439", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 7637.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱姨餐", "card": "15612503213", "mobile": "15612503213", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 801.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱喘卯", "card": "19128698798", "mobile": "19128698798", "store": "TEDELON、直营店", "balance": 0.0, "integral": 14637.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普棵右", "card": "17570144954", "mobile": "17570144954", "store": "TEDELON加盟店", "balance": 0.0, "integral": 1936.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李踌儿", "card": "17896247066", "mobile": "17896247066", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 8120.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱净笑", "card": "19631611707", "mobile": "19631611707", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘幼冀", "card": "19518086236", "mobile": "19518086236", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王抛枉", "card": "13363333179", "mobile": "13363333179", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 1486.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱褂恤", "card": "13621254742", "mobile": "13621254742", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱伊攀", "card": "17922990280", "mobile": "17922990280", "store": "SEPTWOLVES加盟店", "balance": 0.0, "integral": 3949.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘古粉", "card": "17622883899", "mobile": "17622883899", "store": "TEDELON加盟店", "balance": 0.0, "integral": 7913.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李赶痘", "card": "13653040375", "mobile": "13653040375", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8570.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李甫肖", "card": "13366872802", "mobile": "13366872802", "store": "TEDELON、直营店", "balance": 0.0, "integral": 8405.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱轰景", "card": "19522694247", "mobile": "19522694247", "store": "TEDELON、直营店", "balance": 0.0, "integral": 9095.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王早殉", "card": "17163273850", "mobile": "17163273850", "store": "TEDELON、直营店", "balance": 0.0, "integral": 9211.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘吵你", "card": "18284167074", "mobile": "18284167074", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 7381.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张锋登", "card": "18590714070", "mobile": "18590714070", "store": "TEDELON加盟店", "balance": 0.0, "integral": 331.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李枯呛", "card": "18253607955", "mobile": "18253607955", "store": "TEDELON、直营店", "balance": 0.0, "integral": 12927.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "PMB", "card": "15096671634", "mobile": "15096671634", "store": "TEDELON、直营店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "15154889876", "mobile": "15154889876", "store": "ZY测试1", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈赢", "card": "18288726595", "mobile": "18288726595", "store": "南屏街1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "Dd", "card": "15911486322", "mobile": "15911486322", "store": "东川店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "19898989898", "mobile": "19898989898", "store": "小西门店", "balance": 0.0, "integral": 734.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "YS", "card": "15911417659", "mobile": "15911417659", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "dafeng", "card": "13283891498", "mobile": "13283891498", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张近", "card": "15559626858", "mobile": "15559626858", "store": "新奇迹咖啡总仓", "balance": 0.0, "integral": 323.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "lei", "card": "13200000001", "mobile": "13200000001", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "leilei", "card": "13200000004", "mobile": "13200000004", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王颂之", "card": "15808867591", "mobile": "15808867591", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "lei11111", "card": "13200000000", "mobile": "13200000000", "store": "LEI总仓", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "测试", "card": "13555555553", "mobile": "13555555553", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "无所谓", "card": "15096671635", "mobile": "15096671635", "store": "TEDELON、直营店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "蔡秋秋", "card": "13362728072", "mobile": "13362728072", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "15888888888", "mobile": "15888888888", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "zz", "card": "zcw", "mobile": "15555555555", "store": "ZCW店仓", "balance": 0.0, "integral": 1380.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李", "card": "15687740973", "mobile": "15687740973", "store": "南屏街1店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "201314222", "mobile": "15911417659", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "13211112222", "mobile": "13211112222", "store": "TEST-XY-店仓", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "孙", "card": "1510874931", "mobile": "1510874931", "store": "东川店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "彭明波", "card": "15096671232", "mobile": "15096671232", "store": "TEDELON、直营店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "测试开卡啦", "card": "18314209199", "mobile": "18314209199", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "", "card": "13278655643", "mobile": "13278655643", "store": "总部仓库", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李救韧", "card": "15585842876", "mobile": "15585842876", "store": "TEDELON加盟店", "balance": 0.0, "integral": 168.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张甩聘", "card": "13285038757", "mobile": "13285038757", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈硒孩", "card": "17482042624", "mobile": "17482042624", "store": "TEDELON加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘锭酵", "card": "13473005369", "mobile": "13473005369", "store": "TEDELON加盟店", "balance": 0.0, "integral": 4250.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王尔京", "card": "18245523368", "mobile": "18245523368", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8965.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普佳阶", "card": "18379197940", "mobile": "18379197940", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 7928.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王薁渗", "card": "19360839227", "mobile": "19360839227", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8407.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘翼械", "card": "13338692596", "mobile": "13338692596", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8351.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张漆傅", "card": "17164268057", "mobile": "17164268057", "store": "TEDELON加盟店", "balance": 0.0, "integral": 426.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王抉遍", "card": "15547527558", "mobile": "15547527558", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 7607.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普参杨", "card": "15766421314", "mobile": "15766421314", "store": "TEDELON加盟店", "balance": 0.0, "integral": 4540.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈乖弗", "card": "15184853413", "mobile": "15184853413", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 19923.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李痉律", "card": "13938161876", "mobile": "13938161876", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 4706.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王梦寇", "card": "19892202054", "mobile": "19892202054", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 9348.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张惹虑", "card": "18934539297", "mobile": "18934539297", "store": "TEDELON加盟店", "balance": 0.0, "integral": 25.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈讼臼", "card": "18523153986", "mobile": "18523153986", "store": "TEDELON加盟店", "balance": 0.0, "integral": 5385.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈倒砰", "card": "19642980860", "mobile": "19642980860", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 14954.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱舅舆", "card": "15971834855", "mobile": "15971834855", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 714.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱赏舶", "card": "17634722141", "mobile": "17634722141", "store": "TEDELON加盟店", "balance": 0.0, "integral": 8213.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈斑担", "card": "19116951001", "mobile": "19116951001", "store": "TEDELON加盟店", "balance": 0.0, "integral": 4467.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王袍次", "card": "13912861567", "mobile": "13912861567", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 7808.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普独操", "card": "15225983041", "mobile": "15225983041", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 5034.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱钵菩", "card": "18875539608", "mobile": "18875539608", "store": "TEDELON加盟店", "balance": 0.0, "integral": 9357.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王迭鞍", "card": "17896449265", "mobile": "17896449265", "store": "TEDELON加盟店", "balance": 0.0, "integral": 363.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘耕培", "card": "17836775533", "mobile": "17836775533", "store": "TEDELON加盟店", "balance": 0.0, "integral": 6265.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普彦它", "card": "19249733807", "mobile": "19249733807", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 3885.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王矩捎", "card": "17512786804", "mobile": "17512786804", "store": "TEDELON加盟店", "balance": 0.0, "integral": 4159.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普磋坤", "card": "18191681951", "mobile": "18191681951", "store": "TEDELON加盟店", "balance": 0.0, "integral": 3188.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普仆凑", "card": "19513904422", "mobile": "19513904422", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 4409.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈翠影", "card": "19829868897", "mobile": "19829868897", "store": "TEDELON加盟店", "balance": 0.0, "integral": 8902.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘篱殷", "card": "19186326861", "mobile": "19186326861", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 5004.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "李侍蓟", "card": "17246679441", "mobile": "17246679441", "store": "TEDELON加盟店", "balance": 0.0, "integral": 4923.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈暮园", "card": "19799130072", "mobile": "19799130072", "store": "TEDELON加盟店", "balance": 0.0, "integral": 8410.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王操收", "card": "19481843246", "mobile": "19481843246", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 712.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普箱邻", "card": "18391622179", "mobile": "18391622179", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 2606.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普旗渔", "card": "17136658876", "mobile": "17136658876", "store": "TEDELON加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张榔丰", "card": "17995504360", "mobile": "17995504360", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 3761.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱捶闹", "card": "18310102796", "mobile": "18310102796", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 11113.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈函霹", "card": "18143706711", "mobile": "18143706711", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 16630.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张限应", "card": "15665382623", "mobile": "15665382623", "store": "TEDELON加盟店", "balance": 0.0, "integral": 6316.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普亥玛", "card": "15676453414", "mobile": "15676453414", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 13221.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈绢攀", "card": "17931936930", "mobile": "17931936930", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 7718.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "普者伦", "card": "18442804110", "mobile": "18442804110", "store": "TEDELON加盟店", "balance": 0.0, "integral": 8998.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张聂槽", "card": "19978057271", "mobile": "19978057271", "store": "TEDELON加盟店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王报敌", "card": "17994887399", "mobile": "17994887399", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 12791.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王椅吼", "card": "15250233372", "mobile": "15250233372", "store": "TEDELON加盟店", "balance": 0.0, "integral": 9009.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "王牢布", "card": "15116563966", "mobile": "15116563966", "store": "TEDELON加盟店", "balance": 0.0, "integral": 19.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "陈命音", "card": "17832024576", "mobile": "17832024576", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 8770.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "朱猾皖", "card": "15669703984", "mobile": "15669703984", "store": "SEPTWOLVES直营店", "balance": 0.0, "integral": 14320.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "刘鼎防", "card": "18882344289", "mobile": "18882344289", "store": "TEDELON加盟店", "balance": 0.0, "integral": 231.0, "spent": 0.0, "lastDate": "从未消费"}, {"name": "张京亮", "card": "13987179059", "mobile": "13987179059", "store": "小西门店", "balance": 0.0, "integral": 0.0, "spent": 0.0, "lastDate": "从未消费"}];
+
+function render(arr) {
+  const tbody = document.querySelector('#tbl tbody');
+  let h = '';
+  arr.forEach(d => {
+    const bal = d.balance ? '¥' + d.balance.toLocaleString() : '<span class="zero">-</span>';
+    const pts = d.integral ? d.integral.toLocaleString() : '<span class="zero">-</span>';
+    const sp = d.spent ? '¥' + d.spent.toLocaleString() : '<span class="zero">-</span>';
+    h += `<tr class="${d.spent===0?'dormant':''}">
+      <td>${d.name||'-'}</td><td>${d.card||'-'}</td><td>${d.mobile||'-'}</td><td>${d.store}</td>
+      <td class="num">${bal}</td><td class="num">${pts}</td><td class="num">${sp}</td><td>${d.lastDate}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = h;
+  document.getElementById('stats').innerHTML = 
+    `<span>VIP总数:<strong>${arr.length}</strong></span>
+     <span>有消费:<strong>${arr.filter(d=>d.spent>0).length}</strong></span>
+     <span>未消费:<strong>${arr.filter(d=>d.spent===0).length}</strong></span>
+     <span>余额合计:<strong>¥${arr.reduce((s,d)=>s+d.balance,0).toLocaleString()}</strong></span>
+     <span>积分合计:<strong>${arr.reduce((s,d)=>s+d.integral,0).toLocaleString()}</strong></span>
+     <span>累计消费:<strong>¥${arr.reduce((s,d)=>s+d.spent,0).toLocaleString()}</strong></span>`;
+}
+
+function filter() {
+  const store = document.getElementById('fstore').value;
+  const name = document.getElementById('fname').value.toLowerCase();
+  const arr = DATA.filter(d => {
+    if (store && d.store !== store) return false;
+    if (name && !d.name.includes(name) && !d.card.toLowerCase().includes(name) && !d.mobile.includes(name)) return false;
+    return true;
+  });
+  render(arr);
+}
+
+function clearF() {
+  document.getElementById('fstore').value = '';
+  document.getElementById('fname').value = '';
+  render(DATA);
+}
+
+function exportExcel() {
+  const h = '<html><head><meta charset="UTF-8"></head><body>' + document.getElementById('tbl').outerHTML + '</body></html>';
+  const b = new Blob(['﻿' + h], {type:'application/vnd.ms-excel'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'VIP余额明细.xls'; a.click();
+}
+
+render(DATA);
+</script>
+</body></html>
