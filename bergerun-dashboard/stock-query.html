@@ -1,403 +1,1143 @@
-<!DOCTYPE html><html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>库存报表</title>
-<script src="query-data.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',sans-serif;background:#eef0f5;color:#333;font-size:13px}
-.hd{background:#1a1a2e;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:8px}
-.hd h1{font-size:15px;font-weight:600}
-.hd .sb{font-size:11px;color:#889}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 13px; background: #f5f5f5; }
 
-.ly{display:flex;gap:0;height:calc(100vh - 40px)}
-.ls{width:220px;background:#fff;overflow-y:auto;border-right:1px solid #e5e5e5;flex-shrink:0;padding:6px 0}
-.ls .tl{font-size:10px;color:#999;padding:8px 12px 4px;font-weight:600;text-transform:uppercase}
-.ln{display:flex;align-items:center;gap:4px;padding:3px 10px;cursor:pointer;font-size:12px;border-radius:3px;margin:1px 6px}
-.ln:hover{background:#eef1ff}
-.ln.s{background:#e6f0ff;font-weight:600}
-.ln .ar{font-size:7px;color:#999;width:10px;text-align:center}
-.ln .cb{font-size:12px;width:14px;text-align:center;flex-shrink:0}
-.ln .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ln .ct{font-size:10px;color:#aaa;margin-left:auto}
+  /* ===== 顶部标签页 ===== */
+  .tab-bar {
+    background: #fff;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 0 16px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .tab {
+    padding: 10px 20px 8px;
+    border: 1px solid #e0e0e0;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: #f9f9f9;
+    color: #555;
+    cursor: pointer;
+    margin-right: 4px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tab.active {
+    background: #fff;
+    color: #1a73e8;
+    border-bottom: 2px solid #fff;
+    margin-bottom: -2px;
+    font-weight: 500;
+  }
+  .tab .close-btn { color: #999; font-size: 12px; cursor: pointer; }
+  .tab .close-btn:hover { color: #333; }
 
-.rs{flex:1;overflow-y:auto;padding:14px}
-.qp{background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.qg{display:flex;flex-wrap:wrap;gap:5px}
-.cl{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
-.cl label{font-size:9px;color:#999;line-height:1;padding-left:2px}
-.cb{display:flex;align-items:center;gap:3px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:5px;background:#fff;cursor:pointer;font-size:12px;white-space:nowrap;height:27px;min-width:90px}
-.cb:hover{border-color:#4a6cf7}
-.cb .fi{width:10px;height:10px;background:#4a6cf7;clip-path:polygon(0 0,100% 0,65% 50%,65% 100%,35% 100%,35% 50%);opacity:.3;flex-shrink:0}
-.cb.s .fi{opacity:1}
-.cb .tx{color:#333;max-width:70px;overflow:hidden;text-overflow:ellipsis}
-.cb .xx{color:#ff4d4f;font-size:12px;cursor:pointer;display:none;line-height:1;margin-left:2px}
-.cb.s .xx{display:inline}
-.ci{padding:4px 8px;border:1px solid #d9d9d9;border-radius:5px;font-size:12px;height:27px;width:100px}
-.ci:focus{border-color:#4a6cf7;outline:none;box-shadow:0 0 0 2px rgba(74,108,247,.1)}
-.cn{display:flex;align-items:center;gap:3px}
-.cn input{width:55px}
-.cn span{font-size:11px;color:#999}
-.ckbx{width:18px;height:18px;cursor:pointer;margin-top:8px}
-.qb2{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #eee;align-items:center}
-.qb2 button{padding:5px 22px;border-radius:5px;cursor:pointer;font-size:12px}
-.qb2 .qy{background:#4a6cf7;color:#fff;border:none;font-weight:600}
-.qb2 .rs{background:#fff;border:1px solid #d9d9d9}
-.qb2 .si{font-size:11px;color:#888;margin-left:auto}
+  /* ===== 主内容区 ===== */
+  .main-content {
+    background: #fff;
+    padding: 20px 24px;
+    min-height: calc(100vh - 44px);
+  }
 
-/* 结果 */
-.rp{background:#fff;border-radius:8px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:none}
-.rp.s{display:block}
-.rp table{width:100%;border-collapse:collapse;font-size:12px}
-.rp th{background:#1a1a2e;color:#fff;padding:5px 8px;text-align:left;font-size:10px;position:sticky;top:0}
-.rp th.n{text-align:right}
-.rp td{padding:3px 8px;border-bottom:1px solid #f0f0f0;font-size:11px}
-.rp td.n{text-align:right}
-.rp tr:hover td{background:#f8f9ff}
+  /* ===== 查询条件头部 ===== */
+  .query-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .query-title { font-weight: 500; color: #333; }
+  .breadcrumb { color: #1a73e8; cursor: pointer; }
+  .breadcrumb:hover { text-decoration: underline; }
+  .template-label { color: #555; margin-left: 8px; }
+  .template-select {
+    border: 1px solid #d0d0d0;
+    border-radius: 3px;
+    padding: 4px 24px 4px 8px;
+    font-size: 12px;
+    color: #333;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E") no-repeat right 8px center;
+    appearance: none;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .info-btn {
+    width: 18px; height: 18px;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 11px;
+    cursor: pointer;
+  }
 
-/* 弹窗 */
-.mk{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
-.mk.s{display:flex}
-.dg{background:#fff;border-radius:10px;min-width:420px;max-width:600px;max-height:78vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.2)}
-.dg h3{padding:10px 16px;font-size:13px;border-bottom:1px solid #eee;flex-shrink:0}
-.dg-b{padding:8px 16px;overflow-y:auto;flex:1}
-.dg-f{padding:8px 16px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:6px;flex-shrink:0}
-.dg-f button{padding:4px 16px;border-radius:5px;cursor:pointer;font-size:12px}
-.okb{background:#4a6cf7;color:#fff;border:none}
-.clb{background:#fff;border:1px solid #d9d9d9}
-.sr2{display:flex;gap:4px;margin-bottom:6px}
-.sr2 input{padding:3px 6px;border:1px solid #d9d9d9;border-radius:4px;font-size:11px;width:120px}
-.sr2 input:focus{border-color:#4a6cf7;outline:none}
-.sr2 button{padding:3px 10px;border-radius:4px;cursor:pointer;font-size:10px}
-.sr2 .qy2{border:1px solid #4a6cf7;background:#4a6cf7;color:#fff}
-.si3{font-size:11px;color:#888;margin-bottom:3px}
-#dpl label,#dsl label{display:flex;align-items:center;padding:2px 0;cursor:pointer;font-size:11px;gap:3px}
-#dpl label:hover,#dsl label:hover{background:#f5f7ff}
-#dpl span,#dsl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* ===== 查询条件行 ===== */
+  .query-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+  }
+  .field-group {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+  .field-label {
+    font-size: 13px;
+    color: #e57c00;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 50px;
+  }
+  .field-label.required::before {
+    content: "* ";
+  }
+  .field-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #d0d0d0;
+    margin: 0 12px 0 8px;
+    padding-bottom: 2px;
+    min-width: 0;
+  }
+  .field-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #333;
+    background: transparent;
+    min-width: 0;
+    padding: 2px 4px;
+  }
+  .funnel-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #e57c00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 3px;
+    transition: background 0.15s;
+  }
+  .funnel-btn:hover { background: #fff3e0; }
+  .funnel-btn svg { width: 16px; height: 16px; }
+  .field-divider { width: 40px; flex-shrink: 0; }
+
+  /* ===== 弹窗遮罩 ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+
+  /* ===== 弹窗主体 ===== */
+  .modal {
+    background: #fff;
+    border-radius: 4px;
+    width: 900px;
+    max-width: 96vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    overflow: hidden;
+  }
+  .modal-header {
+    background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .modal-header-icon {
+    width: 28px; height: 28px;
+    background: #1a73e8;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-header-icon svg { width: 16px; height: 16px; fill: #fff; }
+  .modal-title { font-size: 15px; font-weight: 600; color: #222; flex: 1; }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #777;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-close:hover { color: #333; }
+
+  /* ===== 弹窗查询条件区 ===== */
+  .modal-query-section {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid #e8e8e8;
+    flex-shrink: 0;
+  }
+  .modal-query-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #222;
+    margin-bottom: 10px;
+  }
+  .modal-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px 20px;
+  }
+  .modal-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .modal-field-label {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+    min-width: 70px;
+    text-align: right;
+  }
+  .modal-field-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+  }
+  .modal-field-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 12px;
+    color: #333;
+    background: transparent;
+    padding: 2px 2px;
+    min-width: 0;
+  }
+  .modal-funnel-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 2px;
+    transition: color 0.15s;
+  }
+  .modal-funnel-btn:hover { color: #e57c00; }
+  .modal-funnel-btn svg { width: 13px; height: 13px; }
+
+  .modal-field-select {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    outline: none;
+    font-size: 12px;
+    color: #333;
+    background: #fff;
+    padding: 2px 4px;
+  }
+
+  /* ===== 弹窗按钮区 ===== */
+  .modal-action-bar {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e8e8e8;
+    flex-shrink: 0;
+    background: #fafafa;
+  }
+  .btn-primary {
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-outline {
+    background: #fff;
+    color: #1a73e8;
+    border: 1px solid #1a73e8;
+    border-radius: 3px;
+    padding: 6px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-outline:hover { background: #e8f0fd; }
+  .btn-default {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 6px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-default:hover { background: #f5f5f5; }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+  }
+  .checkbox-label input { cursor: pointer; }
+
+  .modal-action-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ===== 弹窗主体内容区（结果+多选） ===== */
+  .modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .modal-result-area {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    min-width: 0;
+  }
+  .modal-result-hint {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .modal-result-hint .hint-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+  }
+  .modal-result-hint p {
+    font-size: 12px;
+    color: #555;
+    line-height: 2;
+    text-align: left;
+    max-width: 600px;
+  }
+
+  /* 结果表格 */
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    display: none;
+  }
+  .result-table.visible { display: table; }
+  .result-table th {
+    background: #f0f4fa;
+    padding: 7px 10px;
+    text-align: left;
+    border: 1px solid #dde3ec;
+    font-weight: 600;
+    color: #444;
+    white-space: nowrap;
+  }
+  .result-table td {
+    padding: 6px 10px;
+    border: 1px solid #eaedf2;
+    color: #333;
+    white-space: nowrap;
+  }
+  .result-table tr:hover td { background: #f0f6ff; cursor: pointer; }
+  .result-table tr.selected td { background: #dbeafe; }
+  .result-table tr.selected:hover td { background: #bfdbfe; }
+
+  /* ===== 多选结果区 ===== */
+  .multi-select-panel {
+    width: 260px;
+    flex-shrink: 0;
+    border-left: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .multi-select-header {
+    background: #1a73e8;
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .multi-select-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+    min-height: 0;
+  }
+  .multi-select-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #333;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.1s;
+  }
+  .multi-select-item:hover { background: #f0f4fa; }
+  .multi-select-item.selected { background: #dbeafe; border-color: #93c5fd; }
+  .multi-select-item-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .multi-select-footer {
+    padding: 8px 10px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .multi-select-footer button { flex: 1; font-size: 12px; padding: 5px 6px; }
+
+  /* ===== 主查询条件已选值显示 ===== */
+  .field-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    padding: 2px 0;
+  }
+  .field-tag {
+    background: #e8f0fd;
+    color: #1a73e8;
+    border: 1px solid #c5d8fb;
+    border-radius: 12px;
+    padding: 1px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .field-tag .tag-remove {
+    cursor: pointer;
+    color: #888;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .field-tag .tag-remove:hover { color: #e53935; }
+
+  /* ===== 无结果提示 ===== */
+  .no-result { display: none; text-align: center; padding: 30px; color: #999; font-size: 13px; }
+  .no-result.visible { display: block; }
 </style>
+  <script src="query-data.js"></script>
 </head>
 <body>
-<div class="hd"><h1>库存报表</h1><span class="sb">条件查询</span></div>
-<div class="ly">
-<div class="ls" id="tp"></div>
-<div class="rs">
-<div class="qp">
-<div class="qg" style="gap:7px">
-<div class="cl"><label>仓库</label><div class="cb" onclick="op('store')"><span class="fi"></span><span class="tx" id="sTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('store')">×</span></div></div>
-<div class="cl"><label>款号</label><div class="cb" onclick="op('prod')"><span class="fi"></span><span class="tx" id="pTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('prod')">×</span></div></div>
-<div class="cl"><label>品牌</label><div class="cb" onclick="op('brand')"><span class="fi"></span><span class="tx" id="bTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('brand')">×</span></div></div>
-<div class="cl"><label>年份</label><div class="cb" onclick="op('year')"><span class="fi"></span><span class="tx" id="yTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('year')">×</span></div></div>
-<div class="cl"><label>季节</label><div class="cb" onclick="op('season')"><span class="fi"></span><span class="tx" id="seTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('season')">×</span></div></div>
-<div class="cl"><label>性别</label><div class="cb" onclick="op('gender')"><span class="fi"></span><span class="tx" id="gTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('gender')">×</span></div></div>
-<div class="cl"><label>大类</label><div class="cb" onclick="op('cat')"><span class="fi"></span><span class="tx" id="cTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('cat')">×</span></div></div>
-<div class="cl"><label>小类</label><div class="cb" onclick="op('subcat')"><span class="fi"></span><span class="tx" id="scTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('subcat')">×</span></div></div>
-<div class="cl"><label>自编码</label><input class="ci" id="fSn" placeholder=""></div>
-<div class="cl"><label>品名</label><input class="ci" id="fPn" placeholder=""></div>
-<div class="cl"><label>条码</label><input class="ci" id="fBc" placeholder=""></div>
-<div class="cl"><label>材质</label><input class="ci" id="fMt" placeholder=""></div>
+
+<!-- 标签页 -->
+<div class="tab-bar">
+  <div class="tab active">库存报表 <span class="close-btn">×</span></div>
 </div>
-<div class="qg" style="margin-top:6px">
-<div class="cl"><label>吊牌价</label><div class="cn"><input class="ci" id="fPl0" placeholder="从" style="width:60px"><span>~</span><input class="ci" id="fPl1" placeholder="到" style="width:60px"></div></div>
-<div class="cl"><label>批发价</label><div class="cn"><input class="ci" id="fWp0" placeholder="从" style="width:60px"><span>~</span><input class="ci" id="fWp1" placeholder="到" style="width:60px"></div></div>
-<div class="cl"><label>状态</label><select class="ci" id="fSt" style="width:80px"><option value="">全部</option><option value="Y">正常</option><option value="N">停用</option></select></div>
-<div class="cl"><label><input type="checkbox" id="fNr" style="width:14px;height:14px"> 非零售</label></div>
+
+<!-- 主内容 -->
+<div class="main-content">
+  <!-- 查询条件头部 -->
+  <div class="query-header">
+    <span class="query-title">查询条件 –</span>
+    <span class="breadcrumb">报表中心-->库存报表-->库存报表</span>
+    <span class="template-label">当前模板：</span>
+    <select class="template-select">
+      <option>库存报表111111-超级用户-超...</option>
+    </select>
+    <span class="info-btn">i</span>
+  </div>
+
+  <!-- 查询条件行 -->
+  <div class="query-row">
+    <!-- 店仓 -->
+    <div class="field-group">
+      <span class="field-label required">店仓:</span>
+      <div class="field-input-wrap" id="storeInputWrap">
+        <div class="field-tags" id="storeTags"></div>
+        <input class="field-input" id="storeInput" type="text" readonly placeholder="">
+      </div>
+      <button class="funnel-btn" onclick="openModal('store')" title="筛选店仓">
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="field-divider"></div>
+
+    <!-- 商品 -->
+    <div class="field-group">
+      <span class="field-label required">商品:</span>
+      <div class="field-input-wrap" id="productInputWrap">
+        <div class="field-tags" id="productTags"></div>
+        <input class="field-input" id="productInput" type="text" readonly placeholder="">
+      </div>
+      <button class="funnel-btn" onclick="openModal('product')" title="筛选商品">
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+    <button class="btn-primary" onclick="execQuery()" style="margin-left:16px;flex-shrink:0">🔍 查询</button>
+  </div>
 </div>
-<div class="qb2">
-<button class="qy" onclick="search()">查询</button>
-<button class="rs" onclick="rst()">重置</button>
-<span class="si" id="fInf"></span>
-</div></div>
-<div class="rp" id="rpt">
-<div style="display:flex;justify-content:space-between;margin-bottom:6px">
-<span style="font-weight:600;font-size:13px" id="rT">结果</span>
-<span style="font-size:11px;color:#888" id="rK"></span>
-</div><div id="rB"></div>
-</div></div></div>
+<div id="queryResults"></div>
+
+<!-- ===== 店仓弹窗 ===== -->
+<div class="modal-overlay" id="storeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </div>
+      <span class="modal-title">查找 - 店仓档案（库存报表）</span>
+      <button class="modal-close" onclick="closeModal('store')">×</button>
+    </div>
+
+    <div class="modal-query-section">
+      <div class="modal-query-title">查询条件</div>
+      <div class="modal-fields-grid">
+        <div class="modal-field">
+          <span class="modal-field-label">编号:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_code" placeholder="">
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">店仓名称:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_name" placeholder="">
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">店仓性质:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_nature" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">所属经销商:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_dealer" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">品牌:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_brand" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">城市:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_city" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">店仓类别:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="s_category" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">可用:</span>
+          <select class="modal-field-select" id="s_available">
+            <option value="">全部</option>
+            <option value="1" selected>是</option>
+            <option value="0">否</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-action-bar">
+      <button class="btn-primary" onclick="doSearch('store')">查找</button>
+      <button class="btn-outline" id="storeAddAllBtn" onclick="addAll('store')">添加全部</button>
+      <label class="checkbox-label">
+        <input type="checkbox" id="storeExclude" onchange="toggleExclude('store')">排除
+      </label>
+      <div class="modal-action-right">
+        <button class="btn-primary" onclick="confirmModal('store')">确定</button>
+        <button class="btn-default" onclick="closeModal('store')">取消</button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-result-area" id="storeResultArea">
+        <div class="modal-result-hint" id="storeHint">
+          <div class="hint-title">操作说明</div>
+          <p>
+            1.填上查找条件，也可以不填，点击[查询]按钮。<br>
+            2.在查找结果中选中相应行，这样所选的行就动态地被添加到多选结果栏中；当去除选中行时，这条记录也会从多选栏目去除。<br>
+            3.也可以点击[增加全部]按钮，即将符合查询条件的所有行作为一个集合添加到多选结果栏中，可以添加多个结果集合。<br>
+            4.当排除选项被选中时，添加全部被改为排除全部。<br>
+            5.当排除选项被选中时，在查询结果中将选中的行排除在外。<br>
+            6.排除全部：将整个查询的结果排除在外。<br>
+            7.移除选中行：在多选结果栏中将要移除的结果选中，点击[移除选中行]按钮，要移除的结果就从多选栏中移除。<br>
+            8.移除全部：将多选结果栏中的结果清空。
+          </p>
+        </div>
+        <table class="result-table" id="storeResultTable">
+          <thead>
+            <tr>
+              <th>编号</th>
+              <th>店仓名称</th>
+              <th>店仓性质</th>
+              <th>所属经销商</th>
+              <th>品牌</th>
+              <th>城市</th>
+              <th>可用</th>
+            </tr>
+          </thead>
+          <tbody id="storeResultBody"></tbody>
+        </table>
+        <div class="no-result" id="storeNoResult">未找到匹配记录</div>
+      </div>
+
+      <div class="multi-select-panel">
+        <div class="multi-select-header">多选结果</div>
+        <div class="multi-select-list" id="storeMultiList"></div>
+        <div class="multi-select-footer">
+          <button class="btn-default" onclick="removeSelected('store')">移除选中行</button>
+          <button class="btn-default" onclick="removeAll('store')">移除全部</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 商品弹窗 ===== -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.05 15.96 0 13.5 0c-1.32 0-2.46.56-3.33 1.44L9 3.67 7.83 1.44C6.96.56 5.82 0 4.5 0 2.04 0 0 2.05 0 4.64c0 .48.11.92.18 1.36H0v2h.78L2 20c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2l1.22-12H22V6h-2zm-6.5-4c1.24 0 2.5.88 2.5 2.64 0 .48-.12.92-.27 1.36H8.27C8.12 5.56 8 5.12 8 4.64 8 2.88 9.26 2 10.5 2h3zM4.5 2C5.74 2 7 2.88 7 4.64c0 .48-.12.92-.27 1.36H2.77C2.62 5.56 2.5 5.12 2.5 4.64 2.5 2.88 3.76 2 4.5 2z"/></svg>
+      </div>
+      <span class="modal-title">查找 - 商品档案（库存报表）</span>
+      <button class="modal-close" onclick="closeModal('product')">×</button>
+    </div>
+
+    <div class="modal-query-section">
+      <div class="modal-query-title">查询条件</div>
+      <div class="modal-fields-grid">
+        <div class="modal-field">
+          <span class="modal-field-label">商品编号:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_code" placeholder="">
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">商品名称:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_name" placeholder="">
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">品牌:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_brand" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">品类:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_category" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">系列:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_series" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">季节:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_season" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">年份:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_year" placeholder="">
+            <button class="modal-funnel-btn">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6L13 10v5a1 1 0 01-.553.894l-4-2A1 1 0 018 13v-3L3.2 4.6A1 1 0 013 4z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">款式:</span>
+          <div class="modal-field-input-wrap">
+            <input class="modal-field-input" type="text" id="p_style" placeholder="">
+          </div>
+        </div>
+        <div class="modal-field">
+          <span class="modal-field-label">可用:</span>
+          <select class="modal-field-select" id="p_available">
+            <option value="">全部</option>
+            <option value="1" selected>是</option>
+            <option value="0">否</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-action-bar">
+      <button class="btn-primary" onclick="doSearch('product')">查找</button>
+      <button class="btn-outline" id="productAddAllBtn" onclick="addAll('product')">添加全部</button>
+      <label class="checkbox-label">
+        <input type="checkbox" id="productExclude" onchange="toggleExclude('product')">排除
+      </label>
+      <div class="modal-action-right">
+        <button class="btn-primary" onclick="confirmModal('product')">确定</button>
+        <button class="btn-default" onclick="closeModal('product')">取消</button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-result-area" id="productResultArea">
+        <div class="modal-result-hint" id="productHint">
+          <div class="hint-title">操作说明</div>
+          <p>
+            1.填上查找条件，也可以不填，点击[查询]按钮。<br>
+            2.在查找结果中选中相应行，这样所选的行就动态地被添加到多选结果栏中；当去除选中行时，这条记录也会从多选栏目去除。<br>
+            3.也可以点击[增加全部]按钮，即将符合查询条件的所有行作为一个集合添加到多选结果栏中，可以添加多个结果集合。<br>
+            4.当排除选项被选中时，添加全部被改为排除全部。<br>
+            5.当排除选项被选中时，在查询结果中将选中的行排除在外。<br>
+            6.排除全部：将整个查询的结果排除在外。<br>
+            7.移除选中行：在多选结果栏中将要移除的结果选中，点击[移除选中行]按钮，要移除的结果就从多选栏中移除。<br>
+            8.移除全部：将多选结果栏中的结果清空。
+          </p>
+        </div>
+        <table class="result-table" id="productResultTable">
+          <thead>
+            <tr>
+              <th>商品编号</th>
+              <th>商品名称</th>
+              <th>品牌</th>
+              <th>品类</th>
+              <th>系列</th>
+              <th>季节</th>
+              <th>年份</th>
+              <th>可用</th>
+            </tr>
+          </thead>
+          <tbody id="productResultBody"></tbody>
+        </table>
+        <div class="no-result" id="productNoResult">未找到匹配记录</div>
+      </div>
+
+      <div class="multi-select-panel">
+        <div class="multi-select-header">多选结果</div>
+        <div class="multi-select-list" id="productMultiList"></div>
+        <div class="multi-select-footer">
+          <button class="btn-default" onclick="removeSelected('product')">移除选中行</button>
+          <button class="btn-default" onclick="removeAll('product')">移除全部</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-// ====== 数据 ======
-const sM={},pM={};
-DB.stores.forEach(s=>sM[s.id]=s);
-DB.products.forEach(p=>pM[p.id]=p);
-
-let selStores=[],selProds=[],selTree=null;
-
-// ====== 维度 ======
-const DIM_NAMES={brand:'品牌',year:'年份',season:'季节',cat:'大类',subcat:'小类',gender:'性别'};
-const DIM_PROD={brand:'d1',year:'d2',season:'d3',cat:'d4',subcat:'d6',gender:'d7'};
-const dimData={};
-for(const[k,n]of Object.entries(DIM_NAMES)){
-  const vs=DB.dims[n]||[];
-  vs.sort((a,b)=>a.name.localeCompare(b.name,'zh-CN'));
-  dimData[k]=vs;
+// ===== 模拟数据 =====
+// === 真实数据（伯格珑ERP 84店 16340款） ===
+const dimLookup = {};
+for (const [cat, vs] of Object.entries(DB.dims || {})) {
+  vs.forEach(v => dimLookup[v.id] = v.name);
 }
 
-// ====== 店仓树 ======
-function buildTree(){
-  const el=document.getElementById('tp');
-  const cat={retailDir:[],retailFranch:[],warehouse:[],other:[]};
-  DB.stores.forEach(s=>{
-    if(s.isRetail&&s.isCenter)cat.retailDir.push(s);
-    else if(s.isRetail&&!s.isCenter)cat.retailFranch.push(s);
-    else if(!s.isRetail&&s.isCenter)cat.warehouse.push(s);
-    else cat.other.push(s);
-  });
-  let h=`<div class="tl" style="cursor:pointer" onclick="selAllTree()">☐ 全部</div>`;
-  for(const[ck,cl]of Object.entries({retailDir:'零售·直营',retailFranch:'零售·加盟',warehouse:'仓库',other:'其他'})){
-    if(!cat[ck].length)continue;
-    h+=`<div class="tl">${cl} (${cat[ck].length})</div>`;
-    cat[ck].forEach(s=>h+=`<div class="ln" data-id="${s.id}" onclick="togTree(this)"><span class="cb">□</span><span class="nm">${s.name}</span></div>`);
-  }
-  el.innerHTML=h;
-}
-function togTree(el){
-  el.classList.toggle('s');
-  const cb=el.querySelector('.cb');
-  cb.textContent=el.classList.contains('s')?'☑':'□';
-  upTree();
-}
-function selAllTree(){
-  const all=document.querySelectorAll('#tp .ln');
-  const allSel=!all.length||all[0].classList.contains('s');
-  all.forEach(el=>{el.classList.toggle('s',!allSel);el.querySelector('.cb').textContent=allSel?'□':'☑';});
-  upTree();
-}
-function upTree(){
-  const sel=document.querySelectorAll('#tp .ln.s');
-  selTree=sel.length?new Set(Array.from(sel).map(el=>parseInt(el.dataset.id))):null;
-}
-buildTree();
+const mockStoreData = DB.stores.map(s => {
+  const nature = s.isRetail ? (s.isCenter ? '直营' : '加盟') : (s.isCenter ? '仓库' : '其他');
+  return { code: s.code || '', name: s.name, nature, dealer: '', brand: '', city: '', available: '是' };
+});
 
-// ====== 弹窗系统 ======
-const dlgState={};
-const dlgMap={}; // {dimName: [当前已选IDs]}
+const mockProductData = DB.products.map(p => ({
+  code: p.code, name: p.name,
+  brand: dimLookup[p.d1] || '', category: dimLookup[p.d4] || '',
+  series: dimLookup[p.d6] || '', season: dimLookup[p.d3] || '',
+  year: dimLookup[p.d2] || '', style: p.code || '',
+  available: '是'
+}));
 
-// 动态创建弹窗
-function initDlgs(){
-  for(const[k,n]of Object.entries(DIM_NAMES)){
-    const mk=document.createElement('div');mk.className='mk';mk.id='m'+k;
-    mk.innerHTML=`<div class="dg"><h3>选择${n}</h3><div class="dg-b">
-      <div class="sr2"><input class="srci" id="s${k}" placeholder="搜索" oninput="fD('${k}')"><button class="qy2" onclick="fD('${k}')">查询</button></div>
-      <div class="si3" id="si${k}"></div>
-      <div id="dl${k}" style="max-height:320px;overflow-y:auto"></div></div>
-      <div class="dg-f"><button class="clb" onclick="cDlg('${k}')">取消</button><button class="okb" onclick="cfD('${k}')">确定</button></div></div>`;
-    document.body.appendChild(mk);
-    dlgState[k]=[];
-    // 渲染选项
-    const el=mk.querySelector('#dl'+k);
-    el.innerHTML=dimData[k].map(v=>`<label><input type="checkbox" class="dc" value="${v.id}"><span>${v.name}</span></label>`).join('');
-    upDlgStat(k);
+// === 库存查询 ===
+const storeMap = {}; DB.stores.forEach(s => storeMap[s.id] = s);
+const prodMap = {}; DB.products.forEach(p => prodMap[p.id] = p);
+
+function execQuery() {
+  const sCodes = new Set(state.store.multiSelected.map(x => x.id));
+  const pCodes = new Set(state.product.multiSelected.map(x => x.id));
+  
+  const result = [];
+  for (const [sid, prods] of Object.entries(DB.inventory)) {
+    const s = storeMap[parseInt(sid)];
+    if (!s) continue;
+    if (sCodes.size && !sCodes.has(s.code)) continue;
+    
+    for (const [pid, qty] of Object.entries(prods)) {
+      const p = prodMap[parseInt(pid)];
+      if (!p) continue;
+      if (pCodes.size && !pCodes.has(p.code)) continue;
+      result.push({ storeName: s.name, prodCode: p.code, prodName: p.name, qty, amt: qty * (p.price || 0) });
+    }
   }
-}
-function op(k){
-  if(k==='store'||k==='prod') return; // hand-made below
-  const mk=document.getElementById('m'+k);if(!mk)return;
-  mk.classList.add('s');
-  // 同步已选
-  const ids=new Set(dlgState[k]);
-  mk.querySelectorAll('.dc').forEach(cb=>cb.checked=ids.has(parseInt(cb.value)));
-  upDlgStat(k);
-}
-function cDlg(k){document.getElementById('m'+k).classList.remove('s');}
-function fD(k){
-  const v=document.getElementById('s'+k).value.toLowerCase();
-  document.querySelectorAll('#dl'+k+' label').forEach(l=>{
-    l.style.display=!v||l.querySelector('span').textContent.toLowerCase().includes(v)?'':'none';
-  });
-}
-function upDlgStat(k){
-  const n=document.querySelectorAll('#dl'+k+' .dc:checked').length;
-  const si=document.getElementById('si'+k);
-  if(si)si.textContent=`已选 ${n} 个`;
-}
-function cfD(k){
-  dlgState[k]=Array.from(document.querySelectorAll('#dl'+k+' .dc:checked')).map(cb=>parseInt(cb.value));
-  upBtn(k);
-  cDlg(k);
-}
-function clr(k){
-  dlgState[k]=[];
-  upBtn(k);
-  setTimeout(search,10);
-}
-function upBtn(k){
-  const ids=dlgState[k]||[];
-  const txMap={brand:'bTx',year:'yTx',season:'seTx',cat:'cTx',subcat:'scTx',gender:'gTx',store:'sTx',prod:'pTx'};
-  const id=txMap[k];if(!id)return;
-  const tx=document.getElementById(id);if(!tx)return;
-  const cb=tx.parentElement;
-  if(!ids.length){cb.classList.remove('s');tx.textContent='不限';}
-  else{
-    cb.classList.add('s');
-    const names=ids.map(id=>{const v=dimData[k]?.find(x=>x.id===id);return v?v.name:id;});
-    tx.textContent=names.length===1?names[0]:`${names[0]}等${names.length}个`;
+  result.sort((a, b) => b.qty - a.qty);
+  
+  const main = document.getElementById('queryResults');
+  if (!main) return;
+  
+  const tq = result.reduce((s, x) => s + x.qty, 0);
+  const ta = result.reduce((s, x) => s + x.amt, 0);
+  
+  let rs = `<div class="main-content"><h3 style="margin-bottom:6px;font-size:15px">查询结果</h3><p style="color:#888;font-size:12px;margin-bottom:12px">${result.length}条 · ${tq.toLocaleString()}件 · ¥${(ta/10000).toFixed(0)}万</p>`;
+  
+  if (!result.length) { rs += '<p style="color:#999;padding:30px;text-align:center">无数据</p>'; }
+  else {
+    rs += '<table class="result-table visible" style="display:table"><thead><tr><th>门店</th><th>款号</th><th>品名</th><th>数量</th><th>金额</th></tr></thead><tbody>';
+    let lastStore = '';
+    for (const x of result.slice(0, 500)) {
+      if (x.storeName !== lastStore) {
+        lastStore = x.storeName;
+        rs += `<tr style="background:#f0f4fa;font-weight:600"><td colspan="5">${x.storeName}</td></tr>`;
+      }
+      rs += `<tr><td></td><td>${x.prodCode}</td><td style="color:#888">${x.prodName}</td><td style="text-align:right">${x.qty.toLocaleString()}</td><td style="text-align:right">¥${x.amt.toFixed(0)}</td></tr>`;
+    }
+    if (result.length > 500) rs += `<tr><td colspan="5" style="text-align:center;color:#999">...还有${result.length - 500}条</td></tr>`;
+    rs += `<tr style="font-weight:700;background:#f0f4fa"><td colspan="3">合计</td><td style="text-align:right">${tq.toLocaleString()}</td><td style="text-align:right">¥${ta.toFixed(0)}</td></tr>`;
+    rs += '</tbody></table>';
   }
+  rs += '</div>';
+  main.innerHTML = rs;
 }
 
-// ====== 店仓弹窗 ======
-(function(){
-  const mk=document.getElementById('mStore');
-  const el=mk.querySelector('#dsl');
-  function rS(){
-    const ids=new Set(selStores.map(x=>x.id));
-    el.innerHTML=DB.stores.map(s=>`<label><input type="checkbox" class="sc" value="${s.id}" ${ids.has(s.id)?'checked':''} onchange="uSSt()"><span>${s.name}</span></label>`).join('');
-    uSSt();
+// ===== 状态管理 =====
+const state = {
+  store: {
+    searchResult: [],
+    multiSelected: [],      // [{id, label, excluded}]
+    selectedInMulti: new Set(),
+    selectedInResult: new Set(),
+    exclude: false,
+  },
+  product: {
+    searchResult: [],
+    multiSelected: [],
+    selectedInMulti: new Set(),
+    selectedInResult: new Set(),
+    exclude: false,
   }
-  function sfS(){
-    const v=document.getElementById('ssn').value.toLowerCase();
-    el.querySelectorAll('label').forEach(l=>l.style.display=!v||l.querySelector('span').textContent.toLowerCase().includes(v)?'':'none');
-  }
-  function uSSt(){document.getElementById('ssi').textContent=`已选 ${el.querySelectorAll('.sc:checked').length} 个`;}
-  function cfStore(){
-    selStores=Array.from(el.querySelectorAll('.sc:checked')).map(cb=>sM[parseInt(cb.value)]).filter(Boolean);
-    upBtn2('sTx','store',selStores.map(x=>x.name));
-    mk.classList.remove('s');
-  }
-  window.uSSt=uSSt;window.cfStore=cfStore;
-  window.rsStore=function(){document.getElementById('ssn').value='';sfS();};
-  window.sfStore=sfS;
-  // override op for store
-  const orig=window.op;
-  window.op=function(k){
-    if(k==='store'){mk.classList.add('s');rS();}
-    else if(k==='prod'){document.getElementById('mProd').classList.add('s');rP();}
-    else if(orig)orig(k);
-  };
-})();
-
-// ====== 款号弹窗 ======
-(function(){
-  const mk=document.getElementById('mProd');
-  const el=mk.querySelector('#dpl');
-  function rP(){
-    const ids=new Set(selProds.map(x=>x.id));
-    el.innerHTML=DB.products.map(p=>`<label><input type="checkbox" class="pc" value="${p.id}" ${ids.has(p.id)?'checked':''} onchange="uPSt()"><span style="width:80px;display:inline-block">${p.code}</span><span style="color:#888">${p.name}</span></label>`).join('');
-    uPSt();
-  }
-  function sfP(){
-    const c=document.getElementById('psc').value.toLowerCase();
-    const n=document.getElementById('psn').value.toLowerCase();
-    el.querySelectorAll('label').forEach(l=>{
-      const sp=l.querySelectorAll('span');
-      l.style.display=(!c||sp[0].textContent.toLowerCase().includes(c))&&(!n||sp[1].textContent.toLowerCase().includes(n))?'':'none';
-    });
-  }
-  function uPSt(){document.getElementById('psi').textContent=`已选 ${el.querySelectorAll('.pc:checked').length} 个`;}
-  function cfProd(){
-    selProds=Array.from(el.querySelectorAll('.pc:checked')).map(cb=>pM[parseInt(cb.value)]).filter(Boolean);
-    upBtn2('pTx','prod',selProds.map(x=>x.code));
-    mk.classList.remove('s');
-  }
-  window.uPSt=uPSt;window.cfProd=cfProd;
-  window.sfProd=sfP;
-  window.rsProd=function(){document.getElementById('psc').value='';document.getElementById('psn').value='';sfP();};
-})();
-
-function upBtn2(id,key,vals){
-  const tx=document.getElementById(id);
-  const cb=tx.parentElement;
-  if(!vals.length){cb.classList.remove('s');tx.textContent='不限';}
-  else{cb.classList.add('s');tx.textContent=vals.length===1?vals[0]:`${vals[0]}等${vals.length}个`;}
-}
-// Override clr for store/prod
-const origClr=window.clr;
-window.clr=function(k){
-  if(k==='store'){selStores=[];upBtn2('sTx','store',[]);}
-  else if(k==='prod'){selProds=[];upBtn2('pTx','prod',[]);}
-  else if(origClr)origClr(k);
-  setTimeout(search,10);
 };
 
-// ====== 查询 ======
-function rst(){
-  selStores=[];selProds=[];selTree=null;dlgState.brand=[];dlgState.year=[];dlgState.season=[];dlgState.cat=[];dlgState.subcat=[];dlgState.gender=[];
-  for(const k of Object.keys(DIM_NAMES))upBtn(k);
-  upBtn2('sTx','store',[]);upBtn2('pTx','prod',[]);
-  ['fSn','fPn','fBc','fMt','fPl0','fPl1','fWp0','fWp1'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fSt').value='';document.getElementById('fNr').checked=false;
-  document.getElementById('rpt').classList.remove('s');document.getElementById('fInf').textContent='';
-  document.querySelectorAll('#tp .ln').forEach(el=>{el.classList.remove('s');el.querySelector('.cb').textContent='□';});
-  selTree=null;
+// ===== 弹窗开关 =====
+function openModal(type) {
+  document.getElementById(type + 'Modal').classList.add('active');
+}
+function closeModal(type) {
+  document.getElementById(type + 'Modal').classList.remove('active');
 }
 
-function search(){
-  const sidSet=selStores.length?new Set(selStores.map(x=>x.id)):selTree;
-  const pidSet=selProds.length?new Set(selProds.map(x=>x.id)):null;
-  const tSn=document.getElementById('fSn').value.toLowerCase();
-  const tPn=document.getElementById('fPn').value.toLowerCase();
-  const tBc=document.getElementById('fBc').value.toLowerCase();
-  const tMt=document.getElementById('fMt').value.toLowerCase();
-  const tPl0=parseFloat(document.getElementById('fPl0').value)||0;
-  const tPl1=parseFloat(document.getElementById('fPl1').value)||0;
-  const tWp0=parseFloat(document.getElementById('fWp0').value)||0;
-  const tWp1=parseFloat(document.getElementById('fWp1').value)||0;
-  const tNr=document.getElementById('fNr').checked;
-  const tSt=document.getElementById('fSt').value;
-  
-  const dV={};
-  for(const[k,v]of Object.entries(DIM_PROD)){
-    const ids=dlgState[k];if(ids&&ids.length)dV[k]=new Set(ids);
-  }
-  
-  // 产品过滤
-  const dp=DB.products.filter(p=>{
-    if(tSn&&!p.code.toLowerCase().includes(tSn)&&!(p.sn||'').toLowerCase().includes(tSn))return false;
-    if(tPn&&!p.name.toLowerCase().includes(tPn))return false;
-    if(tPl0&&p.price<tPl0)return false;
-    if(tPl1&&p.price>tPl1)return false;
-    for(const[k,ids]of Object.entries(dV)){
-      const f=v=>{switch(k){
-        case'brand':return v.d1;case'year':return v.d2;case'season':return v.d3;
-        case'cat':return v.d4;case'subcat':return v.d6;case'gender':return v.d7;
-      }};
-      if(!ids.has(f(p)))return false;
+// 点击遮罩关闭
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('active');
     }
-    return true;
   });
-  const dpMap=new Set(dp.map(p=>p.id));
-  
-  // 库存筛选
-  const res=[];
-  for(const[sidStr,prods]of Object.entries(DB.inventory)){
-    const sid=parseInt(sidStr);
-    if(sidSet&&!sidSet.has(sid))continue;
-    for(const[pidStr,qty]of Object.entries(prods)){
-      const pid=parseInt(pidStr);
-      if(pidSet&&!pidSet.has(pid))continue;
-      if(!dpMap.has(pid))continue;
-      const p=pM[pid];
-      res.push({store:sM[sid]||{name:'?'+sid},prod:p||{code:'?'+pid,name:''},qty});
+});
+
+// ===== 排除切换 =====
+function toggleExclude(type) {
+  const cb = document.getElementById(type + 'Exclude');
+  state[type].exclude = cb.checked;
+  const addAllBtn = document.getElementById(type + 'AddAllBtn');
+  addAllBtn.textContent = cb.checked ? '排除全部' : '添加全部';
+}
+
+// ===== 搜索 =====
+function doSearch(type) {
+  const s = state[type];
+  let data = type === 'store' ? mockStoreData : mockProductData;
+
+  if (type === 'store') {
+    const code = document.getElementById('s_code').value.trim().toLowerCase();
+    const name = document.getElementById('s_name').value.trim().toLowerCase();
+    const nature = document.getElementById('s_nature').value.trim().toLowerCase();
+    const dealer = document.getElementById('s_dealer').value.trim().toLowerCase();
+    const brand = document.getElementById('s_brand').value.trim().toLowerCase();
+    const city = document.getElementById('s_city').value.trim().toLowerCase();
+    const category = document.getElementById('s_category').value.trim().toLowerCase();
+    const available = document.getElementById('s_available').value;
+
+    data = data.filter(row => {
+      if (code && !row.code.toLowerCase().includes(code)) return false;
+      if (name && !row.name.toLowerCase().includes(name)) return false;
+      if (nature && !row.nature.toLowerCase().includes(nature)) return false;
+      if (dealer && !row.dealer.toLowerCase().includes(dealer)) return false;
+      if (brand && !row.brand.toLowerCase().includes(brand)) return false;
+      if (city && !row.city.toLowerCase().includes(city)) return false;
+      if (available === '1' && row.available !== '是') return false;
+      if (available === '0' && row.available !== '否') return false;
+      return true;
+    });
+  } else {
+    const code = document.getElementById('p_code').value.trim().toLowerCase();
+    const name = document.getElementById('p_name').value.trim().toLowerCase();
+    const brand = document.getElementById('p_brand').value.trim().toLowerCase();
+    const category = document.getElementById('p_category').value.trim().toLowerCase();
+    const series = document.getElementById('p_series').value.trim().toLowerCase();
+    const season = document.getElementById('p_season').value.trim().toLowerCase();
+    const year = document.getElementById('p_year').value.trim().toLowerCase();
+    const style = document.getElementById('p_style').value.trim().toLowerCase();
+    const available = document.getElementById('p_available').value;
+
+    data = data.filter(row => {
+      if (code && !row.code.toLowerCase().includes(code)) return false;
+      if (name && !row.name.toLowerCase().includes(name)) return false;
+      if (brand && !row.brand.toLowerCase().includes(brand)) return false;
+      if (category && !row.category.toLowerCase().includes(category)) return false;
+      if (series && !row.series.toLowerCase().includes(series)) return false;
+      if (season && !row.season.toLowerCase().includes(season)) return false;
+      if (year && !row.year.toLowerCase().includes(year)) return false;
+      if (style && !row.style.toLowerCase().includes(style) && !row.name.toLowerCase().includes(style)) return false;
+      if (available === '1' && row.available !== '是') return false;
+      if (available === '0' && row.available !== '否') return false;
+      return true;
+    });
+  }
+
+  s.searchResult = data;
+  s.selectedInResult.clear();
+  renderResultTable(type);
+}
+
+// ===== 渲染结果表格 =====
+function renderResultTable(type) {
+  const s = state[type];
+  const hint = document.getElementById(type + 'Hint');
+  const table = document.getElementById(type + 'ResultTable');
+  const tbody = document.getElementById(type + 'ResultBody');
+  const noResult = document.getElementById(type + 'NoResult');
+
+  hint.style.display = 'none';
+  if (s.searchResult.length === 0) {
+    table.classList.remove('visible');
+    noResult.classList.add('visible');
+    return;
+  }
+  noResult.classList.remove('visible');
+  table.classList.add('visible');
+
+  tbody.innerHTML = '';
+  s.searchResult.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    tr.dataset.idx = idx;
+    if (s.selectedInResult.has(idx)) tr.classList.add('selected');
+
+    let cells = [];
+    if (type === 'store') {
+      cells = [row.code, row.name, row.nature, row.dealer, row.brand, row.city, row.available];
+    } else {
+      cells = [row.code, row.name, row.brand, row.category, row.series, row.season, row.year, row.available];
+    }
+    cells.forEach(val => {
+      const td = document.createElement('td');
+      td.textContent = val;
+      tr.appendChild(td);
+    });
+
+    tr.addEventListener('click', () => toggleResultRow(type, idx, row));
+    tbody.appendChild(tr);
+  });
+}
+
+// ===== 点击结果行 =====
+function toggleResultRow(type, idx, row) {
+  const s = state[type];
+  const label = type === 'store' ? `${row.code} ${row.name}` : `${row.code} ${row.name}`;
+  const id = row.code;
+  const isExclude = s.exclude;
+
+  if (s.selectedInResult.has(idx)) {
+    // 取消选中 → 从多选结果移除
+    s.selectedInResult.delete(idx);
+    s.multiSelected = s.multiSelected.filter(item => item.id !== id || item.excluded !== isExclude);
+  } else {
+    // 选中 → 添加到多选结果
+    s.selectedInResult.add(idx);
+    if (!s.multiSelected.find(item => item.id === id && item.excluded === isExclude)) {
+      s.multiSelected.push({ id, label: (isExclude ? '[排除] ' : '') + label, excluded: isExclude });
     }
   }
-  res.sort((a,b)=>b.qty-a.qty);
-  showRes(res);
+
+  // 刷新行样式
+  const tbody = document.getElementById(type + 'ResultBody');
+  Array.from(tbody.rows).forEach(tr => {
+    const i = parseInt(tr.dataset.idx);
+    if (s.selectedInResult.has(i)) tr.classList.add('selected');
+    else tr.classList.remove('selected');
+  });
+
+  renderMultiList(type);
 }
 
-function showRes(res){
-  const r=document.getElementById('rpt');r.classList.add('s');
-  const tQ=res.reduce((s,x)=>s+x.qty,0);
-  const tA=res.reduce((s,x)=>s+x.qty*(x.prod.price||0),0);
-  let parts=[];
-  if(selStores.length)parts.push(selStores.length===1?selStores[0].name:selStores.length+'店');
-  else if(selTree&&selTree.size)parts.push(selTree.size+'个店仓');
-  if(selProds.length)parts.push(selProds.length===1?selProds[0].code:selProds.length+'款');
-  document.getElementById('rT').textContent=parts.length?parts.join('·')+'库存':'全部库存';
-  document.getElementById('rK').textContent=`${res.length}条·${tQ.toLocaleString()}件·¥${(tA/10000).toFixed(0)}万`;
-  if(!res.length){document.getElementById('rB').innerHTML='<div style="padding:30px;text-align:center;color:#999">无数据</div>';return;}
-  let html='<table><thead><tr><th>门店</th><th>款号</th><th>品名</th><th class="n">数量</th><th class="n">吊牌价</th><th class="n">金额</th></tr></thead><tbody>';
-  const max=Math.min(res.length,500);
-  let ls=-1;
-  for(let i=0;i<max;i++){
-    const x=res[i];
-    if(x.store.id!==ls){ls=x.store.id;html+=`<tr style="background:#f8f9ff"><td colspan="6" style="font-weight:600;padding:4px 8px;border-top:1px solid #ddd;font-size:11px">${x.store.name}</td></tr>`;}
-    html+=`<tr><td></td><td>${x.prod.code}</td><td style="color:#888;font-size:10px">${x.prod.name}</td><td class="n">${x.qty.toLocaleString()}</td><td class="n">¥${(x.prod.price||0).toFixed(0)}</td><td class="n">¥${(x.qty*(x.prod.price||0)).toFixed(0)}</td></tr>`;
-  }
-  if(res.length>max)html+=`<tr><td colspan="6" style="text-align:center;color:#999;padding:6px">...还有${res.length-max}条</td></tr>`;
-  html+=`<tr style="font-weight:700;background:#f0f2ff"><td colspan="2">合计</td><td></td><td class="n">${tQ.toLocaleString()}</td><td></td><td class="n">¥${tA.toLocaleString()}</td></tr></tbody></table>`;
-  document.getElementById('rB').innerHTML=html;
-  document.getElementById('fInf').textContent='';
+// ===== 添加全部 =====
+function addAll(type) {
+  const s = state[type];
+  const isExclude = s.exclude;
+
+  s.searchResult.forEach(row => {
+    const id = row.code;
+    const label = (isExclude ? '[排除] ' : '') + `${row.code} ${row.name}`;
+    if (!s.multiSelected.find(item => item.id === id && item.excluded === isExclude)) {
+      s.multiSelected.push({ id, label, excluded: isExclude });
+    }
+  });
+
+  // 全部标记选中
+  s.searchResult.forEach((_, idx) => s.selectedInResult.add(idx));
+  const tbody = document.getElementById(type + 'ResultBody');
+  Array.from(tbody.rows).forEach(tr => tr.classList.add('selected'));
+
+  renderMultiList(type);
 }
 
-initDlgs();
+// ===== 渲染多选结果 =====
+function renderMultiList(type) {
+  const s = state[type];
+  const list = document.getElementById(type + 'MultiList');
+  list.innerHTML = '';
+  s.multiSelected.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'multi-select-item' + (s.selectedInMulti.has(idx) ? ' selected' : '');
+    div.dataset.idx = idx;
+    const span = document.createElement('span');
+    span.className = 'multi-select-item-text';
+    span.textContent = item.label;
+    div.appendChild(span);
+    div.addEventListener('click', () => {
+      if (s.selectedInMulti.has(idx)) s.selectedInMulti.delete(idx);
+      else s.selectedInMulti.add(idx);
+      renderMultiList(type);
+    });
+    list.appendChild(div);
+  });
+}
+
+// ===== 移除选中行 =====
+function removeSelected(type) {
+  const s = state[type];
+  const toRemove = Array.from(s.selectedInMulti).sort((a, b) => b - a);
+  toRemove.forEach(idx => s.multiSelected.splice(idx, 1));
+  s.selectedInMulti.clear();
+  renderMultiList(type);
+}
+
+// ===== 移除全部 =====
+function removeAll(type) {
+  const s = state[type];
+  s.multiSelected = [];
+  s.selectedInMulti.clear();
+  s.selectedInResult.clear();
+  // 清除结果表格选中状态
+  const tbody = document.getElementById(type + 'ResultBody');
+  Array.from(tbody.rows).forEach(tr => tr.classList.remove('selected'));
+  renderMultiList(type);
+}
+
+// ===== 确定 =====
+function confirmModal(type) {
+  const s = state[type];
+  const tagsContainer = document.getElementById(type === 'store' ? 'storeTags' : 'productTags');
+  tagsContainer.innerHTML = '';
+
+  s.multiSelected.forEach(item => {
+    const tag = document.createElement('span');
+    tag.className = 'field-tag';
+    tag.innerHTML = `<span>${item.label}</span><span class="tag-remove" onclick="removeTag(this, '${type}', '${item.id}')">×</span>`;
+    tagsContainer.appendChild(tag);
+  });
+
+  closeModal(type);
+}
+
+// ===== 移除主页面标签 =====
+function removeTag(el, type, id) {
+  const s = state[type];
+  s.multiSelected = s.multiSelected.filter(item => item.id !== id);
+  el.parentElement.remove();
+}
 </script>
-</body></html>
+</body>
+</html>
