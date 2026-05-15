@@ -1,303 +1,363 @@
 <!DOCTYPE html><html lang="zh-CN">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>库存查询</title>
+<title>库存报表</title>
 <script src="query-data.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#e8eaf0;color:#333}
-.hd{background:#1a1a2e;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px}
-.hd h1{font-size:16px;font-weight:600}
-.hd .fg{font-size:11px;color:#999}
-.lay{display:flex;gap:0;height:calc(100vh - 48px)}
-.l{width:260px;background:#fff;overflow-y:auto;border-right:1px solid #e0e0e0;flex-shrink:0}
-.r{flex:1;overflow-y:auto;padding:16px}
-.t{font-size:11px;color:#999;padding:10px 14px 4px;font-weight:600}
-.ni{display:flex;align-items:center;gap:4px;padding:3px 14px;cursor:pointer;font-size:12px;border-radius:4px;margin:1px 4px}
-.ni:hover{background:#eef1ff}
-.ni.a{background:#e6f0ff;font-weight:600}
-.ni .ar{font-size:8px;color:#999;width:12px;text-align:center}
-.ni .ck{flex-shrink:0}
-.ni .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ni .ct{font-size:10px;color:#999;margin-left:auto}
+body{font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',sans-serif;background:#eef0f5;color:#333;font-size:13px}
+.hd{background:#1a1a2e;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:8px}
+.hd h1{font-size:15px;font-weight:600}
+.hd .sb{font-size:11px;color:#889}
 
-.qp{background:#fff;border-radius:8px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.qg{display:flex;flex-wrap:wrap;gap:6px}
-.g{display:flex;flex-direction:column;gap:1px}
-.g label{font-size:10px;color:#999;line-height:1}
-.qb{display:flex;align-items:center;gap:3px;padding:5px 8px;border:1px solid #d9d9d9;border-radius:5px;background:#fff;cursor:pointer;font-size:12px;min-width:110px;white-space:nowrap;height:28px}
-.qb:hover{border-color:#4a6cf7}
-.qb .fl{width:11px;height:11px;background:#4a6cf7;clip-path:polygon(0 0,100% 0,65% 50%,65% 100%,35% 100%,35% 50%);opacity:.4;flex-shrink:0}
-.qb.s .fl{opacity:1}
-.qb .s2{color:#333;max-width:85px;overflow:hidden;text-overflow:ellipsis}
-.qb .cl{color:#ff4d4f;font-size:13px;cursor:pointer;display:none;line-height:1}
-.qb.s .cl{display:inline}
-.qi{padding:5px 8px;border:1px solid #d9d9d9;border-radius:5px;font-size:12px;height:28px;width:100px}
-.qi:focus{border-color:#4a6cf7;outline:none;box-shadow:0 0 0 2px rgba(74,108,247,.12)}
-.qs{padding:4px 6px;border:1px solid #d9d9d9;border-radius:5px;font-size:12px;height:28px;max-width:90px}
-.qn{width:100px;display:flex;gap:4px;align-items:center}
-.qn input{width:45px}
-.qn span{font-size:11px;color:#999}
-.qb2{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}
-.qb2 button{padding:6px 24px;border-radius:6px;cursor:pointer;font-size:12px}
-.qb2 .sq{background:#4a6cf7;color:#fff;border:none;font-weight:600}
+.ly{display:flex;gap:0;height:calc(100vh - 40px)}
+.ls{width:220px;background:#fff;overflow-y:auto;border-right:1px solid #e5e5e5;flex-shrink:0;padding:6px 0}
+.ls .tl{font-size:10px;color:#999;padding:8px 12px 4px;font-weight:600;text-transform:uppercase}
+.ln{display:flex;align-items:center;gap:4px;padding:3px 10px;cursor:pointer;font-size:12px;border-radius:3px;margin:1px 6px}
+.ln:hover{background:#eef1ff}
+.ln.s{background:#e6f0ff;font-weight:600}
+.ln .ar{font-size:7px;color:#999;width:10px;text-align:center}
+.ln .cb{font-size:12px;width:14px;text-align:center;flex-shrink:0}
+.ln .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ln .ct{font-size:10px;color:#aaa;margin-left:auto}
+
+.rs{flex:1;overflow-y:auto;padding:14px}
+.qp{background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.qg{display:flex;flex-wrap:wrap;gap:5px}
+.cl{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.cl label{font-size:9px;color:#999;line-height:1;padding-left:2px}
+.cb{display:flex;align-items:center;gap:3px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:5px;background:#fff;cursor:pointer;font-size:12px;white-space:nowrap;height:27px;min-width:90px}
+.cb:hover{border-color:#4a6cf7}
+.cb .fi{width:10px;height:10px;background:#4a6cf7;clip-path:polygon(0 0,100% 0,65% 50%,65% 100%,35% 100%,35% 50%);opacity:.3;flex-shrink:0}
+.cb.s .fi{opacity:1}
+.cb .tx{color:#333;max-width:70px;overflow:hidden;text-overflow:ellipsis}
+.cb .xx{color:#ff4d4f;font-size:12px;cursor:pointer;display:none;line-height:1;margin-left:2px}
+.cb.s .xx{display:inline}
+.ci{padding:4px 8px;border:1px solid #d9d9d9;border-radius:5px;font-size:12px;height:27px;width:100px}
+.ci:focus{border-color:#4a6cf7;outline:none;box-shadow:0 0 0 2px rgba(74,108,247,.1)}
+.cn{display:flex;align-items:center;gap:3px}
+.cn input{width:55px}
+.cn span{font-size:11px;color:#999}
+.ckbx{width:18px;height:18px;cursor:pointer;margin-top:8px}
+.qb2{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #eee;align-items:center}
+.qb2 button{padding:5px 22px;border-radius:5px;cursor:pointer;font-size:12px}
+.qb2 .qy{background:#4a6cf7;color:#fff;border:none;font-weight:600}
 .qb2 .rs{background:#fff;border:1px solid #d9d9d9}
-.qb2 .si{font-size:11px;color:#888;margin-left:auto;align-self:center}
-.rp{background:#fff;border-radius:8px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.rp table{width:100%;border-collapse:collapse;font-size:12px}
-.rp th{background:#1a1a2e;color:#fff;padding:5px 8px;text-align:left;font-size:11px;position:sticky;top:0}
-.rp th.n{text-align:right}
-.rp td{padding:4px 8px;border-bottom:1px solid #f0f0f0}
-.rp td.n{text-align:right;font-variant-numeric:tabular-nums}
-.rp tr:hover td{background:#f8f9ff}
-.rh{display:none}
-.rh.s{display:block}
+.qb2 .si{font-size:11px;color:#888;margin-left:auto}
 
+/* 结果 */
+.rp{background:#fff;border-radius:8px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:none}
+.rp.s{display:block}
+.rp table{width:100%;border-collapse:collapse;font-size:12px}
+.rp th{background:#1a1a2e;color:#fff;padding:5px 8px;text-align:left;font-size:10px;position:sticky;top:0}
+.rp th.n{text-align:right}
+.rp td{padding:3px 8px;border-bottom:1px solid #f0f0f0;font-size:11px}
+.rp td.n{text-align:right}
+.rp tr:hover td{background:#f8f9ff}
+
+/* 弹窗 */
 .mk{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
 .mk.s{display:flex}
-.dg{background:#fff;border-radius:10px;width:480px;max-height:75vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.2)}
-.dg h3{padding:10px 16px;font-size:14px;border-bottom:1px solid #eee;flex-shrink:0}
+.dg{background:#fff;border-radius:10px;min-width:420px;max-width:600px;max-height:78vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.dg h3{padding:10px 16px;font-size:13px;border-bottom:1px solid #eee;flex-shrink:0}
 .dg-b{padding:8px 16px;overflow-y:auto;flex:1}
 .dg-f{padding:8px 16px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:6px;flex-shrink:0}
-.dg-f button{padding:5px 18px;border-radius:5px;cursor:pointer;font-size:12px}
-.ok{background:#4a6cf7;color:#fff;border:none}
-.cl{background:#fff;border:1px solid #d9d9d9}
-.sr{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
-.sr input{padding:3px 6px;border:1px solid #d9d9d9;border-radius:4px;font-size:11px;width:120px}
-.sr input:focus{border-color:#4a6cf7;outline:none}
-.sr button{padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px}
-.sr .qy{border:1px solid #4a6cf7;background:#4a6cf7;color:#fff}
-.si2{font-size:11px;color:#888;margin-bottom:3px}
-#dsl label{display:flex;align-items:center;padding:2px 0;cursor:pointer;font-size:11px;gap:4px}
-#dsl label:hover{background:#f5f7ff}
+.dg-f button{padding:4px 16px;border-radius:5px;cursor:pointer;font-size:12px}
+.okb{background:#4a6cf7;color:#fff;border:none}
+.clb{background:#fff;border:1px solid #d9d9d9}
+.sr2{display:flex;gap:4px;margin-bottom:6px}
+.sr2 input{padding:3px 6px;border:1px solid #d9d9d9;border-radius:4px;font-size:11px;width:120px}
+.sr2 input:focus{border-color:#4a6cf7;outline:none}
+.sr2 button{padding:3px 10px;border-radius:4px;cursor:pointer;font-size:10px}
+.sr2 .qy2{border:1px solid #4a6cf7;background:#4a6cf7;color:#fff}
+.si3{font-size:11px;color:#888;margin-bottom:3px}
+#dpl label,#dsl label{display:flex;align-items:center;padding:2px 0;cursor:pointer;font-size:11px;gap:3px}
+#dpl label:hover,#dsl label:hover{background:#f5f7ff}
+#dpl span,#dsl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
-<div class="hd"><h1>库存报表</h1><span class="fg">条件查询</span></div>
-<div class="lay">
-<div class="l" id="treePane">
-  <div class="t">店仓树</div>
-  <div id="tree"></div>
+<div class="hd"><h1>库存报表</h1><span class="sb">条件查询</span></div>
+<div class="ly">
+<div class="ls" id="tp"></div>
+<div class="rs">
+<div class="qp">
+<div class="qg" style="gap:7px">
+<div class="cl"><label>仓库</label><div class="cb" onclick="op('store')"><span class="fi"></span><span class="tx" id="sTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('store')">×</span></div></div>
+<div class="cl"><label>款号</label><div class="cb" onclick="op('prod')"><span class="fi"></span><span class="tx" id="pTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('prod')">×</span></div></div>
+<div class="cl"><label>品牌</label><div class="cb" onclick="op('brand')"><span class="fi"></span><span class="tx" id="bTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('brand')">×</span></div></div>
+<div class="cl"><label>年份</label><div class="cb" onclick="op('year')"><span class="fi"></span><span class="tx" id="yTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('year')">×</span></div></div>
+<div class="cl"><label>季节</label><div class="cb" onclick="op('season')"><span class="fi"></span><span class="tx" id="seTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('season')">×</span></div></div>
+<div class="cl"><label>性别</label><div class="cb" onclick="op('gender')"><span class="fi"></span><span class="tx" id="gTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('gender')">×</span></div></div>
+<div class="cl"><label>大类</label><div class="cb" onclick="op('cat')"><span class="fi"></span><span class="tx" id="cTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('cat')">×</span></div></div>
+<div class="cl"><label>小类</label><div class="cb" onclick="op('subcat')"><span class="fi"></span><span class="tx" id="scTx">不限</span><span class="xx" onclick="event.stopPropagation();clr('subcat')">×</span></div></div>
+<div class="cl"><label>自编码</label><input class="ci" id="fSn" placeholder=""></div>
+<div class="cl"><label>品名</label><input class="ci" id="fPn" placeholder=""></div>
+<div class="cl"><label>条码</label><input class="ci" id="fBc" placeholder=""></div>
+<div class="cl"><label>材质</label><input class="ci" id="fMt" placeholder=""></div>
 </div>
-<div class="r">
-  <div class="qp">
-    <div class="qg">
-      <div class="g"><label>仓库</label>
-        <div class="qb" onclick="oD('store')"><span class="fl"></span><span class="s2" id="sSel">不限</span><span class="cl" onclick="event.stopPropagation();cD('store')">×</span></div></div>
-      <div class="g"><label>款号</label>
-        <div class="qb" onclick="oD('prod')"><span class="fl"></span><span class="s2" id="pSel">不限</span><span class="cl" onclick="event.stopPropagation();cD('prod')">×</span></div></div>
-      <div class="g"><label>自编码</label><input class="qi" id="fsn" placeholder="自编码"></div>
-      <div class="g"><label>品名</label><input class="qi" id="fpn" placeholder="品名"></div>
-      <div class="g"><label>条码</label><input class="qi" id="fbc" placeholder="条码"></div>
-      <div class="g"><label>材质</label><input class="qi" id="fmtl" placeholder="材质"></div>
-    </div>
-    <div class="qg" style="margin-top:6px">
-      <div class="g"><label>大类</label><select class="qs" id="fd4"><option value="">全部</option></select></div>
-      <div class="g"><label>小类</label><input class="qi" id="fd6s" placeholder="搜索" style="width:60px"><select class="qs" id="fd6"><option value="">全部</option></select></div>
-      <div class="g"><label>品牌</label><select class="qs" id="fd1"><option value="">全部</option></select></div>
-      <div class="g"><label>年份</label><select class="qs" id="fd2"><option value="">全部</option></select></div>
-      <div class="g"><label>季节</label><select class="qs" id="fd3"><option value="">全部</option></select></div>
-      <div class="g"><label>性别</label><select class="qs" id="fd7"><option value="">全部</option></select></div>
-      <div class="g"><label>状态</label><select class="qs" id="fst"><option value="">全部</option><option value="Y">正常</option><option value="N">停用</option></select></div>
-      <div class="g"><label>非零售</label><input type="checkbox" id="fnr" style="margin-top:10px;width:18px;height:18px;cursor:pointer"></div>
-    </div>
-    <div class="qg" style="margin-top:6px">
-      <div class="g"><label>吊牌价</label><div class="qn"><input class="qi" id="fpl0" placeholder="从"><span>~</span><input class="qi" id="fpl1" placeholder="到"></div></div>
-      <div class="g"><label>批发价</label><div class="qn"><input class="qi" id="fwp0" placeholder="从"><span>~</span><input class="qi" id="fwp1" placeholder="到"></div></div>
-    </div>
-    <div class="qb2">
-      <button class="sq" onclick="sch()">查询</button>
-      <button class="rs" onclick="rst()">重置</button>
-      <span class="si" id="finfo"></span>
-    </div>
-  </div>
-  <div class="rp rh" id="rpt">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="font-weight:600;font-size:13px" id="rT">结果</span>
-      <span style="font-size:11px;color:#888" id="rK"></span>
-    </div>
-    <div id="rB"></div>
-  </div>
+<div class="qg" style="margin-top:6px">
+<div class="cl"><label>吊牌价</label><div class="cn"><input class="ci" id="fPl0" placeholder="从" style="width:60px"><span>~</span><input class="ci" id="fPl1" placeholder="到" style="width:60px"></div></div>
+<div class="cl"><label>批发价</label><div class="cn"><input class="ci" id="fWp0" placeholder="从" style="width:60px"><span>~</span><input class="ci" id="fWp1" placeholder="到" style="width:60px"></div></div>
+<div class="cl"><label>状态</label><select class="ci" id="fSt" style="width:80px"><option value="">全部</option><option value="Y">正常</option><option value="N">停用</option></select></div>
+<div class="cl"><label><input type="checkbox" id="fNr" style="width:14px;height:14px"> 非零售</label></div>
+</div>
+<div class="qb2">
+<button class="qy" onclick="search()">查询</button>
+<button class="rs" onclick="rst()">重置</button>
+<span class="si" id="fInf"></span>
 </div></div>
-
-<!-- 店仓弹窗 -->
-<div class="mk" id="mStore"><div class="dg">
-<h3>选择仓库</h3><div class="dg-b">
-<div class="sr"><input id="ssn" placeholder="名称"><button class="qy" onclick="sfS()">查询</button><button class="cl" onclick="document.getElementById('ssn').value='';sfS()">重置</button></div>
-<div class="si2" id="ssi"></div><div style="max-height:360px;overflow-y:auto" id="dsl"></div>
-</div><div class="dg-f"><button class="cl" onclick="cDg('store')">取消</button><button class="ok" onclick="cfStore()">确定</button></div></div></div>
-
-<!-- 款号弹窗 -->
-<div class="mk" id="mProd"><div class="dg">
-<h3>选择款号</h3><div class="dg-b">
-<div class="sr"><input id="psc" placeholder="款号"><input id="psn" placeholder="品名"><button class="qy" onclick="sfP()">查询</button><button class="cl" onclick="document.getElementById('psc').value='';document.getElementById('psn').value='';sfP()">重置</button></div>
-<div class="si2" id="psi"></div><div style="max-height:400px;overflow-y:auto" id="dpl"></div>
-</div><div class="dg-f"><button class="cl" onclick="cDg('prod')">取消</button><button class="ok" onclick="cfProd()">确定</button></div></div></div>
+<div class="rp" id="rpt">
+<div style="display:flex;justify-content:space-between;margin-bottom:6px">
+<span style="font-weight:600;font-size:13px" id="rT">结果</span>
+<span style="font-size:11px;color:#888" id="rK"></span>
+</div><div id="rB"></div>
+</div></div></div>
 
 <script>
-const sm={},pr={};
-DB.stores.forEach(s=>sm[s.id]=s);
-DB.products.forEach(p=>pr[p.id]=p);
-let ss=[],sp=[],stIds=null; // stIds = tree selected store ids
+// ====== 数据 ======
+const sM={},pM={};
+DB.stores.forEach(s=>sM[s.id]=s);
+DB.products.forEach(p=>pM[p.id]=p);
 
-// 维度
-const DF={fd1:'品牌',fd2:'年份',fd3:'季节',fd4:'大类',fd7:'性别'};
-const DP={fd1:'d1',fd2:'d2',fd3:'d3',fd4:'d4',fd6:'d6',fd7:'d7'};
-for(const[k,n]of Object.entries(DF)){
+let selStores=[],selProds=[],selTree=null;
+
+// ====== 维度 ======
+const DIM_NAMES={brand:'品牌',year:'年份',season:'季节',cat:'大类',subcat:'小类',gender:'性别'};
+const DIM_PROD={brand:'d1',year:'d2',season:'d3',cat:'d4',subcat:'d6',gender:'d7'};
+const dimData={};
+for(const[k,n]of Object.entries(DIM_NAMES)){
   const vs=DB.dims[n]||[];
   vs.sort((a,b)=>a.name.localeCompare(b.name,'zh-CN'));
-  const s=document.getElementById(k);if(!s)continue;
-  vs.forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.name;s.appendChild(o);});
+  dimData[k]=vs;
 }
-// 小类
-const d6vs=DB.dims['小类']||[];
-d6vs.sort((a,b)=>a.name.localeCompare(b.name,'zh-CN'));
-document.getElementById('fd6s').addEventListener('input',function(){
-  const v=this.value.toLowerCase();const s=document.getElementById('fd6');const cv=s.value;
-  s.innerHTML='<option value="">全部</option>';
-  d6vs.filter(x=>x.name.toLowerCase().includes(v)||x.id.toString()===v).slice(0,60).forEach(x=>{
-    const o=document.createElement('option');o.value=x.id;o.textContent=x.name;s.appendChild(o);
-  });
-  if(d6vs.some(x=>x.id.toString()===cv))s.value=cv;
-});
 
-// 店仓树
-function buildTree() {
-  const el=document.getElementById('tree');
-  let y=[],n=[],w=[],o=[];
+// ====== 店仓树 ======
+function buildTree(){
+  const el=document.getElementById('tp');
+  const cat={retailDir:[],retailFranch:[],warehouse:[],other:[]};
   DB.stores.forEach(s=>{
-    if(s.isRetail&&s.isCenter)y.push(s);
-    else if(s.isRetail&&!s.isCenter)n.push(s);
-    else if(!s.isRetail&&s.isCenter)w.push(s);
-    else o.push(s);
+    if(s.isRetail&&s.isCenter)cat.retailDir.push(s);
+    else if(s.isRetail&&!s.isCenter)cat.retailFranch.push(s);
+    else if(!s.isRetail&&s.isCenter)cat.warehouse.push(s);
+    else cat.other.push(s);
   });
-  const render=(items,label)=>items.length?`<div class="t">${label} (${items.length})</div>${items.map(s=>`<div class="ni" data-id="${s.id}" onclick="tT(this)"><span class="ck">□</span><span class="nm">${s.name}</span><span class="ct">${s.code||''}</span></div>`).join('')}`:'';
-  el.innerHTML=`<div class="ni a" onclick="tA()"><span class="ar">▶</span><span class="nm">全部</span></div>${render(y,'零售·直营')}${render(n,'零售·加盟')}${render(w,'仓库')}${render(o,'其他')}`;
+  let h=`<div class="tl" style="cursor:pointer" onclick="selAllTree()">☐ 全部</div>`;
+  for(const[ck,cl]of Object.entries({retailDir:'零售·直营',retailFranch:'零售·加盟',warehouse:'仓库',other:'其他'})){
+    if(!cat[ck].length)continue;
+    h+=`<div class="tl">${cl} (${cat[ck].length})</div>`;
+    cat[ck].forEach(s=>h+=`<div class="ln" data-id="${s.id}" onclick="togTree(this)"><span class="cb">□</span><span class="nm">${s.name}</span></div>`);
+  }
+  el.innerHTML=h;
 }
-function tT(el) {
-  el.classList.toggle('a');
-  const ck=el.querySelector('.ck');
-  ck.textContent=el.classList.contains('a')?'☑':'□';
-  updateTreeStoreIds();
+function togTree(el){
+  el.classList.toggle('s');
+  const cb=el.querySelector('.cb');
+  cb.textContent=el.classList.contains('s')?'☑':'□';
+  upTree();
 }
-function tA() {
-  const all=document.querySelectorAll('#tree .ni[data-id]');
-  const isAll=document.querySelector('#tree .ni.a')&&!document.querySelector('#tree .ni:not(.a)[data-id]');
-  if(isAll){all.forEach(el=>{el.classList.remove('a');el.querySelector('.ck').textContent='□';});}
-  else{all.forEach(el=>{el.classList.add('a');el.querySelector('.ck').textContent='☑';});}
-  updateTreeStoreIds();
+function selAllTree(){
+  const all=document.querySelectorAll('#tp .ln');
+  const allSel=!all.length||all[0].classList.contains('s');
+  all.forEach(el=>{el.classList.toggle('s',!allSel);el.querySelector('.cb').textContent=allSel?'□':'☑';});
+  upTree();
 }
-function updateTreeStoreIds() {
-  const sel=document.querySelectorAll('#tree .ni.a[data-id]');
-  stIds=sel.length?new Set(Array.from(sel).map(el=>parseInt(el.dataset.id))):null;
+function upTree(){
+  const sel=document.querySelectorAll('#tp .ln.s');
+  selTree=sel.length?new Set(Array.from(sel).map(el=>parseInt(el.dataset.id))):null;
 }
 buildTree();
 
-// 弹窗
-function oD(t){document.getElementById('m'+(t==='store'?'Store':'Prod')).classList.add('s');if(t==='store')rS();else rP();}
-function cDg(t){document.getElementById('m'+(t==='store'?'Store':'Prod')).classList.remove('s');}
-function cD(t){
-  if(t==='store'){ss=[];upSBtn();}
-  else{sp=[];upPBtn();}
-  setTimeout(sch,10);
-}
+// ====== 弹窗系统 ======
+const dlgState={};
+const dlgMap={}; // {dimName: [当前已选IDs]}
 
-// 店仓弹窗
-function rS(){
-  const el=document.getElementById('dsl');
-  const ids=new Set(ss.map(x=>x.id));
-  el.innerHTML=DB.stores.map(s=>`<label><input type="checkbox" class="sc" value="${s.id}" ${ids.has(s.id)?'checked':''} onchange="uSStats()"><span>${s.name}</span></label>`).join('');
-  uSStats();
+// 动态创建弹窗
+function initDlgs(){
+  for(const[k,n]of Object.entries(DIM_NAMES)){
+    const mk=document.createElement('div');mk.className='mk';mk.id='m'+k;
+    mk.innerHTML=`<div class="dg"><h3>选择${n}</h3><div class="dg-b">
+      <div class="sr2"><input class="srci" id="s${k}" placeholder="搜索" oninput="fD('${k}')"><button class="qy2" onclick="fD('${k}')">查询</button></div>
+      <div class="si3" id="si${k}"></div>
+      <div id="dl${k}" style="max-height:320px;overflow-y:auto"></div></div>
+      <div class="dg-f"><button class="clb" onclick="cDlg('${k}')">取消</button><button class="okb" onclick="cfD('${k}')">确定</button></div></div>`;
+    document.body.appendChild(mk);
+    dlgState[k]=[];
+    // 渲染选项
+    const el=mk.querySelector('#dl'+k);
+    el.innerHTML=dimData[k].map(v=>`<label><input type="checkbox" class="dc" value="${v.id}"><span>${v.name}</span></label>`).join('');
+    upDlgStat(k);
+  }
 }
-function sfS(){
-  const v=document.getElementById('ssn').value.toLowerCase();
-  document.querySelectorAll('#dsl label').forEach(l=>{
+function op(k){
+  if(k==='store'||k==='prod') return; // hand-made below
+  const mk=document.getElementById('m'+k);if(!mk)return;
+  mk.classList.add('s');
+  // 同步已选
+  const ids=new Set(dlgState[k]);
+  mk.querySelectorAll('.dc').forEach(cb=>cb.checked=ids.has(parseInt(cb.value)));
+  upDlgStat(k);
+}
+function cDlg(k){document.getElementById('m'+k).classList.remove('s');}
+function fD(k){
+  const v=document.getElementById('s'+k).value.toLowerCase();
+  document.querySelectorAll('#dl'+k+' label').forEach(l=>{
     l.style.display=!v||l.querySelector('span').textContent.toLowerCase().includes(v)?'':'none';
   });
 }
-function uSStats(){document.getElementById('ssi').textContent=`已选 ${document.querySelectorAll('#dsl .sc:checked').length} 个`;}
-function cfStore(){
-  ss=Array.from(document.querySelectorAll('#dsl .sc:checked')).map(cb=>sm[parseInt(cb.value)]).filter(Boolean);
-  upSBtn();cDg('store');
+function upDlgStat(k){
+  const n=document.querySelectorAll('#dl'+k+' .dc:checked').length;
+  const si=document.getElementById('si'+k);
+  if(si)si.textContent=`已选 ${n} 个`;
+}
+function cfD(k){
+  dlgState[k]=Array.from(document.querySelectorAll('#dl'+k+' .dc:checked')).map(cb=>parseInt(cb.value));
+  upBtn(k);
+  cDlg(k);
+}
+function clr(k){
+  dlgState[k]=[];
+  upBtn(k);
+  setTimeout(search,10);
+}
+function upBtn(k){
+  const ids=dlgState[k]||[];
+  const txMap={brand:'bTx',year:'yTx',season:'seTx',cat:'cTx',subcat:'scTx',gender:'gTx',store:'sTx',prod:'pTx'};
+  const id=txMap[k];if(!id)return;
+  const tx=document.getElementById(id);if(!tx)return;
+  const cb=tx.parentElement;
+  if(!ids.length){cb.classList.remove('s');tx.textContent='不限';}
+  else{
+    cb.classList.add('s');
+    const names=ids.map(id=>{const v=dimData[k]?.find(x=>x.id===id);return v?v.name:id;});
+    tx.textContent=names.length===1?names[0]:`${names[0]}等${names.length}个`;
+  }
 }
 
-// 款号弹窗
-function rP(){
-  const el=document.getElementById('dpl');
-  const ids=new Set(sp.map(x=>x.id));
-  el.innerHTML=DB.products.map(p=>`<label><input type="checkbox" class="pc" value="${p.id}" ${ids.has(p.id)?'checked':''} onchange="uPStats()"><span style="width:80px;display:inline-block">${p.code}</span><span style="color:#888">${p.name}</span></label>`).join('');
-  uPStats();
-}
-function sfP(){
-  const c=document.getElementById('psc').value.toLowerCase();
-  const n=document.getElementById('psn').value.toLowerCase();
-  document.querySelectorAll('#dpl label').forEach(l=>{
-    const sps=l.querySelectorAll('span');
-    const code=sps[0].textContent.toLowerCase();
-    const name=sps[1].textContent.toLowerCase();
-    l.style.display=(!c||code.includes(c))&&(!n||name.includes(n))?'':'none';
-  });
-}
-function uPStats(){document.getElementById('psi').textContent=`已选 ${document.querySelectorAll('#dpl .pc:checked').length} 个`;}
-function cfProd(){
-  sp=Array.from(document.querySelectorAll('#dpl .pc:checked')).map(cb=>pr[parseInt(cb.value)]).filter(Boolean);
-  upPBtn();cDg('prod');
-}
+// ====== 店仓弹窗 ======
+(function(){
+  const mk=document.getElementById('mStore');
+  const el=mk.querySelector('#dsl');
+  function rS(){
+    const ids=new Set(selStores.map(x=>x.id));
+    el.innerHTML=DB.stores.map(s=>`<label><input type="checkbox" class="sc" value="${s.id}" ${ids.has(s.id)?'checked':''} onchange="uSSt()"><span>${s.name}</span></label>`).join('');
+    uSSt();
+  }
+  function sfS(){
+    const v=document.getElementById('ssn').value.toLowerCase();
+    el.querySelectorAll('label').forEach(l=>l.style.display=!v||l.querySelector('span').textContent.toLowerCase().includes(v)?'':'none');
+  }
+  function uSSt(){document.getElementById('ssi').textContent=`已选 ${el.querySelectorAll('.sc:checked').length} 个`;}
+  function cfStore(){
+    selStores=Array.from(el.querySelectorAll('.sc:checked')).map(cb=>sM[parseInt(cb.value)]).filter(Boolean);
+    upBtn2('sTx','store',selStores.map(x=>x.name));
+    mk.classList.remove('s');
+  }
+  window.uSSt=uSSt;window.cfStore=cfStore;
+  window.rsStore=function(){document.getElementById('ssn').value='';sfS();};
+  window.sfStore=sfS;
+  // override op for store
+  const orig=window.op;
+  window.op=function(k){
+    if(k==='store'){mk.classList.add('s');rS();}
+    else if(k==='prod'){document.getElementById('mProd').classList.add('s');rP();}
+    else if(orig)orig(k);
+  };
+})();
 
-function upSBtn(){
-  const b=document.querySelector('.qb');const s=document.getElementById('sSel');
-  if(!ss.length){b.classList.remove('s');s.textContent='不限';}
-  else if(ss.length===1){b.classList.add('s');s.textContent=ss[0].name;}
-  else{b.classList.add('s');s.textContent=`${ss[0].name}等${ss.length}个`;}
-}
-function upPBtn(){
-  const b=document.querySelectorAll('.qb')[1];const s=document.getElementById('pSel');
-  if(!sp.length){b.classList.remove('s');s.textContent='不限';}
-  else if(sp.length===1){b.classList.add('s');s.textContent=sp[0].code;}
-  else{b.classList.add('s');s.textContent=`${sp[0].code}等${sp.length}个`;}
-}
+// ====== 款号弹窗 ======
+(function(){
+  const mk=document.getElementById('mProd');
+  const el=mk.querySelector('#dpl');
+  function rP(){
+    const ids=new Set(selProds.map(x=>x.id));
+    el.innerHTML=DB.products.map(p=>`<label><input type="checkbox" class="pc" value="${p.id}" ${ids.has(p.id)?'checked':''} onchange="uPSt()"><span style="width:80px;display:inline-block">${p.code}</span><span style="color:#888">${p.name}</span></label>`).join('');
+    uPSt();
+  }
+  function sfP(){
+    const c=document.getElementById('psc').value.toLowerCase();
+    const n=document.getElementById('psn').value.toLowerCase();
+    el.querySelectorAll('label').forEach(l=>{
+      const sp=l.querySelectorAll('span');
+      l.style.display=(!c||sp[0].textContent.toLowerCase().includes(c))&&(!n||sp[1].textContent.toLowerCase().includes(n))?'':'none';
+    });
+  }
+  function uPSt(){document.getElementById('psi').textContent=`已选 ${el.querySelectorAll('.pc:checked').length} 个`;}
+  function cfProd(){
+    selProds=Array.from(el.querySelectorAll('.pc:checked')).map(cb=>pM[parseInt(cb.value)]).filter(Boolean);
+    upBtn2('pTx','prod',selProds.map(x=>x.code));
+    mk.classList.remove('s');
+  }
+  window.uPSt=uPSt;window.cfProd=cfProd;
+  window.sfProd=sfP;
+  window.rsProd=function(){document.getElementById('psc').value='';document.getElementById('psn').value='';sfP();};
+})();
 
+function upBtn2(id,key,vals){
+  const tx=document.getElementById(id);
+  const cb=tx.parentElement;
+  if(!vals.length){cb.classList.remove('s');tx.textContent='不限';}
+  else{cb.classList.add('s');tx.textContent=vals.length===1?vals[0]:`${vals[0]}等${vals.length}个`;}
+}
+// Override clr for store/prod
+const origClr=window.clr;
+window.clr=function(k){
+  if(k==='store'){selStores=[];upBtn2('sTx','store',[]);}
+  else if(k==='prod'){selProds=[];upBtn2('pTx','prod',[]);}
+  else if(origClr)origClr(k);
+  setTimeout(search,10);
+};
+
+// ====== 查询 ======
 function rst(){
-  ss=[];sp=[];stIds=null;upSBtn();upPBtn();
-  ['fsn','fpn','fbc','fmtl','fd6s','fpl0','fpl1','fwp0','fwp1'].forEach(id=>document.getElementById(id).value='');
-  ['fd1','fd2','fd3','fd4','fd6','fd7','fst'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fnr').checked=false;
-  document.getElementById('rpt').classList.remove('s');
-  document.getElementById('finfo').textContent='';
-  // 重绘树
-  document.querySelectorAll('#tree .ni').forEach(el=>{el.classList.remove('a');const ck=el.querySelector('.ck');if(ck)ck.textContent='□';});
-  document.querySelector('#tree .ni.a').classList.remove('a');
+  selStores=[];selProds=[];selTree=null;dlgState.brand=[];dlgState.year=[];dlgState.season=[];dlgState.cat=[];dlgState.subcat=[];dlgState.gender=[];
+  for(const k of Object.keys(DIM_NAMES))upBtn(k);
+  upBtn2('sTx','store',[]);upBtn2('pTx','prod',[]);
+  ['fSn','fPn','fBc','fMt','fPl0','fPl1','fWp0','fWp1'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fSt').value='';document.getElementById('fNr').checked=false;
+  document.getElementById('rpt').classList.remove('s');document.getElementById('fInf').textContent='';
+  document.querySelectorAll('#tp .ln').forEach(el=>{el.classList.remove('s');el.querySelector('.cb').textContent='□';});
+  selTree=null;
 }
 
-function sch(){
-  const sidSet=ss.length?new Set(ss.map(x=>x.id)):stIds;
-  const pidSet=sp.length?new Set(sp.map(x=>x.id)):null;
-  const tSn=document.getElementById('fsn').value.toLowerCase();
-  const tPn=document.getElementById('fpn').value.toLowerCase();
-  const tBc=document.getElementById('fbc').value.toLowerCase();
-  const tMtl=document.getElementById('fmtl').value.toLowerCase();
-  const tPl0=parseFloat(document.getElementById('fpl0').value)||0;
-  const tPl1=parseFloat(document.getElementById('fpl1').value)||0;
-  const tWp0=parseFloat(document.getElementById('fwp0').value)||0;
-  const tWp1=parseFloat(document.getElementById('fwp1').value)||0;
-  const tNRetail=document.getElementById('fnr').checked;
-  const dimVals={};
-  for(const k of Object.keys(DP)){const v=parseInt(document.getElementById(k).value);if(v)dimVals[k]=v;}
-  const tState=document.getElementById('fst').value;
-
+function search(){
+  const sidSet=selStores.length?new Set(selStores.map(x=>x.id)):selTree;
+  const pidSet=selProds.length?new Set(selProds.map(x=>x.id)):null;
+  const tSn=document.getElementById('fSn').value.toLowerCase();
+  const tPn=document.getElementById('fPn').value.toLowerCase();
+  const tBc=document.getElementById('fBc').value.toLowerCase();
+  const tMt=document.getElementById('fMt').value.toLowerCase();
+  const tPl0=parseFloat(document.getElementById('fPl0').value)||0;
+  const tPl1=parseFloat(document.getElementById('fPl1').value)||0;
+  const tWp0=parseFloat(document.getElementById('fWp0').value)||0;
+  const tWp1=parseFloat(document.getElementById('fWp1').value)||0;
+  const tNr=document.getElementById('fNr').checked;
+  const tSt=document.getElementById('fSt').value;
+  
+  const dV={};
+  for(const[k,v]of Object.entries(DIM_PROD)){
+    const ids=dlgState[k];if(ids&&ids.length)dV[k]=new Set(ids);
+  }
+  
+  // 产品过滤
   const dp=DB.products.filter(p=>{
     if(tSn&&!p.code.toLowerCase().includes(tSn)&&!(p.sn||'').toLowerCase().includes(tSn))return false;
     if(tPn&&!p.name.toLowerCase().includes(tPn))return false;
-    if(tMtl&&!((p.material||'').toLowerCase().includes(tMtl)))return false;
     if(tPl0&&p.price<tPl0)return false;
     if(tPl1&&p.price>tPl1)return false;
-    // 批发价需要M_PRODUCT.PRICE字段
-    for(const[k,v]of Object.entries(dimVals)){if(p[DP[k]]!==v)return false;}
+    for(const[k,ids]of Object.entries(dV)){
+      const f=v=>{switch(k){
+        case'brand':return v.d1;case'year':return v.d2;case'season':return v.d3;
+        case'cat':return v.d4;case'subcat':return v.d6;case'gender':return v.d7;
+      }};
+      if(!ids.has(f(p)))return false;
+    }
     return true;
   });
   const dpMap=new Set(dp.map(p=>p.id));
-
-  const result=[];
+  
+  // 库存筛选
+  const res=[];
   for(const[sidStr,prods]of Object.entries(DB.inventory)){
     const sid=parseInt(sidStr);
     if(sidSet&&!sidSet.has(sid))continue;
@@ -305,38 +365,39 @@ function sch(){
       const pid=parseInt(pidStr);
       if(pidSet&&!pidSet.has(pid))continue;
       if(!dpMap.has(pid))continue;
-      const p=pr[pid];
-      result.push({store:sm[sid]||{name:'?'+sid},prod:p||{id:pid,code:'?'+pid,name:''},qty});
+      const p=pM[pid];
+      res.push({store:sM[sid]||{name:'?'+sid},prod:p||{code:'?'+pid,name:''},qty});
     }
   }
-  result.sort((a,b)=>b.qty-a.qty);
-  showR(result);
+  res.sort((a,b)=>b.qty-a.qty);
+  showRes(res);
 }
 
-function showR(result){
+function showRes(res){
   const r=document.getElementById('rpt');r.classList.add('s');
-  const tQ=result.reduce((s,x)=>s+x.qty,0);
-  const tA=result.reduce((s,x)=>s+x.qty*(x.prod.price||0),0);
+  const tQ=res.reduce((s,x)=>s+x.qty,0);
+  const tA=res.reduce((s,x)=>s+x.qty*(x.prod.price||0),0);
   let parts=[];
-  if(ss.length)parts.push(ss.length===1?ss[0].name:ss.length+'店');
-  else if(stIds&&stIds.size)parts.push(stIds.size+'个店仓');
-  if(sp.length)parts.push(sp.length===1?sp[0].code:sp.length+'款');
+  if(selStores.length)parts.push(selStores.length===1?selStores[0].name:selStores.length+'店');
+  else if(selTree&&selTree.size)parts.push(selTree.size+'个店仓');
+  if(selProds.length)parts.push(selProds.length===1?selProds[0].code:selProds.length+'款');
   document.getElementById('rT').textContent=parts.length?parts.join('·')+'库存':'全部库存';
-  document.getElementById('rK').textContent=`${result.length}条·${tQ.toLocaleString()}件·¥${(tA/10000).toFixed(0)}万`;
-  if(!result.length){document.getElementById('rB').innerHTML='<div style="text-align:center;padding:30px;color:#999">无数据</div>';return;}
+  document.getElementById('rK').textContent=`${res.length}条·${tQ.toLocaleString()}件·¥${(tA/10000).toFixed(0)}万`;
+  if(!res.length){document.getElementById('rB').innerHTML='<div style="padding:30px;text-align:center;color:#999">无数据</div>';return;}
   let html='<table><thead><tr><th>门店</th><th>款号</th><th>品名</th><th class="n">数量</th><th class="n">吊牌价</th><th class="n">金额</th></tr></thead><tbody>';
-  const max=Math.min(result.length,1000);
-  let lastSid=-1;
+  const max=Math.min(res.length,500);
+  let ls=-1;
   for(let i=0;i<max;i++){
-    const x=result[i];
-    if(x.store.id!==lastSid){lastSid=x.store.id;html+=`<tr style="background:#f8f9ff"><td colspan="6" style="font-weight:600;font-size:11px;padding:5px 8px;border-top:1px solid #ddd">${x.store.name}</td></tr>`;}
-    html+=`<tr><td></td><td>${x.prod.code}</td><td style="color:#888;font-size:11px">${x.prod.name}</td><td class="n">${x.qty.toLocaleString()}</td><td class="n">¥${(x.prod.price||0).toFixed(0)}</td><td class="n">¥${(x.qty*(x.prod.price||0)).toFixed(0)}</td></tr>`;
+    const x=res[i];
+    if(x.store.id!==ls){ls=x.store.id;html+=`<tr style="background:#f8f9ff"><td colspan="6" style="font-weight:600;padding:4px 8px;border-top:1px solid #ddd;font-size:11px">${x.store.name}</td></tr>`;}
+    html+=`<tr><td></td><td>${x.prod.code}</td><td style="color:#888;font-size:10px">${x.prod.name}</td><td class="n">${x.qty.toLocaleString()}</td><td class="n">¥${(x.prod.price||0).toFixed(0)}</td><td class="n">¥${(x.qty*(x.prod.price||0)).toFixed(0)}</td></tr>`;
   }
-  if(result.length>max)html+=`<tr><td colspan="6" style="text-align:center;color:#999">...还有${result.length-max}条</td></tr>`;
-  html+=`<tr class="t" style="font-weight:700;background:#f0f2ff"><td colspan="2">合计</td><td></td><td class="n">${tQ.toLocaleString()}</td><td></td><td class="n">¥${tA.toLocaleString()}</td></tr></tbody></table>`;
+  if(res.length>max)html+=`<tr><td colspan="6" style="text-align:center;color:#999;padding:6px">...还有${res.length-max}条</td></tr>`;
+  html+=`<tr style="font-weight:700;background:#f0f2ff"><td colspan="2">合计</td><td></td><td class="n">${tQ.toLocaleString()}</td><td></td><td class="n">¥${tA.toLocaleString()}</td></tr></tbody></table>`;
   document.getElementById('rB').innerHTML=html;
-  document.getElementById('finfo').textContent='';
+  document.getElementById('fInf').textContent='';
 }
-upSBtn();upPBtn();
+
+initDlgs();
 </script>
 </body></html>
